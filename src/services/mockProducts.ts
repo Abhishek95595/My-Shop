@@ -280,8 +280,22 @@ export function formatAvailability(availability: ProductAvailability): string {
 
 /**
  * Public catalogue query: returns ONLY products with status === 'published'.
+ * Combines baseline sample products and locally published custom admin products.
  */
 export function getAllPublishedProducts(): Product[] {
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem('koh_admin_custom_products');
+      const overridesRaw = localStorage.getItem('koh_admin_sample_overrides');
+      const overrides = overridesRaw ? JSON.parse(overridesRaw) : {};
+      const baseline = SAMPLE_PRODUCTS.map((p) => overrides[p.id] || p);
+      const custom = raw ? JSON.parse(raw) : [];
+      const all: Product[] = [...baseline, ...custom];
+      return all.filter((p) => p.status === 'published');
+    } catch {
+      return SAMPLE_PRODUCTS.filter((p) => p.status === 'published');
+    }
+  }
   return SAMPLE_PRODUCTS.filter((p) => p.status === 'published');
 }
 
@@ -289,9 +303,8 @@ export function getAllPublishedProducts(): Product[] {
  * Public product lookup by slug: returns only if published.
  */
 export function getProductBySlug(slug: string): Product | undefined {
-  return SAMPLE_PRODUCTS.find(
-    (p) => p.slug === slug && p.status === 'published'
-  );
+  const published = getAllPublishedProducts();
+  return published.find((p) => p.slug === slug);
 }
 
 /**

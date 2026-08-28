@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useSavedItems } from '@/context/SavedItemsContext';
+import { isMockAdmin } from '@/services/admin/adminAuthGuard';
 import {
   User,
   Mail,
@@ -81,14 +82,26 @@ export default function AccountPage() {
         </div>
 
         {/* Sign Out Action */}
-        <button
-          type="button"
-          onClick={() => logout()}
-          className="inline-flex items-center gap-2 py-2.5 px-4 bg-cream-100 hover:bg-gold-100/80 border border-gold-300 rounded-xl text-xs font-bold text-maroon-900 transition-colors shadow-2xs focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 self-stretch sm:self-auto justify-center"
-        >
-          <LogOut className="w-4 h-4 text-maroon-700" />
-          <span>Sign Out</span>
-        </button>
+        <div className="flex items-center gap-2 self-stretch sm:self-auto justify-end">
+          {isMockAdmin(user) && (
+            <Link
+              href="/admin"
+              className="inline-flex items-center gap-1.5 py-2.5 px-4 bg-maroon-800 hover:bg-maroon-900 text-cream-50 rounded-xl text-xs font-bold transition-colors shadow-sm"
+            >
+              <ShieldCheck className="w-4 h-4 text-gold-300" />
+              <span>Admin Dashboard</span>
+            </Link>
+          )}
+
+          <button
+            type="button"
+            onClick={() => logout()}
+            className="inline-flex items-center gap-2 py-2.5 px-4 bg-cream-100 hover:bg-gold-100/80 border border-gold-300 rounded-xl text-xs font-bold text-maroon-900 transition-colors shadow-2xs focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
+          >
+            <LogOut className="w-4 h-4 text-maroon-700" />
+            <span>Sign Out</span>
+          </button>
+        </div>
       </div>
 
       {/* Saved Lists Summary Cards */}
