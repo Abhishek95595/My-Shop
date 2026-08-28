@@ -2,6 +2,9 @@
   "name": "khushi-ornament-house",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=24 <25"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,23 +12,23 @@
     "lint": "eslint src/"
   },
   "dependencies": {
-    "clsx": "^2.1.1",
-    "lucide-react": "^1.16.0",
+    "clsx": "2.1.1",
+    "lucide-react": "1.16.0",
     "next": "16.3.3",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "tailwind-merge": "^3.0.1"
+    "tailwind-merge": "3.0.1"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "16.3.3",
     "@tailwindcss/postcss": "4.3.3",
-    "@types/node": "^22.13.4",
-    "@types/react": "^19.0.10",
-    "@types/react-dom": "^19.0.4",
-    "@typescript-eslint/parser": "^8.24.1",
-    "eslint": "^9.20.1",
-    "eslint-plugin-react-hooks": "^5.1.0",
-    "postcss": "^8.5.2",
+    "@types/node": "22.13.4",
+    "@types/react": "19.0.10",
+    "@types/react-dom": "19.0.4",
+    "@typescript-eslint/parser": "8.68.0",
+    "eslint": "9.39.5",
+    "eslint-plugin-react-hooks": "5.2.0",
+    "postcss": "8.5.2",
     "tailwindcss": "4.3.3",
     "typescript": "5.9.3"
   }
