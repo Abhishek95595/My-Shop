@@ -11,7 +11,8 @@ export const CONTACT_CONFIG = {
   city: 'Gorakhpur',
   state: 'Uttar Pradesh',
   country: 'India',
-  hours: 'Mon – Sun: 10:30 AM – 8:30 PM (Tuesday Closed / Call Ahead)',
+  hours: 'Mon – Sun: 11:00 AM – 8:00 PM',
+  googleMapsUrl: 'https://maps.google.com/?q=Khushi+Ornament+House+Gorakhpur',
 };
 
 export const EXACT_WEIGHT_DISCLAIMER =
@@ -31,9 +32,41 @@ export const APPROVED_SERVICES = [
   'Gold/silver coins in-store offering',
 ];
 
-// Phase 1 navigation items (pointing only to active page sections to prevent dead 404 links)
-export const PHASE_1_NAV_LINKS = [
-  { label: 'Home', href: '#top' },
-  { label: 'Why Us', href: '#trust' },
-  { label: 'Store Details', href: '#store-info' },
+export const CATEGORIES = [
+  'Rings',
+  'Necklaces/Sets',
+  'Chains',
+  'Mangalsutra',
+  'Bangles/Kada',
+] as const;
+
+export const GENDERS = ['Women', 'Men'] as const;
+
+export const PURITIES = ['18K', '22K', '24K'] as const;
+
+export const AVAILABILITIES = ['Available', 'Made on Order'] as const;
+
+export const OCCASIONS = [
+  'Wedding',
+  'Daily Wear',
+  'Festive',
+  'Traditional',
+  'Engagement',
+] as const;
+
+export const WEIGHT_RANGES = [
+  { label: 'All Weights', min: 0, max: Infinity },
+  { label: 'Under 10g', min: 0, max: 10 },
+  { label: '10g – 25g', min: 10, max: 25 },
+  { label: '25g – 50g', min: 25, max: 50 },
+  { label: '50g and above', min: 50, max: Infinity },
+] as const;
+
+// Active navigation links pointing to functional routes
+export const NAV_LINKS = [
+  { label: 'Home', href: '/' },
+  { label: 'Catalogue', href: '/catalogue' },
+  { label: 'Wedding Collection', href: '/catalogue?occasion=Wedding' },
+  { label: 'Custom Jewellery', href: '/#custom-jewellery' },
+  { label: 'Visit Store', href: '/#store-info' },
 ];

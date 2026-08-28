@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { X, Phone, MessageCircle } from 'lucide-react';
-import { CONTACT_CONFIG, PHASE_1_NAV_LINKS } from '@/lib/constants';
+import { CONTACT_CONFIG, NAV_LINKS } from '@/lib/constants';
 
 interface MobileNavProps {
   isOpen: boolean;
@@ -27,7 +27,12 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true" aria-label="Mobile Navigation">
+    <div
+      className="fixed inset-0 z-50 md:hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Mobile Navigation"
+    >
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-charcoal-900/60 backdrop-blur-sm transition-opacity"
@@ -51,7 +56,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
           <button
             type="button"
             onClick={onClose}
-            className="p-2 text-charcoal-700 hover:text-maroon-700 hover:bg-gold-50 rounded"
+            className="p-2 text-charcoal-700 hover:text-maroon-700 hover:bg-gold-50 rounded-lg"
             aria-label="Close navigation menu"
           >
             <X className="w-5 h-5" />
@@ -60,15 +65,15 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
 
         {/* Navigation Links */}
         <div className="py-4 px-3 flex-1 space-y-1">
-          {PHASE_1_NAV_LINKS.map((link) => (
-            <a
+          {NAV_LINKS.map((link) => (
+            <Link
               key={link.href}
               href={link.href}
               onClick={onClose}
-              className="block px-4 py-2.5 rounded text-base font-medium text-charcoal-800 hover:bg-gold-100/70 hover:text-maroon-800 transition-colors"
+              className="block px-4 py-2.5 rounded-lg text-base font-medium text-charcoal-800 hover:bg-gold-100/70 hover:text-maroon-800 transition-colors"
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </div>
 
@@ -80,7 +85,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
             )}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full flex items-center justify-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white py-2.5 px-4 rounded font-semibold text-sm shadow-sm transition-colors"
+            className="w-full flex items-center justify-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white py-2.5 px-4 rounded-lg font-semibold text-sm shadow-sm transition-colors"
           >
             <MessageCircle className="w-4 h-4" />
             <span>WhatsApp Enquiry</span>
@@ -88,7 +93,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
 
           <a
             href={`tel:${CONTACT_CONFIG.primaryPhoneRaw}`}
-            className="w-full flex items-center justify-center gap-2 bg-maroon-700 hover:bg-maroon-800 text-cream-50 py-2.5 px-4 rounded font-semibold text-sm shadow-sm transition-colors"
+            className="w-full flex items-center justify-center gap-2 bg-maroon-700 hover:bg-maroon-800 text-cream-50 py-2.5 px-4 rounded-lg font-semibold text-sm shadow-sm transition-colors"
           >
             <Phone className="w-4 h-4 text-gold-300" />
             <span>Call: {CONTACT_CONFIG.primaryPhone}</span>
