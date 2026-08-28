@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { PRESET_MOCK_USERS } from '@/services/auth/mockAuthService';
-import { X, Sparkles, User, Mail, ShieldAlert, Check } from 'lucide-react';
+import { PRESET_MOCK_USERS, isValidGmail } from '@/services/auth/mockAuthService';
+import { X, Sparkles, User, Mail, ShieldAlert, Check, AlertCircle } from 'lucide-react';
 
 export const MockLoginModal: React.FC = () => {
   const { isLoginModalOpen, closeLoginModal, login } = useAuth();
@@ -14,16 +14,20 @@ export const MockLoginModal: React.FC = () => {
   const [customName, setCustomName] = useState('');
   const [customEmail, setCustomEmail] = useState('');
   const [isCustomMode, setIsCustomMode] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
 
-  // Focus management & Escape key handler
+  // Focus management, focus trap & Escape key handler
   useEffect(() => {
     if (isLoginModalOpen) {
       document.body.style.overflow = 'hidden';
-      // Focus the close button or first actionable element
+      setErrorMessage('');
+
+      // Focus close button initially
       setTimeout(() => {
         closeButtonRef.current?.focus();
       }, 50);
@@ -31,8 +35,33 @@ export const MockLoginModal: React.FC = () => {
       const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === 'Escape') {
           closeLoginModal();
+          return;
+        }
+
+        // Focus trap inside modal
+        if (e.key === 'Tab' && modalRef.current) {
+          const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          );
+          if (focusableElements.length === 0) return;
+
+          const firstElement = focusableElements[0];
+          const lastElement = focusableElements[focusableElements.length - 1];
+
+          if (e.shiftKey) {
+            if (document.activeElement === firstElement) {
+              lastElement.focus();
+              e.preventDefault();
+            }
+          } else {
+            if (document.activeElement === lastElement) {
+              firstElement.focus();
+              e.preventDefault();
+            }
+          }
         }
       };
+
       window.addEventListener('keydown', handleKeyDown);
       return () => {
         window.removeEventListener('keydown', handleKeyDown);
@@ -47,25 +76,53 @@ export const MockLoginModal: React.FC = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    try {
-      if (isCustomMode) {
-        if (!customEmail.trim()) return;
+    setErrorMessage('');
+
+    if (isCustomMode) {
+      const trimmedEmail = customEmail.trim().toLowerCase();
+      const trimmedName = customName.trim();
+
+      if (!trimmedEmail) {
+        setErrorMessage('Please enter a Gmail address.');
+        emailInputRef.current?.focus();
+        return;
+      }
+
+      if (!isValidGmail(trimmedEmail)) {
+        setErrorMessage('Please enter a valid Gmail address ending with @gmail.com.');
+        emailInputRef.current?.focus();
+        return;
+      }
+
+      setIsSubmitting(true);
+      try {
         await login({
-          name: customName.trim() || 'Valued Customer',
-          email: customEmail.trim(),
+          name: trimmedName || 'Valued Customer',
+          email: trimmedEmail,
         });
-      } else {
-        const preset =
-          PRESET_MOCK_USERS.find((u) => u.id === selectedPreset) ||
-          PRESET_MOCK_USERS[0];
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setErrorMessage(err.message);
+        } else {
+          setErrorMessage('Sign-in failed. Please verify your Gmail address.');
+        }
+      } finally {
+        setIsSubmitting(false);
+      }
+    } else {
+      const preset =
+        PRESET_MOCK_USERS.find((u) => u.id === selectedPreset) ||
+        PRESET_MOCK_USERS[0];
+
+      setIsSubmitting(true);
+      try {
         await login({
           name: preset.name,
           email: preset.email,
         });
+      } finally {
+        setIsSubmitting(false);
       }
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -122,8 +179,20 @@ export const MockLoginModal: React.FC = () => {
           </p>
         </div>
 
+        {/* Inline Error Message */}
+        {errorMessage && (
+          <div
+            className="flex items-start gap-2 p-3 bg-maroon-50 border border-maroon-200 rounded-xl text-xs text-maroon-900 font-medium"
+            role="alert"
+            aria-live="polite"
+          >
+            <AlertCircle className="w-4 h-4 text-maroon-700 flex-shrink-0 mt-0.5" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
         {/* Form Selection */}
-        <form onSubmit={handleSignIn} className="space-y-5">
+        <form onSubmit={handleSignIn} className="space-y-5" noValidate>
           {!isCustomMode ? (
             /* Preset Google Personas */
             <div className="space-y-2.5">
@@ -168,10 +237,13 @@ export const MockLoginModal: React.FC = () => {
               <div className="pt-1 text-center">
                 <button
                   type="button"
-                  onClick={() => setIsCustomMode(true)}
-                  className="text-xs font-semibold text-maroon-800 hover:text-maroon-950 underline"
+                  onClick={() => {
+                    setErrorMessage('');
+                    setIsCustomMode(true);
+                  }}
+                  className="text-xs font-semibold text-maroon-800 hover:text-maroon-950 underline cursor-pointer"
                 >
-                  Or enter custom name / email
+                  Or enter custom name / Gmail address
                 </button>
               </div>
             </div>
@@ -179,14 +251,17 @@ export const MockLoginModal: React.FC = () => {
             /* Custom Persona Form */
             <div className="space-y-3">
               <div className="space-y-1">
-                <label className="block text-xs font-bold text-maroon-900">
+                <label
+                  htmlFor="custom-name-input"
+                  className="block text-xs font-bold text-maroon-900"
+                >
                   Full Name
                 </label>
                 <div className="relative">
                   <User className="w-4 h-4 text-gold-700 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
+                    id="custom-name-input"
                     type="text"
-                    required
                     placeholder="e.g. Ramesh Kumar"
                     value={customName}
                     onChange={(e) => setCustomName(e.target.value)}
@@ -196,27 +271,42 @@ export const MockLoginModal: React.FC = () => {
               </div>
 
               <div className="space-y-1">
-                <label className="block text-xs font-bold text-maroon-900">
-                  Gmail Address
+                <label
+                  htmlFor="custom-email-input"
+                  className="block text-xs font-bold text-maroon-900"
+                >
+                  Gmail Address <span className="text-maroon-700">*</span>
                 </label>
                 <div className="relative">
                   <Mail className="w-4 h-4 text-gold-700 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
+                    id="custom-email-input"
+                    ref={emailInputRef}
                     type="email"
                     required
                     placeholder="e.g. ramesh.kumar@gmail.com"
                     value={customEmail}
-                    onChange={(e) => setCustomEmail(e.target.value)}
+                    onChange={(e) => {
+                      setCustomEmail(e.target.value);
+                      if (errorMessage) setErrorMessage('');
+                    }}
                     className="w-full pl-9 pr-3 py-2 text-xs bg-cream-100 border border-gold-200 rounded-lg text-charcoal-900 focus:outline-none focus:border-gold-500"
+                    aria-describedby={errorMessage ? 'custom-email-error' : undefined}
                   />
                 </div>
+                <p className="text-[11px] text-charcoal-500">
+                  Must end in <span className="font-mono font-medium">@gmail.com</span>
+                </p>
               </div>
 
               <div className="pt-1 text-center">
                 <button
                   type="button"
-                  onClick={() => setIsCustomMode(false)}
-                  className="text-xs font-semibold text-maroon-800 hover:text-maroon-950 underline"
+                  onClick={() => {
+                    setErrorMessage('');
+                    setIsCustomMode(false);
+                  }}
+                  className="text-xs font-semibold text-maroon-800 hover:text-maroon-950 underline cursor-pointer"
                 >
                   Back to preset mock accounts
                 </button>
@@ -229,14 +319,14 @@ export const MockLoginModal: React.FC = () => {
             <button
               type="button"
               onClick={closeLoginModal}
-              className="py-2.5 px-4 rounded-xl text-xs font-semibold text-charcoal-700 hover:bg-gold-100 transition-colors"
+              className="py-2.5 px-4 rounded-xl text-xs font-semibold text-charcoal-700 hover:bg-gold-100 transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="py-2.5 px-5 bg-maroon-800 hover:bg-maroon-900 text-cream-50 rounded-xl text-xs font-bold shadow-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
+              className="py-2.5 px-5 bg-maroon-800 hover:bg-maroon-900 text-cream-50 rounded-xl text-xs font-bold shadow-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 cursor-pointer"
             >
               {isSubmitting ? 'Signing In...' : 'Continue with Mock Google'}
             </button>

@@ -18,11 +18,6 @@ export const CONTACT_CONFIG = {
 export const EXACT_WEIGHT_DISCLAIMER =
   'Approximate weight shown. Actual weight may vary depending on size and design.';
 
-export const ADMIN_ALLOWLIST = [
-  '100abhisheksarraf@gmail.com',
-  '100dilipsarraf@gmail.com',
-] as const;
-
 export const APPROVED_SERVICES = [
   'Custom jewellery manufacturing',
   'Gold buying and selling',
