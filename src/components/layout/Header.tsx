@@ -3,12 +3,16 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Phone, MessageCircle, Menu } from 'lucide-react';
+import { Phone, MessageCircle, Menu, Heart, ShoppingBag, User as UserIcon } from 'lucide-react';
 import { CONTACT_CONFIG, NAV_LINKS } from '@/lib/constants';
+import { useAuth } from '@/context/AuthContext';
+import { useSavedItems } from '@/context/SavedItemsContext';
 import { MobileNav } from './MobileNav';
 
 export const Header: React.FC = () => {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const { user, isAuthenticated, openLoginModal } = useAuth();
+  const { wishlistIds, shortlistIds } = useSavedItems();
 
   return (
     <>
@@ -59,9 +63,9 @@ export const Header: React.FC = () => {
             />
           </Link>
 
-          {/* Desktop Navigation Links (Active routes only) */}
+          {/* Desktop Navigation Links */}
           <nav
-            className="hidden md:flex items-center gap-1 xl:gap-2 text-sm font-medium text-charcoal-800"
+            className="hidden lg:flex items-center gap-1 xl:gap-2 text-sm font-medium text-charcoal-800"
             aria-label="Main Navigation"
           >
             {NAV_LINKS.map((link) => (
@@ -75,8 +79,62 @@ export const Header: React.FC = () => {
             ))}
           </nav>
 
-          {/* Right Action Buttons */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          {/* Right Action Icons & Controls */}
+          <div className="flex items-center gap-2 sm:gap-2.5">
+            {/* Wishlist Link & Counter */}
+            <Link
+              href="/wishlist"
+              className="relative p-2 text-charcoal-700 hover:text-maroon-800 hover:bg-gold-100/60 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
+              aria-label={`Wishlist with ${wishlistIds.length} items`}
+            >
+              <Heart className="w-5 h-5" />
+              {wishlistIds.length > 0 && (
+                <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-maroon-700 text-cream-50 text-[10px] font-bold rounded-full flex items-center justify-center shadow-xs">
+                  {wishlistIds.length}
+                </span>
+              )}
+            </Link>
+
+            {/* Buying Shortlist Link & Counter */}
+            <Link
+              href="/shortlist"
+              className="relative p-2 text-charcoal-700 hover:text-maroon-800 hover:bg-gold-100/60 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
+              aria-label={`Buying Shortlist with ${shortlistIds.length} items`}
+            >
+              <ShoppingBag className="w-5 h-5" />
+              {shortlistIds.length > 0 && (
+                <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-gold-600 text-cream-50 text-[10px] font-bold rounded-full flex items-center justify-center shadow-xs">
+                  {shortlistIds.length}
+                </span>
+              )}
+            </Link>
+
+            {/* User Account / Sign In Action */}
+            {isAuthenticated && user ? (
+              <Link
+                href="/account"
+                className="flex items-center gap-1.5 p-1.5 sm:px-3 sm:py-1.5 bg-gold-100/80 hover:bg-gold-200/80 border border-gold-300 rounded-lg text-xs font-semibold text-maroon-900 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
+                aria-label="View My Account"
+              >
+                <div className="w-6 h-6 rounded-full bg-maroon-800 text-cream-50 font-serif font-bold text-xs flex items-center justify-center flex-shrink-0">
+                  {user.name.charAt(0)}
+                </div>
+                <span className="hidden sm:inline max-w-[100px] truncate">
+                  {user.name.split(' ')[0]}
+                </span>
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={() => openLoginModal()}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-cream-50 hover:bg-gold-100/80 border border-gold-300 rounded-lg text-xs font-semibold text-maroon-900 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
+                aria-label="Sign In to Save"
+              >
+                <UserIcon className="w-4 h-4 text-gold-700" />
+                <span className="hidden sm:inline">Sign In</span>
+              </button>
+            )}
+
             {/* WhatsApp Quick Action */}
             <a
               href={`https://wa.me/${CONTACT_CONFIG.whatsappNumberRaw}?text=${encodeURIComponent(
@@ -84,28 +142,18 @@ export const Header: React.FC = () => {
               )}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold px-3.5 py-2 rounded-lg shadow-sm transition-colors"
+              className="hidden sm:inline-flex items-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow-sm transition-colors"
               aria-label="Inquire on WhatsApp"
             >
               <MessageCircle className="w-4 h-4" />
               <span>WhatsApp</span>
             </a>
 
-            {/* Call Action */}
-            <a
-              href={`tel:${CONTACT_CONFIG.primaryPhoneRaw}`}
-              className="hidden sm:inline-flex items-center gap-1.5 bg-maroon-700 hover:bg-maroon-800 text-cream-50 text-xs font-semibold px-3.5 py-2 rounded-lg shadow-sm transition-colors"
-              aria-label="Call Store"
-            >
-              <Phone className="w-4 h-4 text-gold-300" />
-              <span>Call Us</span>
-            </a>
-
             {/* Mobile Menu Hamburger */}
             <button
               type="button"
               onClick={() => setMobileNavOpen(true)}
-              className="md:hidden p-2 text-charcoal-800 hover:text-maroon-700 hover:bg-gold-50 rounded-lg"
+              className="lg:hidden p-2 text-charcoal-800 hover:text-maroon-700 hover:bg-gold-50 rounded-lg"
               aria-label="Open Mobile Menu"
             >
               <Menu className="w-6 h-6" />

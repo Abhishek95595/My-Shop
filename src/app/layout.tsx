@@ -4,6 +4,10 @@ import './globals.css';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { FloatingWhatsApp } from '@/components/layout/FloatingWhatsApp';
+import { ToastProvider } from '@/context/ToastContext';
+import { AuthProvider } from '@/context/AuthContext';
+import { SavedItemsProvider } from '@/context/SavedItemsContext';
+import { MockLoginModal } from '@/components/auth/MockLoginModal';
 
 const playfair = Playfair_Display({
   subsets: ['latin'],
@@ -20,7 +24,7 @@ const plusJakarta = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: 'Khushi Ornament House | 25+ Years of Trust | Gorakhpur Gold Jewellery',
   description:
-    'Explore exquisite 22K and 18K bridal gold jewellery, bespoke necklaces, bangles, and custom heirlooms at Khushi Ornament House in Gorakhpur. Quality craftsmanship and competitive rates.',
+    'Explore 18K, 22K and 24K bridal gold jewellery, bespoke necklaces, bangles, and custom heirlooms at Khushi Ornament House in Gorakhpur. Quality craftsmanship and personal customer guidance.',
   icons: {
     icon: '/assets/khushi-logo.png',
   },
@@ -34,10 +38,17 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${playfair.variable} ${plusJakarta.variable}`}>
       <body className="min-h-screen flex flex-col bg-cream-100 text-charcoal-900 font-sans selection:bg-maroon-700 selection:text-cream-50">
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <FloatingWhatsApp />
+        <ToastProvider>
+          <AuthProvider>
+            <SavedItemsProvider>
+              <Header />
+              <main className="flex-1">{children}</main>
+              <Footer />
+              <FloatingWhatsApp />
+              <MockLoginModal />
+            </SavedItemsProvider>
+          </AuthProvider>
+        </ToastProvider>
       </body>
     </html>
   );

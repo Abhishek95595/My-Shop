@@ -9,14 +9,12 @@ import {
   formatAvailability,
 } from '@/services/mockProducts';
 import { ProductImageGallery } from '@/components/products/ProductImageGallery';
+import { ProductDetailActions } from '@/components/products/ProductDetailActions';
 import {
-  CONTACT_CONFIG,
   EXACT_WEIGHT_DISCLAIMER,
   STORE_NAME,
 } from '@/lib/constants';
 import {
-  Phone,
-  MessageCircle,
   Sparkles,
   ChevronLeft,
   Shield,
@@ -72,12 +70,6 @@ export default async function ProductDetailPage({
   if (!product) {
     notFound();
   }
-
-  // Pre-filled WhatsApp inquiry text including product name, SKU, and product page link
-  const productUrl = `https://khushiornamenthouse.com/catalogue/${product.slug}`;
-  const whatsappMessage = encodeURIComponent(
-    `Hello Khushi Ornament House,\n\nI would like to inquire about this jewellery piece:\n- Product: ${product.name}\n- SKU: ${product.sku}\n- Link: ${productUrl}\n\nPlease share more details and availability.`
-  );
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-10">
@@ -244,36 +236,12 @@ export default async function ProductDetailPage({
             </div>
           )}
 
-          {/* Interactive Live Contact Actions */}
-          <div className="pt-4 space-y-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {/* WhatsApp Enquiry Button */}
-              <a
-                href={`https://wa.me/${CONTACT_CONFIG.whatsappNumberRaw}?text=${whatsappMessage}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-3.5 px-6 rounded-xl shadow-md hover:shadow-lg transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
-                aria-label={`Inquire about ${product.name} on WhatsApp`}
-              >
-                <MessageCircle className="w-5 h-5" />
-                <span>Inquire on WhatsApp</span>
-              </a>
+          {/* Interactive Wishlist, Shortlist, WhatsApp & Call Actions */}
+          <ProductDetailActions product={product} />
 
-              {/* Direct Call Button */}
-              <a
-                href={`tel:${CONTACT_CONFIG.primaryPhoneRaw}`}
-                className="inline-flex items-center justify-center gap-2 bg-maroon-800 hover:bg-maroon-900 text-cream-50 font-semibold py-3.5 px-6 rounded-xl shadow-md hover:shadow-lg transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
-                aria-label={`Call Store to discuss ${product.name}`}
-              >
-                <Phone className="w-5 h-5 text-gold-300" />
-                <span>Call {CONTACT_CONFIG.primaryPhone}</span>
-              </a>
-            </div>
-
-            <p className="text-xs text-charcoal-500 text-center font-sans">
-              Personal showroom consultations &amp; custom bespoke orders welcomed at our Gorakhpur store.
-            </p>
-          </div>
+          <p className="text-xs text-charcoal-500 text-center font-sans">
+            Personal showroom consultations &amp; custom bespoke orders welcomed at our Gorakhpur store.
+          </p>
         </div>
       </div>
     </div>

@@ -1,7 +1,9 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Sparkles, MessageCircle, ArrowRight, Shield } from 'lucide-react';
+import { Sparkles, MessageCircle, ArrowRight, Shield, Heart, ShoppingBag } from 'lucide-react';
 import { Product } from '@/services/productTypes';
 import {
   getPrimaryImage,
@@ -9,6 +11,7 @@ import {
   formatAvailability,
 } from '@/services/mockProducts';
 import { CONTACT_CONFIG, EXACT_WEIGHT_DISCLAIMER } from '@/lib/constants';
+import { useSavedItems } from '@/context/SavedItemsContext';
 
 interface ProductCardProps {
   product: Product;
@@ -20,14 +23,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   isSample = true,
 }) => {
   const primaryImage = getPrimaryImage(product.images);
+  const { isInWishlist, isInShortlist, toggleWishlist, toggleShortlist } =
+    useSavedItems();
+
+  const isFav = isInWishlist(product.id);
+  const isShortlisted = isInShortlist(product.id);
 
   const whatsappMessage = encodeURIComponent(
     `Hello Khushi Ornament House, I am inquiring about the ${product.name} (SKU: ${product.sku}).`
   );
 
   return (
-    <div className="group bg-cream-50 rounded-2xl border border-gold-200/90 shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col overflow-hidden">
-      {/* Image Container with Badges */}
+    <div className="group bg-cream-50 rounded-2xl border border-gold-200/90 shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col overflow-hidden relative">
+      {/* Image Container with Badges & Save Actions */}
       <div className="relative aspect-square w-full bg-cream-100/60 overflow-hidden border-b border-gold-200/60">
         <Link
           href={`/catalogue/${product.slug}`}
@@ -49,8 +57,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           )}
         </Link>
 
-        {/* Top Badges */}
-        <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none gap-2">
+        {/* Top Left Badges */}
+        <div className="absolute top-3 left-3 flex flex-col items-start gap-1.5 pointer-events-none">
           {/* Sample Product Badge */}
           {isSample && (
             <span className="inline-flex items-center gap-1 bg-maroon-900/90 text-cream-50 text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-sm backdrop-blur-xs">
@@ -61,7 +69,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
           {/* Availability Badge */}
           <span
-            className={`text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-sm backdrop-blur-xs ${
+            className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full shadow-sm backdrop-blur-xs ${
               product.availability === 'available'
                 ? 'bg-emerald-800/90 text-cream-50'
                 : 'bg-gold-800/90 text-cream-50'
@@ -69,6 +77,57 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           >
             {formatAvailability(product.availability)}
           </span>
+        </div>
+
+        {/* Top Right Quick Action Buttons */}
+        <div className="absolute top-3 right-3 flex flex-col items-center gap-1.5 z-10">
+          {/* Wishlist Button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              toggleWishlist(product.id, product.name);
+            }}
+            className={`p-2 rounded-full shadow-sm backdrop-blur-xs transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 ${
+              isFav
+                ? 'bg-maroon-800 text-white hover:bg-maroon-900'
+                : 'bg-cream-50/90 text-charcoal-700 hover:text-maroon-800 hover:bg-white'
+            }`}
+            aria-label={
+              isFav
+                ? `Remove ${product.name} from Wishlist`
+                : `Add ${product.name} to Wishlist`
+            }
+            aria-pressed={isFav}
+          >
+            <Heart
+              className={`w-4 h-4 ${isFav ? 'fill-current' : ''}`}
+            />
+          </button>
+
+          {/* Buying Shortlist Button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              toggleShortlist(product.id, product.name);
+            }}
+            className={`p-2 rounded-full shadow-sm backdrop-blur-xs transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 ${
+              isShortlisted
+                ? 'bg-gold-600 text-white hover:bg-gold-700'
+                : 'bg-cream-50/90 text-charcoal-700 hover:text-gold-800 hover:bg-white'
+            }`}
+            aria-label={
+              isShortlisted
+                ? `Remove ${product.name} from Buying Shortlist`
+                : `Add ${product.name} to Buying Shortlist`
+            }
+            aria-pressed={isShortlisted}
+          >
+            <ShoppingBag
+              className={`w-4 h-4 ${isShortlisted ? 'fill-current' : ''}`}
+            />
+          </button>
         </div>
 
         {/* Bottom Purity Pill */}
