@@ -10,7 +10,6 @@ import { SavedItemsProvider } from '@/context/SavedItemsContext';
 import { MockLoginModal } from '@/components/auth/MockLoginModal';
 import {
   STORE_NAME,
-  STORE_OWNER,
   STORE_TAGLINE,
   CONTACT_CONFIG,
   GSTIN,
@@ -36,12 +35,11 @@ export const metadata: Metadata = {
     template: `%s | ${STORE_NAME}`,
   },
   description:
-    'Explore 18K, 22K and 24K bridal gold jewellery, bespoke necklaces, bangles, and custom heirlooms at Khushi Ornament House in Gorakhpur. 25+ years of trusted craftsmanship.',
+    'Explore 18K, 22K and 24K bridal gold jewellery, necklaces, bangles, and custom designs at Khushi Ornament House in Gorakhpur. 25+ Years of Trust.',
   openGraph: {
     title: `${STORE_NAME} | Gorakhpur Gold Jewellery`,
     description:
       '25+ Years of Trust in Gorakhpur. Discover 18K, 22K and 24K gold bridal sets, rings, chains, mangalsutras, and custom jewellery.',
-    url: SITE_URL,
     siteName: STORE_NAME,
     locale: 'en_IN',
     type: 'website',
@@ -58,10 +56,6 @@ const jsonLd = {
   description: `${STORE_TAGLINE}. Fine 18K, 22K and 24K gold jewellery in Gorakhpur.`,
   telephone: CONTACT_CONFIG.primaryPhone,
   email: CONTACT_CONFIG.email,
-  founder: {
-    '@type': 'Person',
-    name: STORE_OWNER,
-  },
   taxID: GSTIN,
   address: {
     '@type': 'PostalAddress',
@@ -71,9 +65,7 @@ const jsonLd = {
     postalCode: '273005',
     addressCountry: 'IN',
   },
-  openingHours: 'Mo,Tu,We,Th,Fr,Sa,Su 11:00-20:00',
   url: SITE_URL,
-  priceRange: '₹₹₹',
 };
 
 export default function RootLayout({
@@ -82,7 +74,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${playfair.variable} ${plusJakarta.variable}`}>
+    <html
+      lang="en"
+      data-scroll-behavior="smooth"
+      className={`${playfair.variable} ${plusJakarta.variable}`}
+    >
       <head>
         <script
           type="application/ld+json"

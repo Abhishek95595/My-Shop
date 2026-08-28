@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { enquiryRepository } from '@/services/enquiries/enquiryRepository';
 import { CONTACT_CONFIG, CATEGORIES } from '@/lib/constants';
 import { useToast } from '@/context/ToastContext';
@@ -15,6 +15,7 @@ import {
 
 export const ContactForm: React.FC = () => {
   const { showToast } = useToast();
+  const submitLockRef = useRef(false);
 
   const [name, setName] = useState('');
   const [mobile, setMobile] = useState('');
@@ -30,8 +31,12 @@ export const ContactForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitLockRef.current) return;
+
+    submitLockRef.current = true;
     setErrorMessage(null);
     setIsSubmitting(true);
+    let succeeded = false;
 
     try {
       // 1. Save enquiry locally through repository
@@ -54,6 +59,7 @@ export const ContactForm: React.FC = () => {
         name: enquiry.name,
         whatsappUrl,
       });
+      succeeded = true;
 
       showToast(
         'Inquiry Saved',
@@ -70,6 +76,9 @@ export const ContactForm: React.FC = () => {
         setErrorMessage('Failed to submit inquiry. Please try again.');
       }
     } finally {
+      if (!succeeded) {
+        submitLockRef.current = false;
+      }
       setIsSubmitting(false);
     }
   };
@@ -91,7 +100,11 @@ export const ContactForm: React.FC = () => {
 
       {/* Success Notification Box */}
       {submittedData && (
-        <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-2xl space-y-3 animate-in fade-in duration-200">
+        <div
+          className="p-4 bg-emerald-50 border border-emerald-300 rounded-2xl space-y-3 animate-in fade-in duration-200"
+          role="status"
+          aria-live="polite"
+        >
           <div className="flex items-start gap-2.5">
             <CheckCircle2 className="w-5 h-5 text-emerald-700 flex-shrink-0 mt-0.5" />
             <div className="space-y-1">
@@ -132,10 +145,14 @@ export const ContactForm: React.FC = () => {
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Name */}
         <div className="space-y-1">
-          <label className="block text-xs font-bold uppercase tracking-wider text-maroon-900">
+          <label
+            htmlFor="enquiry-name"
+            className="block text-xs font-bold uppercase tracking-wider text-maroon-900"
+          >
             Full Name *
           </label>
           <input
+            id="enquiry-name"
             type="text"
             required
             placeholder="e.g. Ramesh Kumar"
@@ -147,10 +164,14 @@ export const ContactForm: React.FC = () => {
 
         {/* Mobile Number */}
         <div className="space-y-1">
-          <label className="block text-xs font-bold uppercase tracking-wider text-maroon-900">
+          <label
+            htmlFor="enquiry-mobile"
+            className="block text-xs font-bold uppercase tracking-wider text-maroon-900"
+          >
             Mobile Number (10-digit Indian Mobile) *
           </label>
           <input
+            id="enquiry-mobile"
             type="tel"
             required
             placeholder="e.g. 9876543210"
@@ -162,10 +183,15 @@ export const ContactForm: React.FC = () => {
 
         {/* Category Interest */}
         <div className="space-y-1">
-          <label className="block text-xs font-bold uppercase tracking-wider text-maroon-900">
+          <label
+            htmlFor="enquiry-interest"
+            className="block text-xs font-bold uppercase tracking-wider text-maroon-900"
+          >
             Jewellery Interest *
           </label>
           <select
+            id="enquiry-interest"
+            required
             value={categoryOrProduct}
             onChange={(e) => setCategoryOrProduct(e.target.value)}
             className="w-full text-xs p-3 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500"
@@ -184,11 +210,16 @@ export const ContactForm: React.FC = () => {
 
         {/* Optional Message */}
         <div className="space-y-1">
-          <label className="block text-xs font-bold uppercase tracking-wider text-maroon-900">
+          <label
+            htmlFor="enquiry-message"
+            className="block text-xs font-bold uppercase tracking-wider text-maroon-900"
+          >
             Message / Specification (Optional)
           </label>
           <textarea
+            id="enquiry-message"
             rows={3}
+            maxLength={1000}
             placeholder="Mention approximate weight, preferred purity, occasion date or specific design requests..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
@@ -200,11 +231,17 @@ export const ContactForm: React.FC = () => {
         <div className="pt-2 space-y-2.5">
           <button
             type="submit"
-            disabled={isSubmitting}
-            className="w-full inline-flex items-center justify-center gap-2 bg-maroon-800 hover:bg-maroon-900 text-cream-50 font-bold text-xs py-3.5 px-6 rounded-xl shadow-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 cursor-pointer"
+            disabled={isSubmitting || !!submittedData}
+            className="w-full inline-flex items-center justify-center gap-2 bg-maroon-800 hover:bg-maroon-900 disabled:bg-charcoal-400 disabled:cursor-not-allowed text-cream-50 font-bold text-xs py-3.5 px-6 rounded-xl shadow-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 cursor-pointer"
           >
             <Send className="w-4 h-4 text-gold-300" />
-            <span>{isSubmitting ? 'Saving Inquiry...' : 'Submit Inquiry & Open WhatsApp'}</span>
+            <span>
+              {isSubmitting
+                ? 'Saving Inquiry...'
+                : submittedData
+                  ? 'Inquiry Saved — Use WhatsApp Link Above'
+                  : 'Submit Inquiry & Open WhatsApp'}
+            </span>
           </button>
 
           <p className="text-[11px] text-charcoal-500 text-center font-sans">

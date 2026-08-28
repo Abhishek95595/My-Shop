@@ -15,8 +15,9 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: `Special Offers & Updates | ${STORE_NAME}`,
-  description: `View seasonal showroom offers and festive announcements from ${STORE_NAME} in Gorakhpur.`,
+  title: 'Special Offers & Updates',
+  description: `View owner-approved showroom offers and announcements from ${STORE_NAME} in Gorakhpur.`,
+  alternates: { canonical: '/offers' },
 };
 
 export default function OffersPage() {
@@ -32,7 +33,7 @@ export default function OffersPage() {
           Offers &amp; Showroom Updates
         </h1>
         <p className="text-sm sm:text-base text-charcoal-700 font-sans leading-relaxed">
-          {STORE_TAGLINE}. Official promotional announcements and seasonal jewellery updates are published here directly by our showroom.
+          {STORE_TAGLINE}. This page is reserved for owner-approved promotional announcements and showroom updates.
         </p>
       </div>
 
@@ -42,10 +43,10 @@ export default function OffersPage() {
           <Tag className="w-8 h-8 text-gold-700" />
         </div>
         <h2 className="text-xl font-serif font-bold text-maroon-950">
-          No Active Offers Currently
+          No active offers currently
         </h2>
         <p className="text-xs sm:text-sm text-charcoal-600 font-sans leading-relaxed">
-          There are no special seasonal promotional campaigns active at this moment. We offer competitive everyday pricing on all 18K, 22K and 24K gold jewellery directly at our Gorakhpur showroom.
+          There are no owner-approved promotional announcements to display at this time. Contact the showroom for current catalogue and rate information.
         </p>
         <div className="pt-2 flex flex-wrap justify-center gap-3">
           <Link

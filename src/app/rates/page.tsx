@@ -51,7 +51,9 @@ export default function RatesPage() {
           <span>Showroom Indicative Rates</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-serif font-bold text-maroon-950">
-          Owner-Updated Current Rates
+          {isLoaded && rates.length > 0
+            ? 'Owner-Updated Current Rates'
+            : 'Showroom Reference Rates'}
         </h1>
         <p className="text-sm sm:text-base text-charcoal-700 font-sans leading-relaxed">
           {STORE_TAGLINE}. Indicative bullion reference rates manually updated by our showroom proprietor.
@@ -126,7 +128,7 @@ export default function RatesPage() {
             <Coins className="w-8 h-8 text-gold-700" />
           </div>
           <h2 className="text-xl font-serif font-bold text-maroon-950">
-            Rates Are Currently Unavailable
+            Rates are currently unavailable.
           </h2>
           <p className="text-xs sm:text-sm text-charcoal-600 font-sans leading-relaxed">
             Owner-updated reference rates have not been published for today. Please contact our Gorakhpur showroom directly for current gold bullion rates and making charge inquiries.

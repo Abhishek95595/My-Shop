@@ -35,8 +35,12 @@ export const FeaturedProductsSection: React.FC = () => {
 
       {/* Products Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-        {featuredProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
+        {featuredProducts.map((product, index) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            eagerImage={index === 0}
+          />
         ))}
       </div>
     </section>

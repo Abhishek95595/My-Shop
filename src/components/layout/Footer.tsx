@@ -20,6 +20,7 @@ import {
   FOOTER_QUICK_LINKS,
   FOOTER_LEGAL_LINKS,
 } from '@/lib/constants';
+import { OwnerRatesFooterLink } from './OwnerRatesFooterLink';
 
 export const Footer: React.FC = () => {
   return (
@@ -44,7 +45,7 @@ export const Footer: React.FC = () => {
               />
             </Link>
             <p className="text-xs sm:text-sm text-charcoal-600 leading-relaxed font-sans">
-              {STORE_TAGLINE}. Dedicated to fine 18K, 22K and 24K gold jewellery, bespoke bridal sets, and honest customer service in Gorakhpur.
+              {STORE_TAGLINE}. Gold jewellery in 18K, 22K and 24K options, bespoke bridal sets, and in-store consultations in Gorakhpur.
             </p>
             <div className="space-y-1 text-xs text-charcoal-600 font-sans">
               <p>
@@ -103,6 +104,7 @@ export const Footer: React.FC = () => {
                   </Link>
                 </li>
               ))}
+              <OwnerRatesFooterLink />
             </ul>
           </div>
 
@@ -135,7 +137,7 @@ export const Footer: React.FC = () => {
                     {CONTACT_CONFIG.hours}
                   </span>
                   <span className="text-xs text-charcoal-500">
-                    Open daily for in-store consultations
+                    Call ahead to confirm the visiting day
                   </span>
                 </div>
               </div>

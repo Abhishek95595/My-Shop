@@ -42,7 +42,7 @@ export const PRESET_MOCK_USERS: MockUser[] = [
  * and Buying Shortlist local persistence.
  * Under NO circumstances does mock customer authentication grant Admin Dashboard access or roles.
  * Entering owner/admin emails in this mock customer flow does NOT grant any admin privileges or routes.
- * Real admin authorization strictly requires verified Firebase authentication and server-side rules.
+ * Real admin authorization strictly requires verified server-side authentication and authorization rules.
  */
 class MockAuthService implements IAuthService {
   private listeners: Set<(user: MockUser | null) => void> = new Set();

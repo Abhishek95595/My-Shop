@@ -157,7 +157,7 @@ export const AdminRatesManager: React.FC = () => {
             <span>Owner-Updated Bullion Reference Rates</span>
           </h2>
           <p className="text-xs text-charcoal-600 font-sans">
-            Rates are entered manually by store owners and published to the public /rates page.
+            Rates are entered manually by authorized administrators on the owner&apos;s behalf and published to the public /rates page.
           </p>
         </div>
 
@@ -212,7 +212,7 @@ export const AdminRatesManager: React.FC = () => {
                   <p className="text-xl font-serif font-bold text-maroon-950">
                     ₹{item.rate.toLocaleString('en-IN')}
                   </p>
-                  <p className="text-[11px] text-charcoal-500 font-sans">per {item.unit}</p>
+                  <p className="text-[11px] text-charcoal-500 font-sans">{item.unit}</p>
                 </div>
 
                 <div className="flex items-center gap-1.5 border-l border-gold-200 pl-4">
@@ -220,6 +220,8 @@ export const AdminRatesManager: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => handleToggleActive(item)}
+                    aria-pressed={item.isActive}
+                    aria-label={`${item.isActive ? 'Deactivate' : 'Activate'} ${item.label}`}
                     className={`py-1.5 px-3 rounded-lg text-xs font-semibold border transition-colors cursor-pointer ${
                       item.isActive
                         ? 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
@@ -234,7 +236,7 @@ export const AdminRatesManager: React.FC = () => {
                     type="button"
                     onClick={() => handleOpenEdit(item)}
                     className="p-2 text-charcoal-500 hover:text-maroon-900 hover:bg-gold-100 rounded-lg transition-colors cursor-pointer"
-                    aria-label="Edit rate"
+                    aria-label={`Edit ${item.label}`}
                   >
                     <Edit className="w-4 h-4" />
                   </button>
@@ -244,7 +246,7 @@ export const AdminRatesManager: React.FC = () => {
                     type="button"
                     onClick={() => handleDeletePrompt(item)}
                     className="p-2 text-charcoal-400 hover:text-maroon-800 hover:bg-maroon-50 rounded-lg transition-colors cursor-pointer"
-                    aria-label="Delete rate"
+                    aria-label={`Delete ${item.label}`}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -279,33 +281,71 @@ export const AdminRatesManager: React.FC = () => {
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal-900/60 backdrop-blur-xs animate-in fade-in duration-200"
           role="dialog"
           aria-modal="true"
+          aria-labelledby="rate-form-title"
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') {
+              setIsModalOpen(false);
+              return;
+            }
+
+            if (event.key === 'Tab') {
+              const focusable = Array.from(
+                event.currentTarget.querySelectorAll<HTMLElement>(
+                  'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'
+                )
+              ).filter((element) => element.offsetParent !== null);
+              const first = focusable[0];
+              const last = focusable[focusable.length - 1];
+              if (!first || !last) return;
+
+              if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+              } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+              }
+            }
+          }}
         >
           <div className="bg-cream-50 border border-gold-300 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-gold-200/80 pb-3">
-              <h3 className="text-lg font-serif font-bold text-maroon-950">
+              <h3
+                id="rate-form-title"
+                className="text-lg font-serif font-bold text-maroon-950"
+              >
                 {editingId ? 'Edit Reference Rate' : 'Add New Reference Rate'}
               </h3>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
                 className="p-1 text-charcoal-400 hover:text-charcoal-700 rounded-lg"
+                aria-label="Close rate form"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {formError && (
-              <div className="p-3 bg-maroon-50 border border-maroon-200 rounded-xl text-xs text-maroon-900">
+              <div
+                className="p-3 bg-maroon-50 border border-maroon-200 rounded-xl text-xs text-maroon-900"
+                role="alert"
+              >
                 {formError}
               </div>
             )}
 
             <form onSubmit={handleSaveRate} className="space-y-3 font-sans">
               <div className="space-y-1">
-                <label className="block text-xs font-bold uppercase tracking-wider text-maroon-900">
+                <label
+                  htmlFor="rate-label"
+                  className="block text-xs font-bold uppercase tracking-wider text-maroon-900"
+                >
                   Rate Label *
                 </label>
                 <input
+                  id="rate-label"
+                  autoFocus
                   type="text"
                   required
                   placeholder="e.g. 22K Gold (916 Standard)"
@@ -317,42 +357,64 @@ export const AdminRatesManager: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-maroon-900">
-                    Material
+                  <label
+                    htmlFor="rate-material"
+                    className="block text-xs font-bold uppercase tracking-wider text-maroon-900"
+                  >
+                    Material / Description
                   </label>
-                  <select
+                  <input
+                    id="rate-material"
+                    type="text"
+                    required
+                    list="rate-material-options"
+                    placeholder="e.g. 22K Gold"
                     value={material}
                     onChange={(e) => setMaterial(e.target.value)}
                     className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500"
-                  >
-                    <option value="22K Gold">22K Gold</option>
-                    <option value="24K Gold">24K Gold</option>
-                    <option value="18K Gold">18K Gold</option>
-                    <option value="Silver">Silver</option>
-                  </select>
+                  />
+                  <datalist id="rate-material-options">
+                    <option value="18K Gold" />
+                    <option value="22K Gold" />
+                    <option value="24K Gold" />
+                    <option value="Silver" />
+                  </datalist>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-maroon-900">
+                  <label
+                    htmlFor="rate-unit"
+                    className="block text-xs font-bold uppercase tracking-wider text-maroon-900"
+                  >
                     Unit
                   </label>
-                  <select
+                  <input
+                    id="rate-unit"
+                    type="text"
+                    required
+                    list="rate-unit-options"
+                    placeholder="e.g. per gram"
                     value={unit}
                     onChange={(e) => setUnit(e.target.value)}
                     className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500"
-                  >
-                    <option value="per gram">per gram</option>
-                    <option value="per 10 grams">per 10 grams</option>
-                    <option value="per kilogram">per kilogram</option>
-                  </select>
+                  />
+                  <datalist id="rate-unit-options">
+                    <option value="per gram" />
+                    <option value="per 10 grams" />
+                    <option value="per kilogram" />
+                  </datalist>
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="block text-xs font-bold uppercase tracking-wider text-maroon-900">
+                <label
+                  htmlFor="rate-value"
+                  className="block text-xs font-bold uppercase tracking-wider text-maroon-900"
+                >
                   Numeric Rate (₹) *
                 </label>
                 <input
+                  id="rate-value"
                   type="number"
                   step="any"
                   required

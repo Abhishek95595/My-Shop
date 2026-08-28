@@ -38,6 +38,7 @@ class MockProductRepository {
       this.dispatchStorageUpdate();
     } catch (err) {
       console.warn('Failed saving custom products to localStorage:', err);
+      throw new Error('Failed to save product metadata in browser storage.');
     }
   }
 
@@ -60,6 +61,7 @@ class MockProductRepository {
       this.dispatchStorageUpdate();
     } catch (err) {
       console.warn('Failed saving sample overrides to localStorage:', err);
+      throw new Error('Failed to save product metadata in browser storage.');
     }
   }
 

@@ -8,21 +8,21 @@ const PROCESS_STEPS = [
     icon: PencilRuler,
     title: 'Design Consultation',
     description:
-      'Share your design sketch, sample photograph, or discuss your vision with our master craftsmen in Gorakhpur.',
+      'Share a design sketch, sample photograph, or discuss your requirements with the showroom team in Gorakhpur.',
   },
   {
     step: '02',
     icon: Flame,
     title: 'Artisan Crafting & Purity',
     description:
-      'Your piece is precision-crafted in 18K, 22K or 24K gold with meticulous detailing and weight accuracy.',
+      'Confirm the chosen 18K, 22K or 24K gold option, design details, and approximate target weight before production.',
   },
   {
     step: '03',
     icon: Gift,
     title: 'Final Weighing & Handover',
     description:
-      'Inspect your finished heirloom in person at our showroom with exact weighing and heirloom gift packaging.',
+      'Inspect the finished jewellery and confirm its final weight in person at the showroom before handover.',
   },
 ];
 
@@ -44,7 +44,7 @@ export const CustomJewellerySection: React.FC = () => {
             Custom Jewellery Process
           </h2>
           <p className="text-sm sm:text-base text-charcoal-600 font-sans leading-relaxed">
-            From a personal sketch to a timeless gold heirloom — experience seamless bespoke craftsmanship tailored to your exact weight and design preferences.
+            Discuss a reference design, preferred gold purity, approximate target weight, and showroom handover through a clear consultation process.
           </p>
         </div>
 
@@ -91,7 +91,7 @@ export const CustomJewellerySection: React.FC = () => {
               Have a Design in Mind?
             </h3>
             <p className="text-xs sm:text-sm text-cream-200/80 font-sans">
-              Connect directly with our Gorakhpur master jeweller on WhatsApp or phone.
+              Connect with our Gorakhpur showroom team on WhatsApp or phone.
             </p>
           </div>
 

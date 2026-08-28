@@ -26,7 +26,7 @@ export const HeroSection: React.FC = () => {
           {/* Trust Badge */}
           <div className="inline-flex items-center gap-2 bg-gold-100/90 border border-gold-300 text-maroon-800 text-xs sm:text-sm font-semibold px-3.5 py-1.5 rounded-full shadow-sm">
             <Sparkles className="w-4 h-4 text-gold-700" />
-            <span>25+ Years of Trust & Quality Craftsmanship in Gorakhpur</span>
+            <span>25+ Years of Trust in Gorakhpur</span>
           </div>
 
           {/* Main Headline */}

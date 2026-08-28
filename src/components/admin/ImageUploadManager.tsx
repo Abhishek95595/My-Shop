@@ -23,12 +23,16 @@ import {
 interface ImageUploadManagerProps {
   images: ProductImage[];
   onChange: (images: ProductImage[]) => void;
+  persistedImageIds?: string[];
+  onBusyChange?: (busy: boolean) => void;
   disabled?: boolean;
 }
 
 export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
   images,
   onChange,
+  persistedImageIds = [],
+  onBusyChange,
   disabled = false,
 }) => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -39,9 +43,15 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
   const replaceInputRef = useRef<HTMLInputElement>(null);
   const replaceTargetIdRef = useRef<string | null>(null);
 
+  const setUploadBusy = (busy: boolean) => {
+    setIsUploading(busy);
+    onBusyChange?.(busy);
+  };
+
   // Load / resolve object URLs for indexeddb images or static URLs
   useEffect(() => {
     let isMounted = true;
+    const acquiredObjectUrls: string[] = [];
 
     async function loadPreviews() {
       const urls: Record<string, string> = {};
@@ -49,6 +59,7 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
         if (img.url.startsWith('indexeddb://')) {
           const resolvedUrl = await imageStorageService.getImageUrl(img.id);
           if (resolvedUrl) {
+            acquiredObjectUrls.push(resolvedUrl);
             urls[img.id] = resolvedUrl;
           }
         } else {
@@ -57,6 +68,9 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
       }
       if (isMounted) {
         setPreviewUrls(urls);
+      } else {
+        acquiredObjectUrls.forEach((url) => imageStorageService.revokeImageUrl(url));
+        acquiredObjectUrls.length = 0;
       }
     }
 
@@ -64,6 +78,8 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
 
     return () => {
       isMounted = false;
+      acquiredObjectUrls.forEach((url) => imageStorageService.revokeImageUrl(url));
+      acquiredObjectUrls.length = 0;
     };
   }, [images]);
 
@@ -79,6 +95,8 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
   };
 
   const handleFiles = async (files: FileList | File[]) => {
+    if (disabled || isUploading) return;
+
     setErrorMsg(null);
     const fileArray = Array.from(files);
 
@@ -87,7 +105,8 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
       return;
     }
 
-    setIsUploading(true);
+    const createdImageIds: string[] = [];
+    setUploadBusy(true);
     try {
       const newImages: ProductImage[] = [...images];
 
@@ -101,7 +120,7 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
 
         const imageId = `img-blob-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
         const storageUrl = await imageStorageService.saveImage(imageId, file);
-        const previewUrl = URL.createObjectURL(file);
+        createdImageIds.push(imageId);
 
         // First image added is primary if no primary exists
         const hasPrimary = newImages.some((img) => img.isPrimary);
@@ -115,18 +134,20 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
         };
 
         newImages.push(newImage);
-        setPreviewUrls((prev) => ({ ...prev, [imageId]: previewUrl }));
       }
 
       onChange(newImages);
     } catch (err: unknown) {
+      await Promise.all(
+        createdImageIds.map((id) => imageStorageService.deleteImage(id))
+      );
       if (err instanceof Error) {
         setErrorMsg(err.message);
       } else {
         setErrorMsg('Failed to process image file.');
       }
     } finally {
-      setIsUploading(false);
+      setUploadBusy(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
@@ -183,16 +204,29 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
   };
 
   const removeImage = async (id: string) => {
-    await imageStorageService.deleteImage(id);
-    const filtered = images.filter((img) => img.id !== id);
+    if (disabled || isUploading) return;
 
-    // If removed image was primary, make the first remaining image primary
-    let updated = filtered.map((img, idx) => ({ ...img, sortOrder: idx + 1 }));
-    if (updated.length > 0 && !updated.some((img) => img.isPrimary)) {
-      updated[0].isPrimary = true;
+    setUploadBusy(true);
+    try {
+      if (!persistedImageIds.includes(id)) {
+        await imageStorageService.deleteImage(id);
+      }
+      const filtered = images.filter((img) => img.id !== id);
+
+      // If removed image was primary, make the first remaining image primary
+      const updated = filtered.map((img, idx) => ({ ...img, sortOrder: idx + 1 }));
+      if (updated.length > 0 && !updated.some((img) => img.isPrimary)) {
+        updated[0].isPrimary = true;
+      }
+
+      onChange(updated);
+    } catch (err: unknown) {
+      setErrorMsg(
+        err instanceof Error ? err.message : 'Failed to remove the image.'
+      );
+    } finally {
+      setUploadBusy(false);
     }
-
-    onChange(updated);
   };
 
   const triggerReplace = (id: string) => {
@@ -202,7 +236,13 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
 
   const handleReplaceFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const targetId = replaceTargetIdRef.current;
-    if (!targetId || !e.target.files || e.target.files.length === 0) return;
+    if (
+      disabled ||
+      isUploading ||
+      !targetId ||
+      !e.target.files ||
+      e.target.files.length === 0
+    ) return;
 
     const file = e.target.files[0];
     const validationError = validateFile(file);
@@ -211,24 +251,27 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
       return;
     }
 
-    setIsUploading(true);
+    setUploadBusy(true);
     try {
-      await imageStorageService.deleteImage(targetId);
-      const newStorageUrl = await imageStorageService.saveImage(targetId, file);
-      const previewUrl = URL.createObjectURL(file);
-
-      setPreviewUrls((prev) => ({ ...prev, [targetId]: previewUrl }));
+      const replacementId = `img-blob-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const newStorageUrl = await imageStorageService.saveImage(replacementId, file);
 
       const updated = images.map((img) =>
-        img.id === targetId ? { ...img, url: newStorageUrl } : img
+        img.id === targetId
+          ? { ...img, id: replacementId, url: newStorageUrl }
+          : img
       );
       onChange(updated);
+
+      if (!persistedImageIds.includes(targetId)) {
+        await imageStorageService.deleteImage(targetId);
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         setErrorMsg(err.message);
       }
     } finally {
-      setIsUploading(false);
+      setUploadBusy(false);
       if (replaceInputRef.current) replaceInputRef.current.value = '';
     }
   };
@@ -239,9 +282,9 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-maroon-900">
+          <span className="block text-xs font-bold uppercase tracking-wider text-maroon-900">
             Product Images ({images.length}/5 slots)
-          </label>
+          </span>
           <p className="text-[11px] text-charcoal-500 font-sans">
             JPG, JPEG, PNG, or WEBP up to 5MB. Exactly one primary image is required to publish.
           </p>
@@ -287,7 +330,23 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
               ? 'border-maroon-700 bg-gold-100/50'
               : 'border-gold-300 bg-cream-50/70 hover:bg-gold-50/60'
           }`}
-          onClick={() => fileInputRef.current?.click()}
+          onClick={() => {
+            if (!disabled && !isUploading) fileInputRef.current?.click();
+          }}
+          onKeyDown={(event) => {
+            if (
+              !disabled &&
+              !isUploading &&
+              (event.key === 'Enter' || event.key === ' ')
+            ) {
+              event.preventDefault();
+              fileInputRef.current?.click();
+            }
+          }}
+          role="button"
+          tabIndex={disabled || isUploading ? -1 : 0}
+          aria-disabled={disabled || isUploading}
+          aria-label="Add product images"
         >
           <input
             ref={fileInputRef}
@@ -323,13 +382,16 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
         accept="image/jpeg,image/png,image/webp"
         onChange={handleReplaceFile}
         className="hidden"
+        disabled={disabled || isUploading}
       />
 
       {/* Image Slots List */}
       {images.length > 0 && (
         <div className="space-y-3">
           {images.map((img, idx) => {
-            const previewUrl = previewUrls[img.id] || img.url;
+            const previewUrl =
+              previewUrls[img.id] ||
+              (img.url.startsWith('indexeddb://') ? '' : img.url);
             return (
               <div
                 key={img.id}
@@ -365,15 +427,20 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
 
                   {/* Alt Text Input */}
                   <div className="flex-1 space-y-1">
-                    <label className="block text-[10px] font-bold text-charcoal-700 uppercase">
+                    <label
+                      htmlFor={`image-alt-${img.id}`}
+                      className="block text-[10px] font-bold text-charcoal-700 uppercase"
+                    >
                       Alt Text / Description (Slot {idx + 1})
                     </label>
                     <input
+                      id={`image-alt-${img.id}`}
                       type="text"
                       required
                       placeholder="e.g. Bridal Gold Necklace - Front view"
                       value={img.altText}
                       onChange={(e) => updateAltText(img.id, e.target.value)}
+                      disabled={disabled || isUploading}
                       className="w-full text-xs px-2.5 py-1.5 bg-cream-100 border border-gold-200 rounded-lg text-charcoal-900 focus:outline-none focus:border-gold-500"
                     />
                   </div>
@@ -384,6 +451,7 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
                   {/* Primary Selector Toggle */}
                   <button
                     type="button"
+                    disabled={disabled || isUploading}
                     onClick={() => setPrimaryImage(img.id)}
                     className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors ${
                       img.isPrimary
@@ -401,7 +469,7 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
                   {/* Reorder Up */}
                   <button
                     type="button"
-                    disabled={idx === 0}
+                    disabled={disabled || isUploading || idx === 0}
                     onClick={() => moveImage(idx, 'up')}
                     className="p-1.5 text-charcoal-600 hover:text-maroon-800 disabled:opacity-30 disabled:cursor-not-allowed rounded"
                     aria-label={`Move image ${idx + 1} up`}
@@ -412,7 +480,7 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
                   {/* Reorder Down */}
                   <button
                     type="button"
-                    disabled={idx === images.length - 1}
+                    disabled={disabled || isUploading || idx === images.length - 1}
                     onClick={() => moveImage(idx, 'down')}
                     className="p-1.5 text-charcoal-600 hover:text-maroon-800 disabled:opacity-30 disabled:cursor-not-allowed rounded"
                     aria-label={`Move image ${idx + 1} down`}
@@ -423,6 +491,7 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
                   {/* Replace Button */}
                   <button
                     type="button"
+                    disabled={disabled || isUploading}
                     onClick={() => triggerReplace(img.id)}
                     className="p-1.5 text-charcoal-600 hover:text-maroon-800 rounded"
                     aria-label={`Replace image ${idx + 1}`}
@@ -433,6 +502,7 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
                   {/* Remove Button */}
                   <button
                     type="button"
+                    disabled={disabled || isUploading}
                     onClick={() => removeImage(img.id)}
                     className="p-1.5 text-maroon-700 hover:text-maroon-950 hover:bg-maroon-50 rounded"
                     aria-label={`Remove image ${idx + 1}`}

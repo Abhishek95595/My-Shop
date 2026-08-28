@@ -24,7 +24,7 @@ export const StoreInfoSection: React.FC = () => {
               Personal Consultation &amp; Location
             </h2>
             <p className="text-sm sm:text-base text-charcoal-600 font-sans max-w-2xl">
-              Visit us in person to explore our bridal showcase, discuss custom jewellery commissions, and experience 25+ years of trusted service.
+              Visit us in person to explore the bridal catalogue and discuss custom jewellery requirements backed by 25+ years of trust.
             </p>
           </div>
 
@@ -70,7 +70,7 @@ export const StoreInfoSection: React.FC = () => {
                 11:00 AM – 8:00 PM
               </p>
               <p className="text-xs text-charcoal-500">
-                Open All 7 Days (Prior call recommended for custom bridal consultations)
+                Please call ahead to confirm the visiting day and consultation availability
               </p>
             </div>
           </div>

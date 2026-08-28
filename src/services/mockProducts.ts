@@ -148,7 +148,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
     shortDescription:
       'Substantial 22K curb link chain with secure clasp for men.',
     detailedDescription:
-      'Crafted with precision curb links and hand-finished polish, this 22K men’s gold chain delivers durability and elegance for everyday or formal festive wear.',
+      'A 22K men’s curb-link gold chain with a polished finish for everyday or formal festive wear.',
     occasion: 'Daily Wear',
     tags: ['Men', 'Chain', '22K Gold', 'Curb Link', 'Classic'],
     isFeatured: true,

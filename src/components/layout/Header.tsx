@@ -25,7 +25,7 @@ export const Header: React.FC = () => {
           <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
             <div className="flex items-center gap-4">
               <span className="hidden sm:inline text-gold-200">
-                ✨ 25+ Years of Trust &amp; Quality Craftsmanship
+                ✨ 25+ Years of Trust
               </span>
               <span className="text-gold-200 font-medium">Gorakhpur Store</span>
             </div>

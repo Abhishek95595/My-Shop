@@ -30,7 +30,7 @@ export interface IImageStorageService {
 
 class IndexedDBImageStorageService implements IImageStorageService {
   private dbPromise: Promise<IDBDatabase> | null = null;
-  private objectUrlMap = new Map<string, string>(); // imageId -> objectUrl
+  private objectUrlMap = new Map<string, { url: string; consumers: number }>();
 
   private async openDB(): Promise<IDBDatabase> {
     if (typeof window === 'undefined' || !window.indexedDB) {
@@ -137,24 +137,34 @@ class IndexedDBImageStorageService implements IImageStorageService {
   }
 
   public async getImageUrl(id: string): Promise<string | null> {
-    // Check if we already created an active Object URL in memory
-    if (this.objectUrlMap.has(id)) {
-      return this.objectUrlMap.get(id)!;
+    const existing = this.objectUrlMap.get(id);
+    if (existing) {
+      existing.consumers += 1;
+      return existing.url;
     }
 
     const blob = await this.getImageBlob(id);
     if (!blob) return null;
 
+    // Another consumer may have populated the cache while IndexedDB was read.
+    // Reuse that URL so simultaneous first-time requests cannot leak an
+    // untracked object URL by overwriting each other in the map.
+    const racedExisting = this.objectUrlMap.get(id);
+    if (racedExisting) {
+      racedExisting.consumers += 1;
+      return racedExisting.url;
+    }
+
     const objectUrl = URL.createObjectURL(blob);
-    this.objectUrlMap.set(id, objectUrl);
+    this.objectUrlMap.set(id, { url: objectUrl, consumers: 1 });
     return objectUrl;
   }
 
   public async deleteImage(id: string): Promise<void> {
     // Revoke any active object URL
-    if (this.objectUrlMap.has(id)) {
-      const url = this.objectUrlMap.get(id)!;
-      URL.revokeObjectURL(url);
+    const activeObjectUrl = this.objectUrlMap.get(id);
+    if (activeObjectUrl) {
+      URL.revokeObjectURL(activeObjectUrl.url);
       this.objectUrlMap.delete(id);
     }
 
@@ -175,10 +185,13 @@ class IndexedDBImageStorageService implements IImageStorageService {
 
   public revokeImageUrl(url: string): void {
     if (typeof window === 'undefined' || !url) return;
-    for (const [id, activeUrl] of this.objectUrlMap.entries()) {
-      if (activeUrl === url) {
-        URL.revokeObjectURL(url);
-        this.objectUrlMap.delete(id);
+    for (const [id, entry] of this.objectUrlMap.entries()) {
+      if (entry.url === url) {
+        entry.consumers -= 1;
+        if (entry.consumers <= 0) {
+          URL.revokeObjectURL(url);
+          this.objectUrlMap.delete(id);
+        }
         break;
       }
     }

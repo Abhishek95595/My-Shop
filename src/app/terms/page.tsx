@@ -2,7 +2,6 @@ import React from 'react';
 import { Metadata } from 'next';
 import {
   STORE_NAME,
-  STORE_OWNER,
   CONTACT_CONFIG,
   GSTIN,
   EXACT_WEIGHT_DISCLAIMER,
@@ -10,8 +9,9 @@ import {
 import { Scale, FileCheck, AlertTriangle } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: `Terms of Service (Draft) | ${STORE_NAME}`,
+  title: 'Terms of Service (Draft)',
   description: `Terms of service draft describing the catalogue, inquiry, and offline transaction conditions for ${STORE_NAME}.`,
+  alternates: { canonical: '/terms' },
 };
 
 export default function TermsOfServicePage() {
@@ -36,7 +36,7 @@ export default function TermsOfServicePage() {
           Terms of Service
         </h1>
         <p className="text-xs font-mono text-charcoal-500">
-          Last Updated: 28 August 2026 • Khushi Ornament House ({GSTIN})
+          Last Updated: 29 August 2026 • Khushi Ornament House ({GSTIN})
         </p>
       </div>
 
@@ -65,7 +65,7 @@ export default function TermsOfServicePage() {
             3. Approximate Weights &amp; Specifications
           </h2>
           <p>
-            {EXACT_WEIGHT_DISCLAIMER} Gold ornaments are crafted individually by goldsmiths; exact gram weight, dimensions, and gemstone allowances are measured on certified scales during physical in-store selection.
+            {EXACT_WEIGHT_DISCLAIMER} Final gram weight, dimensions, and any applicable deductions are confirmed during physical in-store selection.
           </p>
         </section>
 
@@ -87,18 +87,9 @@ export default function TermsOfServicePage() {
           </p>
         </section>
 
-        <section className="space-y-2">
-          <h2 className="text-base font-serif font-bold text-maroon-950 border-b border-gold-200/60 pb-1">
-            6. Intellectual Property &amp; Content
-          </h2>
-          <p>
-            All photographs, jewellery designs, brand identity graphics, and descriptions presented on this website are the property of {STORE_NAME} and proprietor {STORE_OWNER}.
-          </p>
-        </section>
-
         <section className="space-y-2 border-t border-gold-200/60 pt-4">
           <h2 className="text-base font-serif font-bold text-maroon-950">
-            7. Governing Jurisdiction
+            6. Governing Jurisdiction
           </h2>
           <p>
             Any disputes or matters arising in connection with store transactions or inquiries are subject exclusively to the jurisdiction of the competent courts in Gorakhpur, Uttar Pradesh, India.

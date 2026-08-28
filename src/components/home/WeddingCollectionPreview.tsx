@@ -93,7 +93,7 @@ export const WeddingCollectionPreview: React.FC = () => {
           </div>
           <div className="flex items-center gap-2.5 bg-maroon-900/40 p-3 rounded-xl border border-gold-300/20">
             <ShieldCheck className="w-5 h-5 text-gold-400 flex-shrink-0" />
-            <span>Exact weight and purity transparency on every custom bridal commission.</span>
+            <span>Final weight, purity, and availability are confirmed at the showroom.</span>
           </div>
         </div>
       </div>

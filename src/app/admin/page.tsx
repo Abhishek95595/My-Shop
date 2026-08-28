@@ -205,7 +205,7 @@ export default function AdminDashboardPage() {
           <div>
             <p className="font-bold">Development Admin Mode • Local Demonstration Only</p>
             <p className="text-charcoal-600 text-[11px]">
-              Logged in as authorized store owner: <strong className="text-maroon-900">{user?.email}</strong>.
+              Logged in as an authorized administrator: <strong className="text-maroon-900">{user?.email}</strong>.
             </p>
           </div>
         </div>

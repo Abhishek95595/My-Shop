@@ -31,7 +31,7 @@ export const AdminAccessDenied: React.FC = () => {
           Admin Dashboard Access Denied
         </h1>
         <p className="text-sm text-charcoal-600 font-sans leading-relaxed max-w-lg mx-auto">
-          The Admin Dashboard is strictly restricted to authorized store owners.
+          The Admin Dashboard is strictly restricted to authorized administrators.
           {user ? (
             <>
               {' '}

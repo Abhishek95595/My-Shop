@@ -19,8 +19,9 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: `Our Jewellery Services | ${STORE_NAME}`,
+  title: 'Our Jewellery Services',
   description: `Explore services offered by ${STORE_NAME} in Gorakhpur: custom gold jewellery manufacturing, old-gold exchange, retail & wholesale, wedding jewellery, and gold/silver coins.`,
+  alternates: { canonical: '/services' },
 };
 
 export default function ServicesPage() {
@@ -29,7 +30,7 @@ export default function ServicesPage() {
       title: 'Custom Gold Jewellery Manufacturing',
       icon: Gem,
       description:
-        'Have a specific design or bridal vision? We create custom handcrafted gold ornaments tailored to your desired weight, purity (18K, 22K, 24K), and aesthetic specifications.',
+        'Discuss a specific design or bridal requirement, preferred approximate weight, and 18K, 22K or 24K gold option with the showroom team.',
       link: '/custom-jewellery',
       linkText: 'Custom Jewellery Details',
     },
@@ -37,7 +38,7 @@ export default function ServicesPage() {
       title: 'Wedding & Bridal Jewellery',
       icon: Sparkles,
       description:
-        'Complete bridal necklace sets, matching earrings, maang tikka, bangles, and rings crafted with timeless artistry for your special ceremonies.',
+        'Wedding jewellery options include bridal necklace sets, matching earrings, maang tikka, bangles, and rings. Confirm current availability in store.',
       link: '/catalogue?occasion=Wedding',
       linkText: 'View Wedding Jewellery',
     },
@@ -45,7 +46,7 @@ export default function ServicesPage() {
       title: 'Old-Gold Exchange',
       icon: RefreshCw,
       description:
-        'Upgrade your old gold ornaments toward new designs. Evaluation is conducted transparently with physical in-store purity testing and precision weighing.',
+        'Old-gold exchange requires physical in-store inspection. Final valuation is confirmed only after the showroom assessment.',
       link: '/old-gold-exchange',
       linkText: 'Old-Gold Exchange Details',
     },
@@ -53,7 +54,7 @@ export default function ServicesPage() {
       title: 'Gold Buying and Selling',
       icon: Coins,
       description:
-        'Transparent and dependable gold buying and selling services backed by 25+ years of trusted service in the Gorakhpur jewellery market.',
+        'Gold buying and selling services are available at the Gorakhpur showroom. Applicable conditions are confirmed in person.',
       link: '/contact',
       linkText: 'Inquire with Store',
     },
@@ -61,7 +62,7 @@ export default function ServicesPage() {
       title: 'Retail and Wholesale Supply',
       icon: Store,
       description:
-        'Serving both individual retail customers and wholesale trade requirements with dependable purity standards and reliable workmanship.',
+        'Retail and wholesale services are available; product scope and current availability are confirmed directly with the store.',
       link: '/contact',
       linkText: 'Connect with Us',
     },
@@ -69,7 +70,7 @@ export default function ServicesPage() {
       title: 'Gold/Silver Coins & In-Store Silver Articles',
       icon: Layers,
       description:
-        'Fine gold and silver coins for auspicious occasions, gifting, and pooja needs, along with a curated range of in-store silver articles.',
+        'Gold and silver coins and in-store silver articles are available for direct showroom inquiry.',
       link: '/contact',
       linkText: 'Inquire In-Store Items',
     },

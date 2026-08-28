@@ -8,8 +8,8 @@ import { MockUser } from '../auth/authTypes';
  * This is a local mock client-side demonstration check.
  * It does NOT constitute server-side or production security.
  * Client-side mock email checks must never be trusted for real administrative authorization.
- * Production admin authorization will strictly require verified Firebase Authentication
- * and backend Firestore security rules in a later approved phase.
+ * Production admin authorization will strictly require verified server-side
+ * authentication and authorization rules.
  */
 export const ADMIN_EMAILS: readonly string[] = [
   '100abhisheksarraf@gmail.com',
@@ -18,11 +18,11 @@ export const ADMIN_EMAILS: readonly string[] = [
 
 export const PRESET_ADMIN_PERSONAS: { name: string; email: string }[] = [
   {
-    name: 'Abhishek Sarraf (Owner & Admin)',
+    name: 'Abhishek Sarraf (Admin)',
     email: '100abhisheksarraf@gmail.com',
   },
   {
-    name: 'Dilip Sarraf (Owner & Admin)',
+    name: 'Dilip Kumar Verma (Owner & Admin)',
     email: '100dilipsarraf@gmail.com',
   },
 ];

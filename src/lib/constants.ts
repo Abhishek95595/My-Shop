@@ -1,5 +1,5 @@
 export const STORE_NAME = 'Khushi Ornament House';
-export const STORE_TAGLINE = '25+ Years of Trust & Quality Craftsmanship';
+export const STORE_TAGLINE = '25+ Years of Trust';
 export const STORE_OWNER = 'Dilip Kumar Verma';
 export const GSTIN = '09AJBPV9683Q1ZW';
 
@@ -84,7 +84,6 @@ export const FOOTER_QUICK_LINKS = [
   { label: 'Custom Jewellery', href: '/custom-jewellery' },
   { label: 'Old-Gold Exchange', href: '/old-gold-exchange' },
   { label: 'Offers & Updates', href: '/offers' },
-  { label: 'Owner Rates', href: '/rates' },
   { label: 'FAQs', href: '/faq' },
 ];
 

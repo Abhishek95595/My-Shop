@@ -28,15 +28,17 @@ export async function generateMetadata({
 
   if (!product) {
     return {
-      title: `Gold Jewellery | ${STORE_NAME}`,
+      title: 'Gold Jewellery',
       description:
         'Explore exquisite gold jewellery collections crafted with 25+ years of trust at Khushi Ornament House in Gorakhpur.',
+      alternates: { canonical: `/catalogue/${slug}` },
     };
   }
 
   return {
-    title: `${product.name} (${product.purity} Gold) | ${STORE_NAME}`,
+    title: `${product.name} (${product.purity} Gold)`,
     description: product.shortDescription,
+    alternates: { canonical: `/catalogue/${slug}` },
     openGraph: {
       title: `${product.name} | ${STORE_NAME}`,
       description: product.shortDescription,

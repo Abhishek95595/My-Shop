@@ -20,8 +20,9 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: `Contact & Showroom Location | ${STORE_NAME}`,
-  description: `Visit ${STORE_NAME} in Urdu Bazar, Gorakhpur. Connect with store owner ${STORE_OWNER} for gold jewellery inquiries, custom orders, and consultations.`,
+  title: 'Contact & Showroom Location',
+  description: `Visit ${STORE_NAME} in Urdu Bazar, Gorakhpur for gold jewellery inquiries, custom orders, and showroom consultations.`,
+  alternates: { canonical: '/contact' },
 };
 
 export default function ContactPage() {

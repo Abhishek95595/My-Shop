@@ -24,31 +24,47 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
   const [resolvedUrls, setResolvedUrls] = useState<Record<string, string>>({});
 
   useEffect(() => {
+    setSelectedIndex(initialIndex);
+  }, [initialIndex, sortedImages]);
+
+  useEffect(() => {
     let active = true;
+    const acquiredObjectUrls: string[] = [];
 
     async function loadAllUrls() {
       const map: Record<string, string> = {};
       for (const img of sortedImages) {
         if (img.url.startsWith('indexeddb://')) {
           const resolved = await imageStorageService.getImageUrl(img.id);
-          if (resolved) map[img.id] = resolved;
+          if (resolved) {
+            acquiredObjectUrls.push(resolved);
+            map[img.id] = resolved;
+          }
         } else {
           map[img.id] = img.url;
         }
       }
       if (active) {
         setResolvedUrls(map);
+      } else {
+        acquiredObjectUrls.forEach((url) => imageStorageService.revokeImageUrl(url));
+        acquiredObjectUrls.length = 0;
       }
     }
 
     loadAllUrls();
     return () => {
       active = false;
+      acquiredObjectUrls.forEach((url) => imageStorageService.revokeImageUrl(url));
+      acquiredObjectUrls.length = 0;
     };
   }, [sortedImages]);
 
   const activeImage = sortedImages[selectedIndex] || sortedImages[0];
-  const activeUrl = activeImage ? resolvedUrls[activeImage.id] || activeImage.url : '';
+  const activeUrl = activeImage
+    ? resolvedUrls[activeImage.id] ||
+      (activeImage.url.startsWith('indexeddb://') ? '' : activeImage.url)
+    : '';
 
   return (
     <div className="space-y-4">
@@ -59,13 +75,17 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
             src={activeUrl}
             alt={activeImage?.altText || productName}
             fill
-            priority
+            loading="eager"
             sizes="(max-width: 768px) 100vw, 50vw"
             className="object-cover transition-opacity duration-300"
             unoptimized={activeUrl.startsWith('blob:')}
           />
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center text-charcoal-400 font-sans gap-2 bg-cream-100/60">
+          <div
+            className="w-full h-full flex flex-col items-center justify-center text-charcoal-400 font-sans gap-2 bg-cream-100/60"
+            role="img"
+            aria-label={`Image unavailable for ${productName}`}
+          >
             <ImageIcon className="w-8 h-8 text-charcoal-400" />
             <span className="text-xs">No image available</span>
           </div>
@@ -98,7 +118,9 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
         >
           {sortedImages.map((img, index) => {
             const isSelected = index === selectedIndex;
-            const thumbUrl = resolvedUrls[img.id] || img.url;
+            const thumbUrl =
+              resolvedUrls[img.id] ||
+              (img.url.startsWith('indexeddb://') ? '' : img.url);
             return (
               <button
                 key={img.id}
@@ -122,7 +144,11 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
                     unoptimized={thumbUrl.startsWith('blob:')}
                   />
                 ) : (
-                  <div className="w-full h-full bg-cream-200 flex items-center justify-center">
+                  <div
+                    className="w-full h-full bg-cream-200 flex items-center justify-center"
+                    role="img"
+                    aria-label={`Thumbnail unavailable for ${img.altText || productName}`}
+                  >
                     <ImageIcon className="w-4 h-4 text-charcoal-400" />
                   </div>
                 )}

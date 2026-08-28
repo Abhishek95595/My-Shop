@@ -14,13 +14,13 @@ const PILLARS = [
     icon: ShieldCheck,
     title: '25+ Years of Trust',
     description:
-      'Serving Gorakhpur customers since 1999 with transparent dealing and quality service.',
+      'Owner-approved statement of more than 25 years of trust serving customers in Gorakhpur.',
   },
   {
     icon: Gem,
     title: '18K, 22K & 24K Gold Only',
     description:
-      'Committed exclusively to gold jewellery, crafted with traditional care and strict purity standards.',
+      'The initial digital catalogue contains gold jewellery in 18K, 22K and 24K options.',
   },
   {
     icon: Sparkles,
@@ -32,7 +32,7 @@ const PILLARS = [
     icon: Repeat,
     title: 'Old Gold Exchange',
     description:
-      'Clear valuation and exchange service for your old gold jewellery to create fresh designs.',
+      'Old-gold exchange is available after physical inspection and final valuation at the showroom.',
   },
   {
     icon: Users,
@@ -42,9 +42,9 @@ const PILLARS = [
   },
   {
     icon: Clock,
-    title: 'Timely Wedding Deliveries',
+    title: 'Wedding Jewellery Consultation',
     description:
-      'Reliable turnaround for custom bridal orders, ensuring your jewellery is ready for your celebration.',
+      'Discuss bridal designs, availability, and expected custom-order timelines with the showroom team.',
   },
 ];
 
@@ -61,7 +61,7 @@ export const WhyUsSection: React.FC = () => {
           Why Choose {STORE_NAME}
         </h2>
         <p className="text-sm sm:text-base text-charcoal-600 font-sans leading-relaxed">
-          Craftsmanship, fair dealing, and dedicated service in the heart of Gorakhpur.
+          Approved gold jewellery services and in-store guidance in Gorakhpur.
         </p>
       </div>
 

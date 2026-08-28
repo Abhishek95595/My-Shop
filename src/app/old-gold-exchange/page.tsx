@@ -18,8 +18,9 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: `Old-Gold Exchange Service | ${STORE_NAME}`,
-  description: `Transparent old-gold exchange service at ${STORE_NAME}, Gorakhpur. Upgrade your gold jewellery with in-store physical inspection and purity evaluation.`,
+  title: 'Old-Gold Exchange Service',
+  description: `Old-gold exchange information for ${STORE_NAME}, Gorakhpur. Final valuation requires physical in-store inspection.`,
+  alternates: { canonical: '/old-gold-exchange' },
 };
 
 export default function OldGoldExchangePage() {
@@ -32,9 +33,9 @@ export default function OldGoldExchangePage() {
     },
     {
       step: '2',
-      title: 'Precision Weighing & Evaluation',
+      title: 'Weighing & Evaluation',
       description:
-        'Jewellery is weighed accurately and assessed transparently based on net gold weight, purity, and applicable store rates.',
+        'The showroom assesses net gold weight, purity, deductions, and applicable store rates during the physical visit.',
     },
     {
       step: '3',
@@ -56,7 +57,7 @@ export default function OldGoldExchangePage() {
           Old-Gold Exchange
         </h1>
         <p className="text-sm sm:text-base text-charcoal-700 font-sans leading-relaxed">
-          {STORE_TAGLINE}. Upgrade your pre-owned gold jewellery toward new handcrafted ornaments with transparent in-store evaluation.
+          {STORE_TAGLINE}. Old-gold exchange inquiries are completed through physical inspection and final in-store valuation.
         </p>
       </div>
 
@@ -67,7 +68,7 @@ export default function OldGoldExchangePage() {
           <span>Physical In-Store Evaluation Policy</span>
         </div>
         <p className="leading-relaxed">
-          <strong>Important:</strong> Accurate gold valuation depends on physical purity testing, touchstone verification, stone deduction, and precise weighing. Therefore, <strong>final exchange valuation is provided only upon physical inspection at our showroom</strong>. We do not provide automated or online valuation calculators to ensure complete fairness and accuracy.
+          <strong>Important:</strong> Gold valuation depends on physical purity testing, applicable deductions, and weighing. Therefore, <strong>final exchange valuation is provided only upon physical inspection at our showroom</strong>. This website does not provide an automated or online valuation calculator.
         </p>
       </div>
 

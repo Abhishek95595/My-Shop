@@ -1,6 +1,6 @@
 # Khushi Ornament House — Web Platform
 
-Official web showcase and customer consultation application for **Khushi Ornament House**, located in Urdu Bazar, Gorakhpur, Uttar Pradesh. Operating with **25+ Years of Trust & Quality Craftsmanship** under store proprietor **Dilip Kumar Verma**.
+Official web showcase and customer consultation application for **Khushi Ornament House**, located in Urdu Bazar, Gorakhpur, Uttar Pradesh. Operating with **25+ Years of Trust** under store proprietor **Dilip Kumar Verma**.
 
 ---
 
@@ -10,13 +10,13 @@ This platform is a showcase catalogue and customer inquiry application designed 
 - Showcase handcrafted gold jewellery (18K, 22K, and 24K purities).
 - Facilitate bespoke custom order inquiries and physical showroom consultations.
 - Support personal customer Wishlists and Buying Shortlists with local mock authentication.
-- Enable authorized store owners to manage catalogue products, customer inquiries, and indicative reference bullion rates.
+- Enable approved mock administrators to manage catalogue products, customer inquiries, and owner-entered reference rates.
 
 ---
 
 ## 2. Technology Stack
 
-- **Framework**: [Next.js 16.3.3 (App Router with Turbopack)](https://nextjs.org/)
+- **Framework**: [Next.js 16.3.3](https://nextjs.org/) App Router (Turbopack development server; webpack production build for host compatibility)
 - **Core**: React 19, TypeScript 5
 - **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) with custom luxury theme tokens (Ivory/Cream, Maroon, Restrained Gold)
 - **Icons**: [Lucide React](https://lucide.dev/)
@@ -96,10 +96,11 @@ npm run lint
 ## 5. Mock Storage Architecture & Boundaries
 
 1. **Local Storage**:
-   - `koh_mock_current_user`: Active mock session.
-   - `koh_wishlist_mock-user-*`: Customer wishlist items.
-   - `koh_shortlist_mock-user-*`: Customer buying shortlist items.
+   - `koh_mock_auth_session`: Active mock session.
+   - `koh_saved_wishlist_mock-user-*`: Customer wishlist items.
+   - `koh_saved_shortlist_mock-user-*`: Customer buying shortlist items.
    - `koh_admin_custom_products`: Locally created custom catalogue products.
+   - `koh_admin_sample_overrides`: Local edits to baseline sample products.
    - `koh_customer_enquiries`: Saved customer contact inquiries.
    - `koh_owner_rates`: Owner-entered bullion reference rates.
 2. **IndexedDB (`KOH_ImageDB`)**:
@@ -108,6 +109,7 @@ npm run lint
    - Firebase and Firestore are **intentionally not configured**.
    - Cloudinary, Gmail API, and real Google OAuth SDK are **not connected**.
    - Payment gateways, cart checkouts, and shipping delivery systems are **strictly excluded**.
+   - Hosting, deployment, and a purchased production domain are **not configured**.
 
 ---
 
@@ -116,7 +118,7 @@ npm run lint
 To reset all local test data (custom products, enquiries, saved wishlists, and IndexedDB images):
 1. In your browser DevTools, go to **Application > Storage**.
 2. Click **Clear site data** (clears LocalStorage and IndexedDB).
-3. Alternatively, click **Sign Out** from the Account page.
+3. **Sign Out** clears only the active mock session. It does not erase saved lists, catalogue data, enquiries, rates, or IndexedDB images.
 
 ---
 
@@ -126,4 +128,4 @@ To reset all local test data (custom products, enquiries, saved wishlists, and I
 - **Audit**: `found 0 vulnerabilities`
 - **TypeScript**: `0 errors`
 - **Linting**: `0 errors, 0 warnings`
-- **Build**: `13/13 static & dynamic routes compiled`
+- **Build**: `25/25 static pages and routes generated`

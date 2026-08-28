@@ -84,7 +84,7 @@ export const OwnerRatesModule: React.FC = () => {
                   {item.label}
                 </span>
                 <span className="text-[11px] text-charcoal-500 font-sans">
-                  {item.material} • per {item.unit}
+                  {item.material} • {item.unit}
                 </span>
               </div>
               <div className="text-right">

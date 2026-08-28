@@ -126,6 +126,7 @@ export const AdminEnquiriesManager: React.FC = () => {
               key={tab.key}
               type="button"
               onClick={() => setSelectedStatus(tab.key)}
+              aria-pressed={selectedStatus === tab.key}
               className={`py-2 px-3.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                 selectedStatus === tab.key
                   ? 'bg-maroon-800 text-cream-50 shadow-xs'
@@ -142,6 +143,7 @@ export const AdminEnquiriesManager: React.FC = () => {
           <Search className="w-4 h-4 text-gold-700 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
+            aria-label="Search inquiries by name, mobile, interest, or message"
             placeholder="Search by name, mobile, or category..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -180,6 +182,7 @@ export const AdminEnquiriesManager: React.FC = () => {
 
                   <select
                     value={enq.status}
+                    aria-label={`Status for inquiry from ${enq.name}`}
                     onChange={(e) => handleStatusChange(enq.id, e.target.value as EnquiryStatus)}
                     className={`text-xs font-bold py-1.5 px-3 rounded-xl border focus:outline-none cursor-pointer ${
                       enq.status === 'new'

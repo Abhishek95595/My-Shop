@@ -20,8 +20,9 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: `About Us | ${STORE_NAME}`,
-  description: `Learn about ${STORE_NAME}, owned and operated by ${STORE_OWNER} in Gorakhpur with 25+ years of trust and dedicated jewellery craftsmanship.`,
+  title: 'About Us',
+  description: `Learn about ${STORE_NAME}, owned and operated by ${STORE_OWNER} in Gorakhpur with 25+ Years of Trust.`,
+  alternates: { canonical: '/about' },
 };
 
 export default function AboutPage() {
@@ -49,10 +50,10 @@ export default function AboutPage() {
             <span>Store Introduction</span>
           </h2>
           <p>
-            Welcome to <strong className="text-maroon-950">Khushi Ornament House</strong>, located at Urdu Bazar in Gorakhpur, Uttar Pradesh. For over 25 years, our establishment has served individuals and families looking for dependable gold jewellery, personalized ornaments, and reliable service.
+            Welcome to <strong className="text-maroon-950">Khushi Ornament House</strong>, located at Urdu Bazar in Gorakhpur, Uttar Pradesh. The owner-approved business introduction highlights more than 25 years of trust and a showroom focused on gold jewellery and consultation.
           </p>
           <p>
-            Our showroom offers a curated selection of 18K, 22K and 24K gold jewellery, including bridal necklace sets, rings, chains, mangalsutras, and bangles. Every piece is crafted with meticulous attention to detail, finish, and wearability.
+            Our showroom offers 18K, 22K and 24K gold jewellery, including bridal necklace sets, rings, chains, mangalsutras, and bangles. The website presents catalogue information; final design, weight, availability, and transaction details are confirmed in store.
           </p>
         </div>
 
@@ -67,7 +68,7 @@ export default function AboutPage() {
               <div>
                 <strong className="text-maroon-950 block mb-0.5">25+ Years of Trust</strong>
                 <span className="text-charcoal-600">
-                  Decades of established goodwill serving generations of local customers in Gorakhpur.
+                  More than 25 years of trust serving customers in Gorakhpur.
                 </span>
               </div>
             </div>
@@ -75,9 +76,9 @@ export default function AboutPage() {
             <div className="flex items-start gap-3 p-4 bg-cream-100/70 border border-gold-200 rounded-2xl">
               <UserCheck className="w-5 h-5 text-gold-700 flex-shrink-0 mt-0.5" />
               <div>
-                <strong className="text-maroon-950 block mb-0.5">Personalized Owner Consultation</strong>
+                <strong className="text-maroon-950 block mb-0.5">Showroom Consultation</strong>
                 <span className="text-charcoal-600">
-                  Direct guidance from proprietor {STORE_OWNER} for custom manufacturing and bespoke designs.
+                  In-store guidance is available for custom manufacturing and bespoke design requirements.
                 </span>
               </div>
             </div>
@@ -126,7 +127,7 @@ export default function AboutPage() {
             Visit Our Gorakhpur Showroom
           </h3>
           <p className="text-xs text-cream-200/80 font-sans">
-            Open daily from {CONTACT_CONFIG.hours} at Urdu Bazar, Gorakhpur.
+            Showroom hours: {CONTACT_CONFIG.hours}. Please call ahead to confirm the visiting day.
           </p>
         </div>
         <div className="flex items-center gap-3">

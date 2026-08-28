@@ -9,8 +9,9 @@ import {
 import { Shield, FileText, AlertTriangle, Info } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: `Privacy Policy (Draft) | ${STORE_NAME}`,
+  title: 'Privacy Policy (Draft)',
   description: `Privacy policy draft describing local storage, customer privacy, and data handling practices at ${STORE_NAME}.`,
+  alternates: { canonical: '/privacy' },
 };
 
 export default function PrivacyPolicyPage() {
@@ -35,7 +36,7 @@ export default function PrivacyPolicyPage() {
           Privacy Policy
         </h1>
         <p className="text-xs font-mono text-charcoal-500">
-          Last Updated: 28 August 2026 • Khushi Ornament House ({GSTIN})
+          Last Updated: 29 August 2026 • Khushi Ornament House ({GSTIN})
         </p>
       </div>
 
@@ -49,7 +50,7 @@ export default function PrivacyPolicyPage() {
             Khushi Ornament House operates this web platform as a digital catalogue and customer consultation tool. In this development and demonstration phase, the application operates entirely using <strong>browser-local storage (LocalStorage and IndexedDB)</strong>.
           </p>
           <p>
-            No user information, passwords, or personal data are transmitted to external backend servers, cloud databases, Firebase, Cloudinary, or third-party analytics trackers.
+            The local repositories do not send saved data to a Khushi Ornament House backend, cloud database, Firebase, Cloudinary, or third-party analytics service. WhatsApp and phone actions are separate external handoffs described below.
           </p>
         </section>
 
@@ -78,7 +79,7 @@ export default function PrivacyPolicyPage() {
             3. Communications via WhatsApp &amp; Phone
           </h2>
           <p>
-            When you initiate a WhatsApp chat or phone call using links on this website, you are interacting directly through WhatsApp or your telephony provider with our Gorakhpur showroom staff. Your messages are subject to WhatsApp&apos;s privacy policies and standard telecommunications regulations.
+            When you choose a WhatsApp handoff, the website opens WhatsApp with a prefilled message that may contain the inquiry details you entered. The customer must tap Send in WhatsApp before the message is delivered to the showroom. WhatsApp and phone interactions are governed by the applicable provider&apos;s policies.
           </p>
         </section>
 
@@ -96,7 +97,7 @@ export default function PrivacyPolicyPage() {
             5. Clearing Your Local Data
           </h2>
           <p>
-            You can clear all stored mock data, wishlists, and cached images at any time by clearing your browser&apos;s cache and local storage, or by tapping &quot;Sign Out&quot; in the Account section.
+            You can clear all stored mock data, wishlists, and IndexedDB images through your browser&apos;s site-data controls. Signing out removes only the current mock session; it does not erase saved lists, catalogue data, enquiries, rates, or images.
           </p>
         </section>
 

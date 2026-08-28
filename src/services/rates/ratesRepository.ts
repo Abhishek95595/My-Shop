@@ -57,10 +57,21 @@ class MockRatesRepository {
     const target = current.find((r) => r.id === id);
     if (!target) return null;
 
+    const nextLabel = updates.label?.trim() ?? target.label;
+    const nextRate = updates.rate ?? target.rate;
+    if (!nextLabel) throw new Error('Rate label is required.');
+    if (typeof nextRate !== 'number' || nextRate <= 0) {
+      throw new Error('Numeric rate must be greater than zero.');
+    }
+
     const updated: RateItem = {
       ...target,
       ...updates,
       id: target.id,
+      label: nextLabel,
+      material: updates.material?.trim() || target.material,
+      unit: updates.unit?.trim() || target.unit,
+      rate: nextRate,
       lastUpdated: new Date().toISOString(),
     };
 

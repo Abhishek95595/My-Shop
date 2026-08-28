@@ -43,6 +43,9 @@ class MockEnquiryRepository {
       }
     } catch (err) {
       console.warn('Failed saving enquiries to localStorage:', err);
+      throw new Error(
+        'Unable to save your inquiry in browser storage. Please check your browser storage settings and try again.'
+      );
     }
   }
 
@@ -63,6 +66,9 @@ class MockEnquiryRepository {
     }
 
     const trimmedMessage = input.message ? input.message.trim() : undefined;
+    if (trimmedMessage && trimmedMessage.length > 1000) {
+      throw new Error('Optional message must be 1000 characters or fewer.');
+    }
 
     const newEnquiry: CustomerEnquiry = {
       id: `enq-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,

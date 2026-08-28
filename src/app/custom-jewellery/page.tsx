@@ -19,8 +19,9 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: `Custom Gold Jewellery Manufacturing | ${STORE_NAME}`,
-  description: `Bespoke gold jewellery manufacturing at ${STORE_NAME}, Gorakhpur. Custom bridal necklaces, rings, chains, and bangles crafted to your exact specifications.`,
+  title: 'Custom Gold Jewellery Manufacturing',
+  description: `Custom gold jewellery consultation at ${STORE_NAME}, Gorakhpur for bridal necklaces, rings, chains, and bangles.`,
+  alternates: { canonical: '/custom-jewellery' },
 };
 
 export default function CustomJewelleryPage() {
@@ -41,13 +42,13 @@ export default function CustomJewelleryPage() {
       step: '03',
       title: 'Artisan Craftsmanship',
       description:
-        'Our experienced goldsmiths meticulously craft your piece with precision setting, milgrain polishing, and detailed finishing.',
+        'The agreed design moves into manufacturing after its design, gold option, approximate target weight, and timeline are discussed.',
     },
     {
       step: '04',
       title: 'Inspection & Showroom Handover',
       description:
-        'Inspect your completed custom jewellery in person at our Gorakhpur store with full transparency and personal verification.',
+        'Inspect the completed custom jewellery and confirm its final specifications in person at our Gorakhpur showroom.',
     },
   ];
 
@@ -63,7 +64,7 @@ export default function CustomJewelleryPage() {
           Custom Gold Jewellery
         </h1>
         <p className="text-sm sm:text-base text-charcoal-700 font-sans leading-relaxed">
-          {STORE_TAGLINE}. We bring your dream bridal and ceremonial designs to life with handcrafted gold ornaments made specifically for you.
+          {STORE_TAGLINE}. Discuss made-to-order bridal and ceremonial gold jewellery through our showroom consultation process.
         </p>
       </div>
 
@@ -106,7 +107,7 @@ export default function CustomJewelleryPage() {
               <span>Available Purities</span>
             </div>
             <p className="text-charcoal-600">
-              Crafted in 18 Karat, 22 Karat (916), or 24 Karat yellow gold.
+              Discuss 18 Karat, 22 Karat, or 24 Karat gold options during consultation.
             </p>
           </div>
 
@@ -139,7 +140,7 @@ export default function CustomJewelleryPage() {
             Start Your Custom Design Consultation
           </h3>
           <p className="text-xs text-cream-200/80 font-sans">
-            Connect with {STORE_OWNER} and our team at Urdu Bazar, Gorakhpur.
+            Connect with our showroom team at Urdu Bazar, Gorakhpur.
           </p>
         </div>
         <div className="flex items-center gap-3">

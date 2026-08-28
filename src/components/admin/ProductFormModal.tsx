@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Product, ProductCategory, ProductImage } from '@/services/productTypes';
 import { productRepository } from '@/services/products/productRepository';
+import { imageStorageService } from '@/services/images/imageStorageService';
 import { ImageUploadManager } from './ImageUploadManager';
 import {
   CATEGORIES,
@@ -45,15 +46,43 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isImageBusy, setIsImageBusy] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   const modalRef = useRef<HTMLDivElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
+
+  const handleCancel = useCallback(() => {
+    if (isSubmitting || isImageBusy || isClosing) return;
+
+    setIsClosing(true);
+
+    const persistedIds = new Set(
+      productToEdit?.images.map((image) => image.id) ?? []
+    );
+    const unsavedImageIds = images
+      .map((image) => image.id)
+      .filter((id) => !persistedIds.has(id));
+
+    void Promise.all(
+      unsavedImageIds.map((id) => imageStorageService.deleteImage(id))
+    )
+      .catch((err) => {
+        console.warn('Failed cleaning up unsaved product images:', err);
+      })
+      .finally(() => {
+        setIsClosing(false);
+        onClose();
+      });
+  }, [images, isClosing, isImageBusy, isSubmitting, onClose, productToEdit]);
 
   // Initialize or reset form fields
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
       setValidationErrors([]);
+      setIsImageBusy(false);
+      setIsClosing(false);
 
       if (productToEdit) {
         setName(productToEdit.name);
@@ -91,20 +120,47 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
         closeBtnRef.current?.focus();
       }, 50);
 
-      const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') {
-          onClose();
-        }
-      };
-      window.addEventListener('keydown', handleKeyDown);
       return () => {
-        window.removeEventListener('keydown', handleKeyDown);
         document.body.style.overflow = 'unset';
       };
     } else {
       document.body.style.overflow = 'unset';
     }
-  }, [isOpen, productToEdit, onClose]);
+  }, [isOpen, productToEdit]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        handleCancel();
+        return;
+      }
+
+      if (event.key === 'Tab' && modalRef.current) {
+        const focusable = Array.from(
+          modalRef.current.querySelectorAll<HTMLElement>(
+            'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'
+          )
+        ).filter((element) => element.offsetParent !== null);
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (!first || !last) return;
+
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleCancel, isOpen]);
 
   // Update SKU preview on category change for new products
   useEffect(() => {
@@ -125,6 +181,8 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
   if (!isOpen) return null;
 
   const handleSubmit = async (desiredStatus: 'draft' | 'published') => {
+    if (isSubmitting || isImageBusy || isClosing) return;
+
     setValidationErrors([]);
     const weightNum = parseFloat(approxWeight);
 
@@ -169,7 +227,17 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
     try {
       if (isEditing && productToEdit) {
         const updated = productRepository.updateProduct(productToEdit.id, payload);
-        if (updated) onSave(updated);
+        if (updated) {
+          const nextImageIds = new Set(payload.images.map((image) => image.id));
+          const removedImageIds = productToEdit.images
+            .map((image) => image.id)
+            .filter((id) => !nextImageIds.has(id));
+
+          await Promise.all(
+            removedImageIds.map((id) => imageStorageService.deleteImage(id))
+          );
+          onSave(updated);
+        }
       } else {
         const created = productRepository.createProduct(payload);
         onSave(created);
@@ -194,7 +262,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-charcoal-900/60 backdrop-blur-xs transition-opacity"
-        onClick={onClose}
+        onClick={handleCancel}
         aria-hidden="true"
       />
 
@@ -221,7 +289,8 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
           <button
             ref={closeBtnRef}
             type="button"
-            onClick={onClose}
+            onClick={handleCancel}
+            disabled={isSubmitting || isImageBusy || isClosing}
             className="p-1.5 text-charcoal-500 hover:text-maroon-900 hover:bg-gold-100 rounded-full transition-colors"
             aria-label="Close product form"
           >
@@ -250,9 +319,9 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Auto Immutable SKU */}
             <div className="space-y-1">
-              <label className="block text-xs font-bold uppercase tracking-wider text-maroon-900">
+              <span className="block text-xs font-bold uppercase tracking-wider text-maroon-900">
                 SKU (Immutable)
-              </label>
+              </span>
               <div className="p-2.5 bg-cream-200/70 border border-gold-300 rounded-xl font-mono text-xs text-maroon-950 font-bold">
                 {skuPreview || 'Generating SKU...'}
               </div>
@@ -263,10 +332,14 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
             {/* Category */}
             <div className="space-y-1">
-              <label className="block text-xs font-bold uppercase tracking-wider text-maroon-900">
+              <label
+                htmlFor="product-category"
+                className="block text-xs font-bold uppercase tracking-wider text-maroon-900"
+              >
                 Category *
               </label>
               <select
+                id="product-category"
                 value={category}
                 onChange={(e) => setCategory(e.target.value as ProductCategory)}
                 className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500"
@@ -283,10 +356,14 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
           {/* Product Name & Slug */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="block text-xs font-bold uppercase tracking-wider text-maroon-900">
+              <label
+                htmlFor="product-name"
+                className="block text-xs font-bold uppercase tracking-wider text-maroon-900"
+              >
                 Product Name *
               </label>
               <input
+                id="product-name"
                 type="text"
                 required
                 placeholder="e.g. Royal Bridal Gold Necklace"
@@ -297,10 +374,14 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             </div>
 
             <div className="space-y-1">
-              <label className="block text-xs font-bold uppercase tracking-wider text-maroon-900">
+              <label
+                htmlFor="product-slug"
+                className="block text-xs font-bold uppercase tracking-wider text-maroon-900"
+              >
                 URL Slug *
               </label>
               <input
+                id="product-slug"
                 type="text"
                 required
                 placeholder="e.g. royal-bridal-gold-necklace"
@@ -314,10 +395,14 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
           {/* Gender, Purity, Approx Weight, Availability */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="space-y-1">
-              <label className="block text-[11px] font-bold uppercase text-maroon-900">
+              <label
+                htmlFor="product-gender"
+                className="block text-[11px] font-bold uppercase text-maroon-900"
+              >
                 Gender *
               </label>
               <select
+                id="product-gender"
                 value={gender}
                 onChange={(e) => setGender(e.target.value as 'Women' | 'Men')}
                 className="w-full text-xs p-2 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none"
@@ -331,10 +416,14 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             </div>
 
             <div className="space-y-1">
-              <label className="block text-[11px] font-bold uppercase text-maroon-900">
+              <label
+                htmlFor="product-purity"
+                className="block text-[11px] font-bold uppercase text-maroon-900"
+              >
                 Purity *
               </label>
               <select
+                id="product-purity"
                 value={purity}
                 onChange={(e) => setPurity(e.target.value as '18K' | '22K' | '24K')}
                 className="w-full text-xs p-2 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none"
@@ -348,10 +437,14 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             </div>
 
             <div className="space-y-1">
-              <label className="block text-[11px] font-bold uppercase text-maroon-900">
+              <label
+                htmlFor="product-weight"
+                className="block text-[11px] font-bold uppercase text-maroon-900"
+              >
                 Weight (g) *
               </label>
               <input
+                id="product-weight"
                 type="number"
                 step="0.1"
                 min="0.1"
@@ -363,10 +456,14 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             </div>
 
             <div className="space-y-1">
-              <label className="block text-[11px] font-bold uppercase text-maroon-900">
+              <label
+                htmlFor="product-availability"
+                className="block text-[11px] font-bold uppercase text-maroon-900"
+              >
                 Availability *
               </label>
               <select
+                id="product-availability"
                 value={availability}
                 onChange={(e) =>
                   setAvailability(
@@ -384,10 +481,14 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
           {/* Occasion & Tags */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="block text-xs font-bold uppercase tracking-wider text-maroon-900">
+              <label
+                htmlFor="product-occasion"
+                className="block text-xs font-bold uppercase tracking-wider text-maroon-900"
+              >
                 Occasion *
               </label>
               <input
+                id="product-occasion"
                 type="text"
                 list="occasions-list"
                 required
@@ -404,10 +505,14 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             </div>
 
             <div className="space-y-1">
-              <label className="block text-xs font-bold uppercase tracking-wider text-maroon-900">
+              <label
+                htmlFor="product-tags"
+                className="block text-xs font-bold uppercase tracking-wider text-maroon-900"
+              >
                 Tags (Comma separated)
               </label>
               <input
+                id="product-tags"
                 type="text"
                 placeholder="e.g. Bridal, Handcrafted, 22K Gold"
                 value={tagsInput}
@@ -419,10 +524,14 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
           {/* Short Description */}
           <div className="space-y-1">
-            <label className="block text-xs font-bold uppercase tracking-wider text-maroon-900">
+            <label
+              htmlFor="product-short-description"
+              className="block text-xs font-bold uppercase tracking-wider text-maroon-900"
+            >
               Short Description *
             </label>
             <input
+              id="product-short-description"
               type="text"
               required
               placeholder="1-2 sentences summarizing the jewellery piece"
@@ -434,10 +543,14 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
           {/* Detailed Craftsmanship Description */}
           <div className="space-y-1">
-            <label className="block text-xs font-bold uppercase tracking-wider text-maroon-900">
+            <label
+              htmlFor="product-detailed-description"
+              className="block text-xs font-bold uppercase tracking-wider text-maroon-900"
+            >
               Detailed Description *
             </label>
             <textarea
+              id="product-detailed-description"
               rows={3}
               required
               placeholder="Detailed description of craftsmanship, motifs, polish and design highlights."
@@ -466,15 +579,21 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
           {/* Local Image Upload Manager */}
           <div className="pt-2 border-t border-gold-200/80">
-            <ImageUploadManager images={images} onChange={setImages} disabled={isSubmitting} />
+            <ImageUploadManager
+              images={images}
+              onChange={setImages}
+              persistedImageIds={productToEdit?.images.map((image) => image.id) ?? []}
+              onBusyChange={setIsImageBusy}
+              disabled={isSubmitting || isClosing}
+            />
           </div>
 
           {/* Footer Action Buttons */}
           <div className="pt-4 border-t border-gold-200/80 flex flex-wrap items-center justify-end gap-3">
             <button
               type="button"
-              onClick={onClose}
-              disabled={isSubmitting}
+              onClick={handleCancel}
+              disabled={isSubmitting || isImageBusy || isClosing}
               className="py-2.5 px-4 rounded-xl text-xs font-semibold text-charcoal-700 hover:bg-gold-100 transition-colors"
             >
               Cancel
@@ -482,7 +601,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
             <button
               type="button"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isImageBusy || isClosing}
               onClick={() => handleSubmit('draft')}
               className="py-2.5 px-5 bg-gold-100 hover:bg-gold-200 border border-gold-300 text-maroon-950 rounded-xl text-xs font-bold transition-colors shadow-2xs"
             >
@@ -491,11 +610,17 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
             <button
               type="button"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isImageBusy || isClosing}
               onClick={() => handleSubmit('published')}
               className="py-2.5 px-6 bg-maroon-800 hover:bg-maroon-900 text-cream-50 rounded-xl text-xs font-bold transition-colors shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
             >
-              {isSubmitting ? 'Saving...' : 'Publish Product'}
+              {isSubmitting
+                ? 'Saving...'
+                : isImageBusy
+                  ? 'Finishing Image...'
+                  : isClosing
+                    ? 'Closing...'
+                    : 'Publish Product'}
             </button>
           </div>
         </form>

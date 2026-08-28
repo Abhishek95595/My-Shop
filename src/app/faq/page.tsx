@@ -16,8 +16,9 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: `Frequently Asked Questions (FAQ) | ${STORE_NAME}`,
+  title: 'Frequently Asked Questions (FAQ)',
   description: `Find answers about gold jewellery collections, custom manufacturing, old-gold exchange, showroom consultations, and store policies at ${STORE_NAME} in Gorakhpur.`,
+  alternates: { canonical: '/faq' },
 };
 
 export default function FaqPage() {
@@ -35,7 +36,7 @@ export default function FaqPage() {
     {
       question: 'Why are product weights listed as "approximate"?',
       answer:
-        'Because handcrafted gold ornaments involve master artisanal goldsmithing, the final weight of an individual piece may vary slightly depending on finger size, design adjustment, and metal finishing. Final invoice weight is determined on calibrated scales during in-store purchase.',
+        'The final weight of an individual piece may vary with size, design adjustments, and finishing. Final weight is confirmed during the physical in-store transaction.',
     },
     {
       question: 'What is the difference between "Available" and "Made on Order"?',
@@ -59,7 +60,7 @@ export default function FaqPage() {
     },
     {
       question: 'What are your showroom hours and location?',
-      answer: `Our showroom is located at ${CONTACT_CONFIG.address}. We are open daily from ${CONTACT_CONFIG.hours}. You can reach us at ${CONTACT_CONFIG.primaryPhone}.`,
+      answer: `Our showroom is located at ${CONTACT_CONFIG.address}. Showroom hours are ${CONTACT_CONFIG.hours}; please call ${CONTACT_CONFIG.primaryPhone} to confirm the visiting day.`,
     },
   ];
 

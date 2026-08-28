@@ -1,4 +1,5 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import { HeroSection } from '@/components/hero/HeroSection';
 import { Shield, Sparkles, MapPin } from 'lucide-react';
 import { ShopByCategory } from '@/components/home/ShopByCategory';
@@ -10,6 +11,10 @@ import { OwnerRatesModule } from '@/components/home/OwnerRatesModule';
 import { GalleryPreviewModule } from '@/components/home/GalleryPreviewModule';
 import { TestimonialsModule } from '@/components/home/TestimonialsModule';
 import { StoreInfoSection } from '@/components/home/StoreInfoSection';
+
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+};
 
 export default function HomePage() {
   return (
@@ -29,7 +34,7 @@ export default function HomePage() {
                 25+ Years of Trust
               </h4>
               <p className="text-xs text-charcoal-600 font-sans">
-                Serving Gorakhpur families since 1999
+                Serving customers in Gorakhpur for over 25 years
               </p>
             </div>
           </div>
