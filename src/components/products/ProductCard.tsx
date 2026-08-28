@@ -3,15 +3,23 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Sparkles, MessageCircle, ArrowRight, Shield } from 'lucide-react';
 import { Product } from '@/services/productTypes';
+import {
+  getPrimaryImage,
+  formatWeight,
+  formatAvailability,
+} from '@/services/mockProducts';
 import { CONTACT_CONFIG, EXACT_WEIGHT_DISCLAIMER } from '@/lib/constants';
 
 interface ProductCardProps {
   product: Product;
+  isSample?: boolean;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const primaryImage =
-    product.images.find((img) => img.isPrimary) || product.images[0];
+export const ProductCard: React.FC<ProductCardProps> = ({
+  product,
+  isSample = true,
+}) => {
+  const primaryImage = getPrimaryImage(product.images);
 
   const whatsappMessage = encodeURIComponent(
     `Hello Khushi Ornament House, I am inquiring about the ${product.name} (SKU: ${product.sku}).`
@@ -29,7 +37,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           {primaryImage ? (
             <Image
               src={primaryImage.url}
-              alt={primaryImage.alt || product.name}
+              alt={primaryImage.altText || product.name}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -44,7 +52,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {/* Top Badges */}
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none gap-2">
           {/* Sample Product Badge */}
-          {product.isSampleProduct && (
+          {isSample && (
             <span className="inline-flex items-center gap-1 bg-maroon-900/90 text-cream-50 text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-sm backdrop-blur-xs">
               <Sparkles className="w-3 h-3 text-gold-300" />
               <span>Sample Product</span>
@@ -54,12 +62,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           {/* Availability Badge */}
           <span
             className={`text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-sm backdrop-blur-xs ${
-              product.status === 'Available'
+              product.availability === 'available'
                 ? 'bg-emerald-800/90 text-cream-50'
                 : 'bg-gold-800/90 text-cream-50'
             }`}
           >
-            {product.status}
+            {formatAvailability(product.availability)}
           </span>
         </div>
 
@@ -111,7 +119,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               Approx. Weight:
             </span>
             <span className="font-serif font-bold text-maroon-900 text-sm">
-              {product.approximateWeight}
+              {formatWeight(product.approxWeight)}
             </span>
           </div>
 

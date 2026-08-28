@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { ProductImage } from '@/services/productTypes';
+import { getSortedImages } from '@/services/mockProducts';
 import { Sparkles } from 'lucide-react';
 
 interface ProductImageGalleryProps {
@@ -14,7 +15,7 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
   images,
   productName,
 }) => {
-  const sortedImages = [...images].sort((a, b) => a.sortOrder - b.sortOrder);
+  const sortedImages = getSortedImages(images);
   const primaryIndex = sortedImages.findIndex((img) => img.isPrimary);
   const initialIndex = primaryIndex !== -1 ? primaryIndex : 0;
 
@@ -28,7 +29,7 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
         {activeImage ? (
           <Image
             src={activeImage.url}
-            alt={activeImage.alt || productName}
+            alt={activeImage.altText || productName}
             fill
             priority
             sizes="(max-width: 768px) 100vw, 50vw"
@@ -40,7 +41,7 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
           </div>
         )}
 
-        {/* Primary/Sample Indicator */}
+        {/* Primary Indicator */}
         {activeImage?.isPrimary && (
           <div className="absolute top-4 left-4">
             <span className="inline-flex items-center gap-1.5 bg-maroon-900/90 text-cream-50 text-xs font-semibold px-3 py-1 rounded-full shadow-sm backdrop-blur-xs">
@@ -58,7 +59,7 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
         )}
       </div>
 
-      {/* Ordered Thumbnails Strip (When multiple slots exist) */}
+      {/* Ordered Thumbnails Strip */}
       {sortedImages.length > 1 && (
         <div
           className="flex items-center gap-3 overflow-x-auto pb-2 focus:outline-none"
@@ -77,12 +78,12 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
                     ? 'border-maroon-700 shadow-md ring-2 ring-gold-400/50 scale-102'
                     : 'border-gold-200 hover:border-gold-400 opacity-80 hover:opacity-100'
                 }`}
-                aria-label={`Show ${img.alt || `View ${index + 1}`}`}
+                aria-label={`Show ${img.altText || `View ${index + 1}`}`}
                 aria-pressed={isSelected}
               >
                 <Image
                   src={img.url}
-                  alt={img.alt || `${productName} view ${index + 1}`}
+                  alt={img.altText || `${productName} view ${index + 1}`}
                   fill
                   sizes="96px"
                   className="object-cover"

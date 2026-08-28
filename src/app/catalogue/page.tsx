@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { SAMPLE_PRODUCTS } from '@/services/mockProducts';
+import { getAllPublishedProducts } from '@/services/mockProducts';
 import { ProductCard } from '@/components/products/ProductCard';
 import {
   ProductFilterBar,
@@ -33,19 +33,20 @@ function CatalogueContent() {
     sortBy: 'name-asc',
   });
 
+  const publishedProducts = useMemo(() => getAllPublishedProducts(), []);
+
   // Extract unique occasions dynamically
   const availableOccasions = useMemo(() => {
     const set = new Set<string>();
-    SAMPLE_PRODUCTS.forEach((p) => {
+    publishedProducts.forEach((p) => {
       if (p.occasion) set.add(p.occasion);
     });
     return Array.from(set);
-  }, []);
+  }, [publishedProducts]);
 
   const handleFilterChange = (newFilters: Partial<FilterState>) => {
     setFilters((prev) => {
       const updated = { ...prev, ...newFilters };
-      // Update URL query params cleanly
       const params = new URLSearchParams();
       if (updated.category !== 'All') params.set('category', updated.category);
       if (updated.gender !== 'All') params.set('gender', updated.gender);
@@ -79,82 +80,84 @@ function CatalogueContent() {
 
   // Filter and sort product records
   const filteredProducts = useMemo(() => {
-    return SAMPLE_PRODUCTS.filter((product) => {
-      // 1. Search Query
-      if (filters.search.trim()) {
-        const query = filters.search.toLowerCase().trim();
-        const matchesName = product.name.toLowerCase().includes(query);
-        const matchesSku = product.sku.toLowerCase().includes(query);
-        const matchesTag = product.tags.some((t) =>
-          t.toLowerCase().includes(query)
-        );
-        const matchesDesc = product.shortDescription
-          .toLowerCase()
-          .includes(query);
-        if (!matchesName && !matchesSku && !matchesTag && !matchesDesc) {
+    return publishedProducts
+      .filter((product) => {
+        // 1. Search Query
+        if (filters.search.trim()) {
+          const query = filters.search.toLowerCase().trim();
+          const matchesName = product.name.toLowerCase().includes(query);
+          const matchesSku = product.sku.toLowerCase().includes(query);
+          const matchesTag = product.tags.some((t) =>
+            t.toLowerCase().includes(query)
+          );
+          const matchesDesc = product.shortDescription
+            .toLowerCase()
+            .includes(query);
+          if (!matchesName && !matchesSku && !matchesTag && !matchesDesc) {
+            return false;
+          }
+        }
+
+        // 2. Category
+        if (filters.category !== 'All' && product.category !== filters.category) {
           return false;
         }
-      }
 
-      // 2. Category
-      if (filters.category !== 'All' && product.category !== filters.category) {
-        return false;
-      }
+        // 3. Gender
+        if (filters.gender !== 'All' && product.gender !== filters.gender) {
+          return false;
+        }
 
-      // 3. Gender
-      if (filters.gender !== 'All' && product.gender !== filters.gender) {
-        return false;
-      }
+        // 4. Purity
+        if (filters.purity !== 'All' && product.purity !== filters.purity) {
+          return false;
+        }
 
-      // 4. Purity
-      if (filters.purity !== 'All' && product.purity !== filters.purity) {
-        return false;
-      }
-
-      // 5. Availability
-      if (
-        filters.availability !== 'All' &&
-        product.status !== filters.availability
-      ) {
-        return false;
-      }
-
-      // 6. Occasion
-      if (
-        filters.occasion !== 'All' &&
-        product.occasion.toLowerCase() !== filters.occasion.toLowerCase()
-      ) {
-        return false;
-      }
-
-      // 7. Weight Range
-      const currentWeightRange = WEIGHT_RANGES[filters.weightIndex];
-      if (currentWeightRange) {
+        // 5. Availability
         if (
-          product.approximateWeightGrams < currentWeightRange.min ||
-          product.approximateWeightGrams >= currentWeightRange.max
+          filters.availability !== 'All' &&
+          product.availability !== filters.availability
         ) {
           return false;
         }
-      }
 
-      return true;
-    }).sort((a, b) => {
-      if (filters.sortBy === 'name-asc') {
-        return a.name.localeCompare(b.name);
-      }
-      if (filters.sortBy === 'name-desc') {
-        return b.name.localeCompare(a.name);
-      }
-      if (filters.sortBy === 'weight-asc') {
-        return a.approximateWeightGrams - b.approximateWeightGrams;
-      }
-      if (filters.sortBy === 'weight-desc') {
-        return b.approximateWeightGrams - a.approximateWeightGrams;
-      }
-      return 0;
-    });
-  }, [filters]);
+        // 6. Occasion
+        if (
+          filters.occasion !== 'All' &&
+          product.occasion.toLowerCase() !== filters.occasion.toLowerCase()
+        ) {
+          return false;
+        }
+
+        // 7. Weight Range
+        const currentWeightRange = WEIGHT_RANGES[filters.weightIndex];
+        if (currentWeightRange) {
+          if (
+            product.approxWeight < currentWeightRange.min ||
+            product.approxWeight >= currentWeightRange.max
+          ) {
+            return false;
+          }
+        }
+
+        return true;
+      })
+      .sort((a, b) => {
+        if (filters.sortBy === 'name-asc') {
+          return a.name.localeCompare(b.name);
+        }
+        if (filters.sortBy === 'name-desc') {
+          return b.name.localeCompare(a.name);
+        }
+        if (filters.sortBy === 'weight-asc') {
+          return a.approxWeight - b.approxWeight;
+        }
+        if (filters.sortBy === 'weight-desc') {
+          return b.approxWeight - a.approxWeight;
+        }
+        return 0;
+      });
+  }, [publishedProducts, filters]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
@@ -162,13 +165,13 @@ function CatalogueContent() {
       <div className="space-y-3 max-w-3xl">
         <div className="inline-flex items-center gap-2 bg-gold-100/90 border border-gold-300 text-maroon-900 text-xs font-semibold px-3 py-1 rounded-full shadow-xs">
           <Sparkles className="w-3.5 h-3.5 text-gold-700" />
-          <span>Pure 18K, 22K &amp; 24K Gold Jewellery Only</span>
+          <span>18K, 22K and 24K Gold Jewellery</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-serif font-bold text-maroon-950">
           Gold Jewellery Catalogue
         </h1>
         <p className="text-sm sm:text-base text-charcoal-700 font-sans leading-relaxed">
-          Browse our curated bridal sets, traditional rings, mangalsutras, chains, and bangles. Each piece is crafted with heirloom quality at {STORE_NAME} in Gorakhpur.
+          Browse our bridal sets, classic rings, mangalsutras, chains, and bangles. Each piece is crafted with quality and care at {STORE_NAME} in Gorakhpur.
         </p>
       </div>
 

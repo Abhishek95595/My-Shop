@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Sparkles, ArrowRight, HeartHandshake, ShieldCheck } from 'lucide-react';
-import { getWeddingProducts } from '@/services/mockProducts';
+import { getWeddingProducts, formatWeight, getPrimaryImage } from '@/services/mockProducts';
 
 export const WeddingCollectionPreview: React.FC = () => {
   const weddingProducts = getWeddingProducts().slice(0, 3);
@@ -25,7 +25,7 @@ export const WeddingCollectionPreview: React.FC = () => {
               The Royal Wedding Collection
             </h2>
             <p className="text-sm sm:text-base text-cream-200/90 font-sans leading-relaxed">
-              Designed for auspicious beginnings. Explore our signature bridal sets, heavy wedding bangles, and heirloom mangalsutras crafted with 22K pure gold.
+              Designed for auspicious beginnings. Explore our signature bridal sets, wedding bangles, and mangalsutras crafted in 22K gold.
             </p>
           </div>
 
@@ -41,8 +41,7 @@ export const WeddingCollectionPreview: React.FC = () => {
         {/* Wedding Highlights Grid */}
         <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-6">
           {weddingProducts.map((product) => {
-            const primaryImg =
-              product.images.find((i) => i.isPrimary) || product.images[0];
+            const primaryImg = getPrimaryImage(product.images);
             return (
               <Link
                 key={product.id}
@@ -53,7 +52,7 @@ export const WeddingCollectionPreview: React.FC = () => {
                   {primaryImg && (
                     <Image
                       src={primaryImg.url}
-                      alt={product.name}
+                      alt={primaryImg.altText || product.name}
                       fill
                       sizes="(max-width: 768px) 100vw, 33vw"
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -75,7 +74,7 @@ export const WeddingCollectionPreview: React.FC = () => {
                   </div>
 
                   <div className="pt-2 flex items-center justify-between text-xs text-gold-300 border-t border-gold-300/20">
-                    <span>Approx. {product.approximateWeight}</span>
+                    <span>Approx. {formatWeight(product.approxWeight)}</span>
                     <span className="font-medium group-hover:underline inline-flex items-center gap-1">
                       View Piece <ArrowRight className="w-3 h-3" />
                     </span>
@@ -90,7 +89,7 @@ export const WeddingCollectionPreview: React.FC = () => {
         <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs text-cream-200 font-sans">
           <div className="flex items-center gap-2.5 bg-maroon-900/40 p-3 rounded-xl border border-gold-300/20">
             <HeartHandshake className="w-5 h-5 text-gold-400 flex-shrink-0" />
-            <span>Complete bridal trousseau consultation available at our Gorakhpur showroom.</span>
+            <span>Bridal trousseau consultation available at our Gorakhpur showroom.</span>
           </div>
           <div className="flex items-center gap-2.5 bg-maroon-900/40 p-3 rounded-xl border border-gold-300/20">
             <ShieldCheck className="w-5 h-5 text-gold-400 flex-shrink-0" />

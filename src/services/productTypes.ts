@@ -9,12 +9,14 @@ export type ProductGender = 'Women' | 'Men';
 
 export type GoldPurity = '18K' | '22K' | '24K';
 
-export type ProductAvailability = 'Available' | 'Made on Order';
+export type ProductAvailability = 'available' | 'made_on_order';
+
+export type ProductPublicationStatus = 'draft' | 'published' | 'archived';
 
 export interface ProductImage {
   id: string;
   url: string;
-  alt: string;
+  altText: string;
   sortOrder: number;
   isPrimary: boolean;
 }
@@ -25,21 +27,19 @@ export interface Product {
   name: string;
   slug: string;
   category: ProductCategory;
-  gender: ProductGender;
-  purity: GoldPurity;
-  approximateWeight: string;
-  approximateWeightGrams: number;
-  status: ProductAvailability;
+  gender: 'Women' | 'Men';
+  purity: '18K' | '22K' | '24K';
+  approxWeight: number;
+  availability: 'available' | 'made_on_order';
+  images: ProductImage[];
   shortDescription: string;
   detailedDescription: string;
   occasion: string;
   tags: string[];
-  images: ProductImage[];
-  isSampleProduct: boolean;
-  isFeatured?: boolean;
-  isWeddingCollection?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
+  isFeatured: boolean;
+  status: 'draft' | 'published' | 'archived';
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface GoldRateItem {

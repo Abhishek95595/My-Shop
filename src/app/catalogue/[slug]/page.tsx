@@ -3,9 +3,10 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import {
-  SAMPLE_PRODUCTS,
-  getAllProducts,
+  getAllPublishedProducts,
   getProductBySlug,
+  formatWeight,
+  formatAvailability,
 } from '@/services/mockProducts';
 import { ProductImageGallery } from '@/components/products/ProductImageGallery';
 import {
@@ -33,7 +34,7 @@ interface ProductDetailPageProps {
 }
 
 export async function generateStaticParams() {
-  const products = getAllProducts();
+  const products = getAllPublishedProducts();
   return products.map((product) => ({
     slug: product.slug,
   }));
@@ -93,7 +94,7 @@ export default async function ProductDetailPage({
 
       {/* Main Product Details Two-Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-        {/* Left Column: Image Gallery (5 cols on lg) */}
+        {/* Left Column: Image Gallery */}
         <div className="lg:col-span-6 space-y-4">
           <ProductImageGallery
             images={product.images}
@@ -101,26 +102,24 @@ export default async function ProductDetailPage({
           />
         </div>
 
-        {/* Right Column: Specifications, Information & Actions (6 cols on lg) */}
+        {/* Right Column: Specifications, Information & Actions */}
         <div className="lg:col-span-6 space-y-6">
           {/* Header Badges & SKU */}
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-2">
-              {product.isSampleProduct && (
-                <span className="inline-flex items-center gap-1 bg-maroon-900 text-cream-50 text-xs font-semibold px-3 py-1 rounded-full shadow-xs">
-                  <Sparkles className="w-3.5 h-3.5 text-gold-300" />
-                  <span>Sample Product</span>
-                </span>
-              )}
+              <span className="inline-flex items-center gap-1 bg-maroon-900 text-cream-50 text-xs font-semibold px-3 py-1 rounded-full shadow-xs">
+                <Sparkles className="w-3.5 h-3.5 text-gold-300" />
+                <span>Sample Product</span>
+              </span>
 
               <span
                 className={`text-xs font-semibold px-3 py-1 rounded-full shadow-xs ${
-                  product.status === 'Available'
+                  product.availability === 'available'
                     ? 'bg-emerald-800 text-cream-50'
                     : 'bg-gold-800 text-cream-50'
                 }`}
               >
-                {product.status}
+                {formatAvailability(product.availability)}
               </span>
 
               <span className="text-xs font-bold text-gold-800 bg-gold-100/90 border border-gold-300 px-2.5 py-1 rounded-full">
@@ -186,7 +185,7 @@ export default async function ProductDetailPage({
                 <div>
                   <span className="text-charcoal-500 block">Approx. Weight</span>
                   <span className="font-serif font-bold text-maroon-900 text-sm">
-                    {product.approximateWeight}
+                    {formatWeight(product.approxWeight)}
                   </span>
                 </div>
               </div>
@@ -206,7 +205,7 @@ export default async function ProductDetailPage({
                 <div>
                   <span className="text-charcoal-500 block">Availability</span>
                   <span className="font-semibold text-charcoal-900">
-                    {product.status}
+                    {formatAvailability(product.availability)}
                   </span>
                 </div>
               </div>

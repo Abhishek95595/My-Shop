@@ -14,37 +14,37 @@ const PILLARS = [
     icon: ShieldCheck,
     title: '25+ Years of Trust',
     description:
-      'Serving generations of Gorakhpur families since 1999 with transparent dealing and genuine relationships.',
+      'Serving Gorakhpur customers since 1999 with transparent dealing and quality service.',
   },
   {
     icon: Gem,
     title: '18K, 22K & 24K Gold Only',
     description:
-      'Committed exclusively to pure gold jewellery, crafted with traditional care and strict purity standards.',
+      'Committed exclusively to gold jewellery, crafted with traditional care and strict purity standards.',
   },
   {
     icon: Sparkles,
     title: 'Bespoke Custom Jewellery',
     description:
-      'Bring your design ideas, photos, or family heirlooms. We manufacture custom bridal sets and jewellery to order.',
+      'Bring your design ideas, photos, or old gold. We manufacture custom bridal sets and jewellery to order.',
   },
   {
     icon: Repeat,
     title: 'Old Gold Exchange',
     description:
-      'Fair valuation and seamless exchange for your old gold jewellery to create fresh, contemporary designs.',
+      'Clear valuation and exchange service for your old gold jewellery to create fresh designs.',
   },
   {
     icon: Users,
-    title: 'Personal In-Store Guidance',
+    title: 'Personal Customer Guidance',
     description:
-      'Direct consultation with our family team at our Gorakhpur showroom for bridal sets and investment purchases.',
+      'Direct personal customer guidance at our Gorakhpur showroom for bridal sets and everyday jewellery.',
   },
   {
     icon: Clock,
     title: 'Timely Wedding Deliveries',
     description:
-      'Reliable turnaround for custom bridal orders, ensuring your jewellery is ready well before your auspicious date.',
+      'Reliable turnaround for custom bridal orders, ensuring your jewellery is ready for your celebration.',
   },
 ];
 
@@ -55,13 +55,13 @@ export const WhyUsSection: React.FC = () => {
       <div className="text-center max-w-3xl mx-auto space-y-3">
         <div className="inline-flex items-center gap-1.5 text-xs font-bold text-gold-800 uppercase tracking-widest bg-gold-100/90 border border-gold-300 px-3.5 py-1 rounded-full">
           <Sparkles className="w-3.5 h-3.5 text-gold-700" />
-          <span>Our Heritage &amp; Commitment</span>
+          <span>25+ Years of Trust</span>
         </div>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-bold text-maroon-950">
           Why Choose {STORE_NAME}
         </h2>
         <p className="text-sm sm:text-base text-charcoal-600 font-sans leading-relaxed">
-          More than two decades of craftsmanship, fair dealing, and dedicated service in the heart of Gorakhpur.
+          Craftsmanship, fair dealing, and dedicated service in the heart of Gorakhpur.
         </p>
       </div>
 

@@ -34,7 +34,7 @@ export const Footer: React.FC = () => {
               />
             </Link>
             <p className="text-sm text-charcoal-600 leading-relaxed font-sans">
-              25+ Years of Trust &amp; Quality Craftsmanship in Gorakhpur. Dedicated to bespoke wedding jewellery, pure gold collections, and personal customer service.
+              25+ Years of Trust &amp; Quality Craftsmanship in Gorakhpur. Dedicated to bespoke wedding jewellery, gold collections, and personal customer service.
             </p>
             <div className="flex items-center gap-2 text-xs text-maroon-700 font-semibold bg-gold-50 border border-gold-200 rounded px-3 py-1.5 w-fit">
               <ShieldCheck className="w-4 h-4 text-gold-700" />

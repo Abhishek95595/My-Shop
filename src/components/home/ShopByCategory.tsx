@@ -58,7 +58,7 @@ export const ShopByCategory: React.FC = () => {
             Shop by Gold Category
           </h2>
           <p className="text-sm sm:text-base text-charcoal-600 font-sans max-w-2xl">
-            Explore pure gold craftsmanship across classic rings, grand bridal necklaces, daily chains, sacred mangalsutras, and wedding bangles.
+            Explore gold jewellery craftsmanship across classic rings, grand bridal necklaces, daily chains, sacred mangalsutras, and wedding bangles.
           </p>
         </div>
 

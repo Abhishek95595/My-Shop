@@ -6,7 +6,6 @@ import {
   CATEGORIES,
   GENDERS,
   PURITIES,
-  AVAILABILITIES,
   WEIGHT_RANGES,
 } from '@/lib/constants';
 
@@ -28,6 +27,12 @@ interface ProductFilterBarProps {
   availableOccasions: string[];
   totalResults: number;
 }
+
+const AVAILABILITY_OPTIONS = [
+  { value: 'All', label: 'All Statuses' },
+  { value: 'available', label: 'Available' },
+  { value: 'made_on_order', label: 'Made on Order' },
+];
 
 export const ProductFilterBar: React.FC<ProductFilterBarProps> = ({
   filters,
@@ -109,7 +114,7 @@ export const ProductFilterBar: React.FC<ProductFilterBarProps> = ({
         </div>
       </div>
 
-      {/* Filter Options Grid (Desktop view + collapsible on mobile) */}
+      {/* Filter Options Grid */}
       <div
         className={`bg-cream-50 border border-gold-200/80 rounded-2xl p-4 sm:p-5 shadow-card ${
           mobileFiltersOpen ? 'block' : 'hidden md:block'
@@ -183,16 +188,15 @@ export const ProductFilterBar: React.FC<ProductFilterBarProps> = ({
               onChange={(e) => onFilterChange({ availability: e.target.value })}
               className="w-full py-1.5 px-2.5 bg-cream-100 border border-gold-200 rounded-lg text-xs text-charcoal-800 focus:outline-none focus:border-gold-500"
             >
-              <option value="All">All Statuses</option>
-              {AVAILABILITIES.map((status) => (
-                <option key={status} value={status}>
-                  {status}
+              {AVAILABILITY_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Occasion Filter (Flexible) */}
+          {/* Occasion Filter */}
           <div className="space-y-1.5">
             <label className="block text-[11px] font-bold uppercase tracking-wider text-maroon-900">
               Occasion
