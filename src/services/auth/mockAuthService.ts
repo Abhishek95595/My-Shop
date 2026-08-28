@@ -14,13 +14,13 @@ export function isValidGmail(email: string): boolean {
 }
 
 /**
- * Deterministically derives a stable customer ID from the normalized Gmail address.
+ * Deterministically derives a stable, collision-free customer ID from the normalized Gmail address.
+ * Uses encodeURIComponent on normalized email (e.g. mock-user-gmail-a.b%40gmail.com).
  * Display name is NOT used for identity/storage resolution.
  */
 export function deriveCustomerIdFromEmail(email: string): string {
-  const normalized = email.trim().toLowerCase();
-  const safeId = normalized.replace(/[^a-z0-9]/g, '_');
-  return `mock-user-gmail-${safeId}`;
+  const normalizedEmail = email.trim().toLowerCase();
+  return `mock-user-gmail-${encodeURIComponent(normalizedEmail)}`;
 }
 
 export const PRESET_MOCK_USERS: MockUser[] = [
@@ -85,9 +85,7 @@ class MockAuthService implements IAuthService {
     }
 
     if (!isValidGmail(normalizedEmail)) {
-      throw new Error(
-        'Invalid Gmail address. Mock customer login requires a valid address ending in @gmail.com'
-      );
+      throw new Error('Please enter a valid Gmail address ending in @gmail.com.');
     }
 
     const customerId = deriveCustomerIdFromEmail(normalizedEmail);

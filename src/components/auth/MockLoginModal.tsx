@@ -82,14 +82,8 @@ export const MockLoginModal: React.FC = () => {
       const trimmedEmail = customEmail.trim().toLowerCase();
       const trimmedName = customName.trim();
 
-      if (!trimmedEmail) {
-        setErrorMessage('Please enter a Gmail address.');
-        emailInputRef.current?.focus();
-        return;
-      }
-
-      if (!isValidGmail(trimmedEmail)) {
-        setErrorMessage('Please enter a valid Gmail address ending with @gmail.com.');
+      if (!trimmedEmail || !isValidGmail(trimmedEmail)) {
+        setErrorMessage('Please enter a valid Gmail address ending in @gmail.com.');
         emailInputRef.current?.focus();
         return;
       }
