@@ -23,6 +23,28 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   isSample = true,
 }) => {
   const primaryImage = getPrimaryImage(product.images);
+  const [resolvedImageUrl, setResolvedImageUrl] = React.useState<string>(
+    primaryImage?.url || ''
+  );
+
+  React.useEffect(() => {
+    let active = true;
+    if (primaryImage?.url.startsWith('indexeddb://')) {
+      import('@/services/images/imageStorageService').then(({ imageStorageService }) => {
+        imageStorageService.getImageUrl(primaryImage.id).then((resolved) => {
+          if (active && resolved) {
+            setResolvedImageUrl(resolved);
+          }
+        });
+      });
+    } else {
+      setResolvedImageUrl(primaryImage?.url || '');
+    }
+    return () => {
+      active = false;
+    };
+  }, [primaryImage]);
+
   const { isInWishlist, isInShortlist, toggleWishlist, toggleShortlist } =
     useSavedItems();
 
@@ -42,13 +64,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           className="block w-full h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
           aria-label={`View details for ${product.name}`}
         >
-          {primaryImage ? (
+          {resolvedImageUrl ? (
             <Image
-              src={primaryImage.url}
-              alt={primaryImage.altText || product.name}
+              src={resolvedImageUrl}
+              alt={primaryImage?.altText || product.name}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               className="object-cover group-hover:scale-105 transition-transform duration-500"
+              unoptimized={resolvedImageUrl.startsWith('blob:')}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-charcoal-500 text-xs">

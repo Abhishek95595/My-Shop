@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { Product } from '@/services/productTypes';
 import { getAllPublishedProducts } from '@/services/mockProducts';
 import { ProductCard } from '@/components/products/ProductCard';
 import {
@@ -33,7 +34,23 @@ function CatalogueContent() {
     sortBy: 'name-asc',
   });
 
-  const publishedProducts = useMemo(() => getAllPublishedProducts(), []);
+  const [publishedProducts, setPublishedProducts] = useState<Product[]>(() =>
+    getAllPublishedProducts()
+  );
+
+  React.useEffect(() => {
+    const handleUpdate = () => {
+      setPublishedProducts(getAllPublishedProducts());
+    };
+
+    window.addEventListener('koh_products_updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+
+    return () => {
+      window.removeEventListener('koh_products_updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
+  }, []);
 
   // Extract unique occasions dynamically
   const availableOccasions = useMemo(() => {
@@ -87,7 +104,7 @@ function CatalogueContent() {
           const query = filters.search.toLowerCase().trim();
           const matchesName = product.name.toLowerCase().includes(query);
           const matchesSku = product.sku.toLowerCase().includes(query);
-          const matchesTag = product.tags.some((t) =>
+          const matchesTag = product.tags.some((t: string) =>
             t.toLowerCase().includes(query)
           );
           const matchesDesc = product.shortDescription

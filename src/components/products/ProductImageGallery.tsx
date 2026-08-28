@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { ProductImage } from '@/services/productTypes';
 import { getSortedImages } from '@/services/mockProducts';
-import { Sparkles } from 'lucide-react';
+import { imageStorageService } from '@/services/images/imageStorageService';
+import { Sparkles, Image as ImageIcon } from 'lucide-react';
 
 interface ProductImageGalleryProps {
   images: ProductImage[];
@@ -15,29 +16,58 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
   images,
   productName,
 }) => {
-  const sortedImages = getSortedImages(images);
+  const sortedImages = React.useMemo(() => getSortedImages(images), [images]);
   const primaryIndex = sortedImages.findIndex((img) => img.isPrimary);
   const initialIndex = primaryIndex !== -1 ? primaryIndex : 0;
 
   const [selectedIndex, setSelectedIndex] = useState<number>(initialIndex);
+  const [resolvedUrls, setResolvedUrls] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadAllUrls() {
+      const map: Record<string, string> = {};
+      for (const img of sortedImages) {
+        if (img.url.startsWith('indexeddb://')) {
+          const resolved = await imageStorageService.getImageUrl(img.id);
+          if (resolved) map[img.id] = resolved;
+        } else {
+          map[img.id] = img.url;
+        }
+      }
+      if (active) {
+        setResolvedUrls(map);
+      }
+    }
+
+    loadAllUrls();
+    return () => {
+      active = false;
+    };
+  }, [sortedImages]);
+
   const activeImage = sortedImages[selectedIndex] || sortedImages[0];
+  const activeUrl = activeImage ? resolvedUrls[activeImage.id] || activeImage.url : '';
 
   return (
     <div className="space-y-4">
       {/* Main Image Showcase */}
       <div className="relative aspect-square w-full bg-cream-50 border border-gold-200/90 rounded-2xl overflow-hidden shadow-card">
-        {activeImage ? (
+        {activeUrl ? (
           <Image
-            src={activeImage.url}
-            alt={activeImage.altText || productName}
+            src={activeUrl}
+            alt={activeImage?.altText || productName}
             fill
             priority
             sizes="(max-width: 768px) 100vw, 50vw"
             className="object-cover transition-opacity duration-300"
+            unoptimized={activeUrl.startsWith('blob:')}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-charcoal-400 font-sans">
-            No image available
+          <div className="w-full h-full flex flex-col items-center justify-center text-charcoal-400 font-sans gap-2 bg-cream-100/60">
+            <ImageIcon className="w-8 h-8 text-charcoal-400" />
+            <span className="text-xs">No image available</span>
           </div>
         )}
 
@@ -68,6 +98,7 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
         >
           {sortedImages.map((img, index) => {
             const isSelected = index === selectedIndex;
+            const thumbUrl = resolvedUrls[img.id] || img.url;
             return (
               <button
                 key={img.id}
@@ -81,13 +112,20 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
                 aria-label={`Show ${img.altText || `View ${index + 1}`}`}
                 aria-pressed={isSelected}
               >
-                <Image
-                  src={img.url}
-                  alt={img.altText || `${productName} view ${index + 1}`}
-                  fill
-                  sizes="96px"
-                  className="object-cover"
-                />
+                {thumbUrl ? (
+                  <Image
+                    src={thumbUrl}
+                    alt={img.altText || `${productName} view ${index + 1}`}
+                    fill
+                    sizes="96px"
+                    className="object-cover"
+                    unoptimized={thumbUrl.startsWith('blob:')}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-cream-200 flex items-center justify-center">
+                    <ImageIcon className="w-4 h-4 text-charcoal-400" />
+                  </div>
+                )}
                 {img.isPrimary && (
                   <span className="absolute top-1 left-1 w-2 h-2 rounded-full bg-gold-400" />
                 )}
