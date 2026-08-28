@@ -8,8 +8,18 @@ import {
   Clock,
   ShieldCheck,
   ExternalLink,
+  Mail,
 } from 'lucide-react';
-import { CONTACT_CONFIG, STORE_NAME, CATEGORIES } from '@/lib/constants';
+import {
+  CONTACT_CONFIG,
+  STORE_NAME,
+  STORE_TAGLINE,
+  STORE_OWNER,
+  GSTIN,
+  CATEGORIES,
+  FOOTER_QUICK_LINKS,
+  FOOTER_LEGAL_LINKS,
+} from '@/lib/constants';
 
 export const Footer: React.FC = () => {
   return (
@@ -17,7 +27,7 @@ export const Footer: React.FC = () => {
       id="store-info"
       className="bg-cream-100 border-t border-gold-200/90 text-charcoal-800 pt-12 pb-8"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 pb-10 border-b border-gold-200/80">
           {/* Brand & Introduction */}
           <div className="space-y-4 lg:col-span-1">
@@ -33,21 +43,29 @@ export const Footer: React.FC = () => {
                 className="h-12 w-auto object-contain"
               />
             </Link>
-            <p className="text-sm text-charcoal-600 leading-relaxed font-sans">
-              25+ Years of Trust &amp; Quality Craftsmanship in Gorakhpur. Dedicated to bespoke wedding jewellery, gold collections, and personal customer service.
+            <p className="text-xs sm:text-sm text-charcoal-600 leading-relaxed font-sans">
+              {STORE_TAGLINE}. Dedicated to fine 18K, 22K and 24K gold jewellery, bespoke bridal sets, and honest customer service in Gorakhpur.
             </p>
-            <div className="flex items-center gap-2 text-xs text-maroon-700 font-semibold bg-gold-50 border border-gold-200 rounded px-3 py-1.5 w-fit">
+            <div className="space-y-1 text-xs text-charcoal-600 font-sans">
+              <p>
+                Proprietor: <strong className="text-maroon-950">{STORE_OWNER}</strong>
+              </p>
+              <p>
+                GSTIN: <strong className="font-mono text-maroon-950">{GSTIN}</strong>
+              </p>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-maroon-800 font-semibold bg-gold-100/80 border border-gold-300 rounded-xl px-3 py-1.5 w-fit">
               <ShieldCheck className="w-4 h-4 text-gold-700" />
-              <span>Trusted Local Jeweller Since 1999</span>
+              <span>25+ Years of Trust</span>
             </div>
           </div>
 
           {/* Quick Categories Navigation */}
           <div className="space-y-3">
-            <h3 className="text-base font-serif font-bold text-maroon-800 tracking-wide uppercase">
+            <h3 className="text-xs font-serif font-bold text-maroon-950 uppercase tracking-widest">
               Gold Collections
             </h3>
-            <ul className="space-y-2 text-sm text-charcoal-700 font-sans">
+            <ul className="space-y-2 text-xs sm:text-sm text-charcoal-700 font-sans">
               {CATEGORIES.map((cat) => (
                 <li key={cat}>
                   <Link
@@ -69,24 +87,40 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* Store Hours & Visiting Information */}
+          {/* Showroom & Services */}
           <div className="space-y-3">
-            <h3 className="text-base font-serif font-bold text-maroon-800 tracking-wide uppercase">
+            <h3 className="text-xs font-serif font-bold text-maroon-950 uppercase tracking-widest">
+              Services &amp; Information
+            </h3>
+            <ul className="space-y-2 text-xs sm:text-sm text-charcoal-700 font-sans">
+              {FOOTER_QUICK_LINKS.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="hover:text-maroon-800 hover:underline transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Store Location & Hours */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-serif font-bold text-maroon-950 uppercase tracking-widest">
               Showroom &amp; Hours
             </h3>
-            <div className="space-y-3 text-sm text-charcoal-700 font-sans">
+            <div className="space-y-3 text-xs sm:text-sm text-charcoal-700 font-sans">
               <div className="flex items-start gap-2.5">
-                <MapPin className="w-4 h-4 text-gold-700 flex-shrink-0 mt-1" />
-                <div>
-                  <span>
-                    {CONTACT_CONFIG.addressLine1}, {CONTACT_CONFIG.city},{' '}
-                    {CONTACT_CONFIG.state}
-                  </span>
+                <MapPin className="w-4 h-4 text-gold-700 flex-shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  <p className="leading-snug">{CONTACT_CONFIG.address}</p>
                   <a
-                    href={CONTACT_CONFIG.googleMapsUrl}
+                    href={CONTACT_CONFIG.mapUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-xs text-maroon-800 font-semibold hover:underline mt-1"
+                    className="inline-flex items-center gap-1 text-xs text-maroon-800 font-bold hover:underline pt-0.5"
                   >
                     <span>View on Google Maps</span>
                     <ExternalLink className="w-3 h-3" />
@@ -95,33 +129,24 @@ export const Footer: React.FC = () => {
               </div>
 
               <div className="flex items-start gap-2.5">
-                <Clock className="w-4 h-4 text-gold-700 flex-shrink-0 mt-1" />
+                <Clock className="w-4 h-4 text-gold-700 flex-shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-semibold text-maroon-900 block">
+                  <span className="font-bold text-maroon-950 block">
                     {CONTACT_CONFIG.hours}
                   </span>
                   <span className="text-xs text-charcoal-500">
-                    Open all days for bridal consultations
+                    Open daily for in-store consultations
                   </span>
                 </div>
               </div>
-            </div>
-          </div>
 
-          {/* Contact Details */}
-          <div className="space-y-3">
-            <h3 className="text-base font-serif font-bold text-maroon-800 tracking-wide uppercase">
-              Contact &amp; Enquiry
-            </h3>
-            <div className="space-y-2.5 text-sm text-charcoal-700 font-sans">
-              <div className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-maroon-700 flex-shrink-0" />
+              <div className="flex items-center gap-2 pt-1">
+                <Phone className="w-4 h-4 text-maroon-800 flex-shrink-0" />
                 <a
                   href={`tel:${CONTACT_CONFIG.primaryPhoneRaw}`}
-                  className="font-medium text-maroon-800 hover:underline"
-                  aria-label={`Primary Call: ${CONTACT_CONFIG.primaryPhone}`}
+                  className="font-bold text-maroon-900 hover:underline"
                 >
-                  {CONTACT_CONFIG.primaryPhone} (Primary Call)
+                  {CONTACT_CONFIG.primaryPhone}
                 </a>
               </div>
 
@@ -129,33 +154,38 @@ export const Footer: React.FC = () => {
                 <MessageCircle className="w-4 h-4 text-emerald-700 flex-shrink-0" />
                 <a
                   href={`https://wa.me/${CONTACT_CONFIG.whatsappNumberRaw}?text=${encodeURIComponent(
-                    'Hello Khushi Ornament House, I would like to inquire about your jewellery collections.'
+                    'Hello Khushi Ornament House, I would like to inquire about your jewellery.'
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-medium text-emerald-800 hover:underline"
-                  aria-label={`WhatsApp Enquiry: ${CONTACT_CONFIG.whatsappNumber}`}
+                  className="font-bold text-emerald-800 hover:underline"
                 >
                   {CONTACT_CONFIG.whatsappNumber} (WhatsApp)
                 </a>
-              </div>
-
-              <div className="text-xs text-charcoal-600 pl-6 pt-1">
-                <span>Secondary Line: </span>
-                <span className="font-medium text-charcoal-800">
-                  {CONTACT_CONFIG.secondaryPhone} (Store Info Only)
-                </span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Bottom Legal & Copyright Bar */}
-        <div className="pt-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-charcoal-600 font-sans">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-charcoal-600 font-sans">
           <p>
             © {new Date().getFullYear()} {STORE_NAME}. All rights reserved.
           </p>
-          <p className="text-gold-700">Gorakhpur, Uttar Pradesh, India</p>
+
+          <div className="flex flex-wrap items-center gap-4">
+            {FOOTER_LEGAL_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="hover:text-maroon-900 hover:underline transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+
+          <p className="text-gold-800 font-medium">Gorakhpur, Uttar Pradesh, India</p>
         </div>
       </div>
     </footer>

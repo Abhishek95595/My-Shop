@@ -80,7 +80,7 @@ export default function HomePage() {
       <CustomJewellerySection />
 
       {/* 8. Optional Owner-Entered Rates Module (Hidden completely when empty) */}
-      <OwnerRatesModule ratesState={null} />
+      <OwnerRatesModule />
 
       {/* 9. Gallery Preview Module (Hidden completely when empty) */}
       <GalleryPreviewModule items={[]} />

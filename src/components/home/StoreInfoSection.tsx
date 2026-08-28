@@ -29,7 +29,7 @@ export const StoreInfoSection: React.FC = () => {
           </div>
 
           <a
-            href={CONTACT_CONFIG.googleMapsUrl}
+            href={CONTACT_CONFIG.mapUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-maroon-800 hover:bg-maroon-900 text-cream-50 text-xs sm:text-sm font-semibold px-5 py-3 rounded-xl shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 flex-shrink-0"
@@ -53,9 +53,7 @@ export const StoreInfoSection: React.FC = () => {
             <p className="text-sm text-charcoal-700 font-sans leading-relaxed">
               {STORE_NAME}
               <br />
-              {CONTACT_CONFIG.addressLine1}
-              <br />
-              {CONTACT_CONFIG.city}, {CONTACT_CONFIG.state} – {CONTACT_CONFIG.country}
+              {CONTACT_CONFIG.address}
             </p>
           </div>
 

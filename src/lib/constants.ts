@@ -1,31 +1,40 @@
 export const STORE_NAME = 'Khushi Ornament House';
 export const STORE_TAGLINE = '25+ Years of Trust & Quality Craftsmanship';
+export const STORE_OWNER = 'Dilip Kumar Verma';
+export const GSTIN = '09AJBPV9683Q1ZW';
+
+export const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
 export const CONTACT_CONFIG = {
   primaryPhone: '+91 8853665166',
   primaryPhoneRaw: '918853665166',
   secondaryPhone: '+91 9415386668',
+  secondaryPhoneRaw: '919415386668',
   whatsappNumber: '+91 8853665166',
   whatsappNumberRaw: '918853665166',
-  addressLine1: 'Main Market, Gorakhpur',
+  email: '100dilipsarraf@gmail.com',
+  address:
+    'Urdu Bazar Rd, near Water Tank, Urdu Bazar, Bade Kajipur, Gorakhpur, Uttar Pradesh 273005',
   city: 'Gorakhpur',
   state: 'Uttar Pradesh',
+  pincode: '273005',
   country: 'India',
-  hours: 'Mon – Sun: 11:00 AM – 8:00 PM',
-  googleMapsUrl: 'https://maps.google.com/?q=Khushi+Ornament+House+Gorakhpur',
+  hours: '11:00 AM – 8:00 PM',
+  mapUrl: 'https://maps.app.goo.gl/VwGs1tiZNae65soSA?g_st=iw',
 };
 
 export const EXACT_WEIGHT_DISCLAIMER =
   'Approximate weight shown. Actual weight may vary depending on size and design.';
 
 export const APPROVED_SERVICES = [
-  'Custom jewellery manufacturing',
+  'Custom gold jewellery manufacturing',
   'Gold buying and selling',
   'Old-gold exchange',
-  'Retail and wholesale service',
+  'Retail and wholesale',
   'Wedding jewellery',
-  'Gold/silver coins in-store offering',
-];
+  'Gold/silver coins and in-store silver articles',
+] as const;
 
 export const CATEGORIES = [
   'Rings',
@@ -57,11 +66,29 @@ export const WEIGHT_RANGES = [
   { label: '50g and above', min: 50, max: Infinity },
 ] as const;
 
-// Active navigation links pointing to functional routes
+// Active navigation links pointing to functional working routes
 export const NAV_LINKS = [
   { label: 'Home', href: '/' },
   { label: 'Catalogue', href: '/catalogue' },
   { label: 'Wedding Collection', href: '/catalogue?occasion=Wedding' },
-  { label: 'Custom Jewellery', href: '/#custom-jewellery' },
-  { label: 'Visit Store', href: '/#store-info' },
+  { label: 'Custom Jewellery', href: '/custom-jewellery' },
+  { label: 'Old-Gold Exchange', href: '/old-gold-exchange' },
+  { label: 'Services', href: '/services' },
+  { label: 'About', href: '/about' },
+  { label: 'Contact', href: '/contact' },
+];
+
+export const FOOTER_QUICK_LINKS = [
+  { label: 'All Jewellery', href: '/catalogue' },
+  { label: 'Wedding Collection', href: '/catalogue?occasion=Wedding' },
+  { label: 'Custom Jewellery', href: '/custom-jewellery' },
+  { label: 'Old-Gold Exchange', href: '/old-gold-exchange' },
+  { label: 'Offers & Updates', href: '/offers' },
+  { label: 'Owner Rates', href: '/rates' },
+  { label: 'FAQs', href: '/faq' },
+];
+
+export const FOOTER_LEGAL_LINKS = [
+  { label: 'Privacy Policy', href: '/privacy' },
+  { label: 'Terms of Service', href: '/terms' },
 ];

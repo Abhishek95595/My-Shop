@@ -8,6 +8,14 @@ import { ToastProvider } from '@/context/ToastContext';
 import { AuthProvider } from '@/context/AuthContext';
 import { SavedItemsProvider } from '@/context/SavedItemsContext';
 import { MockLoginModal } from '@/components/auth/MockLoginModal';
+import {
+  STORE_NAME,
+  STORE_OWNER,
+  STORE_TAGLINE,
+  CONTACT_CONFIG,
+  GSTIN,
+  SITE_URL,
+} from '@/lib/constants';
 
 const playfair = Playfair_Display({
   subsets: ['latin'],
@@ -22,12 +30,50 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Khushi Ornament House | 25+ Years of Trust | Gorakhpur Gold Jewellery',
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: `${STORE_NAME} | 25+ Years of Trust | Gorakhpur Gold Jewellery`,
+    template: `%s | ${STORE_NAME}`,
+  },
   description:
-    'Explore 18K, 22K and 24K bridal gold jewellery, bespoke necklaces, bangles, and custom heirlooms at Khushi Ornament House in Gorakhpur. Quality craftsmanship and personal customer guidance.',
+    'Explore 18K, 22K and 24K bridal gold jewellery, bespoke necklaces, bangles, and custom heirlooms at Khushi Ornament House in Gorakhpur. 25+ years of trusted craftsmanship.',
+  openGraph: {
+    title: `${STORE_NAME} | Gorakhpur Gold Jewellery`,
+    description:
+      '25+ Years of Trust in Gorakhpur. Discover 18K, 22K and 24K gold bridal sets, rings, chains, mangalsutras, and custom jewellery.',
+    url: SITE_URL,
+    siteName: STORE_NAME,
+    locale: 'en_IN',
+    type: 'website',
+  },
   icons: {
     icon: '/assets/khushi-logo.png',
   },
+};
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'JewelryStore',
+  name: STORE_NAME,
+  description: `${STORE_TAGLINE}. Fine 18K, 22K and 24K gold jewellery in Gorakhpur.`,
+  telephone: CONTACT_CONFIG.primaryPhone,
+  email: CONTACT_CONFIG.email,
+  founder: {
+    '@type': 'Person',
+    name: STORE_OWNER,
+  },
+  taxID: GSTIN,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'Urdu Bazar Rd, near Water Tank, Urdu Bazar, Bade Kajipur',
+    addressLocality: 'Gorakhpur',
+    addressRegion: 'Uttar Pradesh',
+    postalCode: '273005',
+    addressCountry: 'IN',
+  },
+  openingHours: 'Mo,Tu,We,Th,Fr,Sa,Su 11:00-20:00',
+  url: SITE_URL,
+  priceRange: '₹₹₹',
 };
 
 export default function RootLayout({
@@ -37,6 +83,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${playfair.variable} ${plusJakarta.variable}`}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className="min-h-screen flex flex-col bg-cream-100 text-charcoal-900 font-sans selection:bg-maroon-700 selection:text-cream-50">
         <ToastProvider>
           <AuthProvider>
