@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { MockUser } from '@/services/auth/authTypes';
-import { authService } from '@/services/auth/mockAuthService';
+import { firebaseAuthService as authService } from '@/services/auth/firebaseAuthService';
 
 interface AuthContextType {
   user: MockUser | null;

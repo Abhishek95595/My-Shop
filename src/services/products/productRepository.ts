@@ -1,5 +1,13 @@
-import { Product, ProductCategory, ProductImage } from '../productTypes';
+import { Product, ProductCategory } from '../productTypes';
 import { SAMPLE_PRODUCTS } from '../mockProducts';
+import { db, isFirebaseConfigured } from '@/lib/firebase/client';
+import { 
+  collection, 
+  onSnapshot, 
+  doc, 
+  setDoc, 
+  updateDoc
+} from 'firebase/firestore';
 
 const CUSTOM_PRODUCTS_STORAGE_KEY = 'koh_admin_custom_products';
 const SAMPLE_OVERRIDES_STORAGE_KEY = 'koh_admin_sample_overrides';
@@ -17,7 +25,31 @@ export interface ProductValidationResult {
   errors: string[];
 }
 
-class MockProductRepository {
+class ProductRepository {
+  private productsCache: Product[] = [];
+  private isLoaded = false;
+
+  constructor() {
+    if (isFirebaseConfigured && db) {
+      try {
+        const productsRef = collection(db, 'products');
+        onSnapshot(productsRef, (snapshot) => {
+          const list: Product[] = [];
+          snapshot.forEach((d) => {
+            list.push({ id: d.id, ...d.data() } as Product);
+          });
+          this.productsCache = list;
+          this.isLoaded = true;
+          this.dispatchStorageUpdate();
+        }, (err) => {
+          console.error('Firestore products sync error:', err);
+        });
+      } catch (err) {
+        console.error('Failed setting up Firestore onSnapshot:', err);
+      }
+    }
+  }
+
   private getStoredCustomProducts(): Product[] {
     if (typeof window === 'undefined') return [];
     try {
@@ -75,19 +107,16 @@ class MockProductRepository {
     }
   }
 
-  /**
-   * Retrieves all products (Baseline + Custom with any active overrides)
-   */
   public getAllProducts(): Product[] {
+    if (isFirebaseConfigured && db && this.isLoaded) {
+      return this.productsCache;
+    }
     const overrides = this.getStoredSampleOverrides();
     const baseline = SAMPLE_PRODUCTS.map((p) => overrides[p.id] || p);
     const custom = this.getStoredCustomProducts();
     return [...baseline, ...custom];
   }
 
-  /**
-   * Retrieves all currently published products for public catalogue views.
-   */
   public getPublishedProducts(): Product[] {
     return this.getAllProducts().filter((p) => p.status === 'published');
   }
@@ -102,10 +131,6 @@ class MockProductRepository {
     return all.find((p) => p.slug === slug) || null;
   }
 
-  /**
-   * Generates a unique, sequential, and immutable SKU based on category.
-   * Format: KOH-GLD-{CATEGORY_CODE}-{SEQUENCE}
-   */
   public generateUniqueSku(category: ProductCategory): string {
     const categoryCode = CATEGORY_CODES[category] || 'GEN';
     const prefix = `KOH-GLD-${categoryCode}-`;
@@ -127,7 +152,6 @@ class MockProductRepository {
     const nextSeq = (maxSeq + 1).toString().padStart(3, '0');
     let candidate = `${prefix}${nextSeq}`;
 
-    // Ensure collision-freedom
     let counter = maxSeq + 1;
     while (all.some((p) => p.sku === candidate)) {
       counter++;
@@ -137,9 +161,6 @@ class MockProductRepository {
     return candidate;
   }
 
-  /**
-   * Generates a clean URL slug from name, preventing collisions.
-   */
   public generateUniqueSlug(name: string, excludeProductId?: string): string {
     const baseSlug = name
       .toLowerCase()
@@ -159,9 +180,6 @@ class MockProductRepository {
     return candidate;
   }
 
-  /**
-   * Validates a product before publication.
-   */
   public validateForPublish(product: Partial<Product>): ProductValidationResult {
     const errors: string[] = [];
 
@@ -207,9 +225,6 @@ class MockProductRepository {
     };
   }
 
-  /**
-   * Creates a new custom product.
-   */
   public createProduct(data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Product {
     const id = `prod-custom-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
     const now = new Date().toISOString();
@@ -221,14 +236,19 @@ class MockProductRepository {
       updatedAt: now,
     };
 
-    const current = this.getStoredCustomProducts();
-    this.saveCustomProducts([...current, newProduct]);
+    if (isFirebaseConfigured && db) {
+      const docRef = doc(db, 'products', id);
+      setDoc(docRef, newProduct).catch((err) => {
+        console.error('Failed to create product in Firestore:', err);
+      });
+    } else {
+      const current = this.getStoredCustomProducts();
+      this.saveCustomProducts([...current, newProduct]);
+    }
+
     return newProduct;
   }
 
-  /**
-   * Updates an existing product (custom or sample override).
-   */
   public updateProduct(id: string, updates: Partial<Omit<Product, 'id' | 'sku' | 'createdAt'>>): Product | null {
     const all = this.getAllProducts();
     const existing = all.find((p) => p.id === id);
@@ -239,28 +259,35 @@ class MockProductRepository {
       ...existing,
       ...updates,
       id: existing.id,
-      sku: existing.sku, // SKU is immutable
-      createdAt: existing.createdAt, // createdAt preserved
+      sku: existing.sku,
+      createdAt: existing.createdAt,
       updatedAt: now,
     };
 
-    const isBaseline = SAMPLE_PRODUCTS.some((p) => p.id === id);
-    if (isBaseline) {
-      const overrides = this.getStoredSampleOverrides();
-      overrides[id] = updated;
-      this.saveSampleOverrides(overrides);
+    if (isFirebaseConfigured && db) {
+      const docRef = doc(db, 'products', id);
+      updateDoc(docRef, {
+        ...updates,
+        updatedAt: now
+      }).catch((err) => {
+        console.error('Failed to update product in Firestore:', err);
+      });
     } else {
-      const custom = this.getStoredCustomProducts();
-      const nextCustom = custom.map((p) => (p.id === id ? updated : p));
-      this.saveCustomProducts(nextCustom);
+      const isBaseline = SAMPLE_PRODUCTS.some((p) => p.id === id);
+      if (isBaseline) {
+        const overrides = this.getStoredSampleOverrides();
+        overrides[id] = updated;
+        this.saveSampleOverrides(overrides);
+      } else {
+        const custom = this.getStoredCustomProducts();
+        const nextCustom = custom.map((p) => (p.id === id ? updated : p));
+        this.saveCustomProducts(nextCustom);
+      }
     }
 
     return updated;
   }
 
-  /**
-   * Transitions a product's publication status ('draft' | 'published' | 'archived')
-   */
   public setStatus(id: string, status: 'draft' | 'published' | 'archived'): Product | null {
     const existing = this.getProductById(id);
     if (!existing) return null;
@@ -282,4 +309,4 @@ class MockProductRepository {
   }
 }
 
-export const productRepository = new MockProductRepository();
+export const productRepository = new ProductRepository();

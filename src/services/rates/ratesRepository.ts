@@ -1,9 +1,55 @@
 import { RateItem, CreateRateInput } from './ratesTypes';
+import { db, isFirebaseConfigured } from '@/lib/firebase/client';
+import { 
+  collection, 
+  onSnapshot, 
+  doc, 
+  setDoc, 
+  updateDoc,
+  deleteDoc
+} from 'firebase/firestore';
 
 const RATES_STORAGE_KEY = 'koh_owner_rates';
 
-class MockRatesRepository {
+class RatesRepository {
+  private ratesCache: RateItem[] = [];
+  private isLoaded = false;
+
+  constructor() {
+    if (isFirebaseConfigured && db) {
+      try {
+        const ratesRef = collection(db, 'rates');
+        onSnapshot(ratesRef, (snapshot) => {
+          const list: RateItem[] = [];
+          snapshot.forEach((d) => {
+            list.push({ id: d.id, ...d.data() } as RateItem);
+          });
+          this.ratesCache = list;
+          this.isLoaded = true;
+          this.dispatchStorageUpdate();
+        }, (err) => {
+          console.error('Firestore rates sync error:', err);
+        });
+      } catch (err) {
+        console.error('Failed setting up Firestore rates onSnapshot:', err);
+      }
+    }
+  }
+
+  private dispatchStorageUpdate() {
+    if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+      try {
+        window.dispatchEvent(new Event('koh_rates_updated'));
+      } catch (err) {
+        console.warn('Dispatch event warning:', err);
+      }
+    }
+  }
+
   public getAllRates(): RateItem[] {
+    if (isFirebaseConfigured && db && this.isLoaded) {
+      return this.ratesCache;
+    }
     if (typeof window === 'undefined') return [];
     try {
       const raw = localStorage.getItem(RATES_STORAGE_KEY);
@@ -23,9 +69,7 @@ class MockRatesRepository {
     if (typeof window === 'undefined') return;
     try {
       localStorage.setItem(RATES_STORAGE_KEY, JSON.stringify(rates));
-      if (typeof window.dispatchEvent === 'function') {
-        window.dispatchEvent(new Event('koh_rates_updated'));
-      }
+      this.dispatchStorageUpdate();
     } catch (err) {
       console.warn('Failed saving rates to localStorage:', err);
     }
@@ -38,23 +82,34 @@ class MockRatesRepository {
       throw new Error('Numeric rate must be greater than zero.');
     }
 
+    const id = `rate-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+    const now = new Date().toISOString();
+
     const newRate: RateItem = {
       ...input,
-      id: `rate-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+      id,
       label: trimmedLabel,
       material: input.material.trim() || '22K Gold',
       unit: input.unit.trim() || 'per gram',
-      lastUpdated: new Date().toISOString(),
+      lastUpdated: now,
     };
 
-    const current = this.getAllRates();
-    this.saveRates([...current, newRate]);
+    if (isFirebaseConfigured && db) {
+      const docRef = doc(db, 'rates', id);
+      setDoc(docRef, newRate).catch((err) => {
+        console.error('Failed to add rate to Firestore:', err);
+      });
+    } else {
+      const current = this.getAllRates();
+      this.saveRates([...current, newRate]);
+    }
+
     return newRate;
   }
 
   public updateRate(id: string, updates: Partial<CreateRateInput>): RateItem | null {
-    const current = this.getAllRates();
-    const target = current.find((r) => r.id === id);
+    const all = this.getAllRates();
+    const target = all.find((r) => r.id === id);
     if (!target) return null;
 
     const nextLabel = updates.label?.trim() ?? target.label;
@@ -64,6 +119,7 @@ class MockRatesRepository {
       throw new Error('Numeric rate must be greater than zero.');
     }
 
+    const now = new Date().toISOString();
     const updated: RateItem = {
       ...target,
       ...updates,
@@ -72,26 +128,48 @@ class MockRatesRepository {
       material: updates.material?.trim() || target.material,
       unit: updates.unit?.trim() || target.unit,
       rate: nextRate,
-      lastUpdated: new Date().toISOString(),
+      lastUpdated: now,
     };
 
-    const next = current.map((r) => (r.id === id ? updated : r));
-    this.saveRates(next);
+    if (isFirebaseConfigured && db) {
+      const docRef = doc(db, 'rates', id);
+      updateDoc(docRef, {
+        ...updates,
+        label: nextLabel,
+        rate: nextRate,
+        material: updates.material?.trim() || target.material,
+        unit: updates.unit?.trim() || target.unit,
+        lastUpdated: now
+      }).catch((err) => {
+        console.error('Failed to update rate in Firestore:', err);
+      });
+    } else {
+      const next = all.map((r) => (r.id === id ? updated : r));
+      this.saveRates(next);
+    }
+
     return updated;
   }
 
   public deleteRate(id: string): void {
-    const current = this.getAllRates();
-    const next = current.filter((r) => r.id !== id);
-    this.saveRates(next);
+    if (isFirebaseConfigured && db) {
+      const docRef = doc(db, 'rates', id);
+      deleteDoc(docRef).catch((err) => {
+        console.error('Failed to delete rate from Firestore:', err);
+      });
+    } else {
+      const current = this.getAllRates();
+      const next = current.filter((r) => r.id !== id);
+      this.saveRates(next);
+    }
   }
 
   public toggleActive(id: string): RateItem | null {
-    const current = this.getAllRates();
-    const target = current.find((r) => r.id === id);
+    const all = this.getAllRates();
+    const target = all.find((r) => r.id === id);
     if (!target) return null;
     return this.updateRate(id, { isActive: !target.isActive });
   }
 }
 
-export const ratesRepository = new MockRatesRepository();
+export const ratesRepository = new RatesRepository();

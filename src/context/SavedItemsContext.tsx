@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Product } from '@/services/productTypes';
-import { savedItemsService } from '@/services/savedItems/savedItemsService';
+import { firestoreSavedItemsService as savedItemsService } from '@/services/savedItems/firestoreSavedItemsService';
 import { useAuth } from './AuthContext';
 import { useToast } from './ToastContext';
 
@@ -42,8 +42,17 @@ export const SavedItemsProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   }, [user]);
 
   useEffect(() => {
-    reloadLists();
-  }, [reloadLists]);
+    if (user) {
+      savedItemsService.startUserSync(user.id, reloadLists);
+    } else {
+      reloadLists();
+    }
+    return () => {
+      if (user) {
+        savedItemsService.stopUserSync(user.id);
+      }
+    };
+  }, [user, reloadLists]);
 
   const isInWishlist = useCallback(
     (productId: string) => wishlistIds.includes(productId),
