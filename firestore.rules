@@ -9,8 +9,9 @@ service cloud.firestore {
 
     // Admins Collection: Read restricted to the matching admin, writes fully disabled
     match /admins/{uid} {
-      allow read: if request.auth != null && request.auth.uid == uid;
-      allow write: if false;
+      allow get: if request.auth != null && request.auth.uid == uid;
+      allow list: if false;
+      allow create, update, delete: if false;
     }
 
     // Products Collection: Public may read published items, writes require admin credentials
