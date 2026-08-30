@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useSavedItems } from '@/context/SavedItemsContext';
-import { isMockAdmin } from '@/services/admin/adminAuthGuard';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 import {
   User,
   Mail,
@@ -21,6 +21,8 @@ import {
 export default function AccountPage() {
   const { user, isAuthenticated, isLoading, openLoginModal, logout } = useAuth();
   const { wishlistIds, shortlistIds } = useSavedItems();
+  // Shortcut visibility only — /admin re-verifies authorization independently.
+  const { isAdminAuthenticated } = useAdminAuth();
 
   if (isLoading) {
     return (
@@ -83,7 +85,7 @@ export default function AccountPage() {
 
         {/* Sign Out Action */}
         <div className="flex items-center gap-2 self-stretch sm:self-auto justify-end">
-          {isMockAdmin(user) && (
+          {isAdminAuthenticated && (
             <Link
               href="/admin"
               className="inline-flex items-center gap-1.5 py-2.5 px-4 bg-maroon-800 hover:bg-maroon-900 text-cream-50 rounded-xl text-xs font-bold transition-colors shadow-sm"

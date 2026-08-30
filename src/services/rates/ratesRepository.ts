@@ -1,4 +1,5 @@
 import { RateItem, CreateRateInput } from './ratesTypes';
+import { RepositoryStatus } from '../types';
 import { db, isFirebaseConfigured } from '@/lib/firebase/client';
 import { 
   collection, 
@@ -6,34 +7,130 @@ import {
   doc, 
   setDoc, 
   updateDoc,
-  deleteDoc
+  deleteDoc,
+  query,
+  where
 } from 'firebase/firestore';
 
 const RATES_STORAGE_KEY = 'koh_owner_rates';
 
+/**
+ * Two independent Firestore streams back this repository, because Firestore
+ * security rules are not filters:
+ *
+ * - The PUBLIC stream is constrained with where('isActive', '==', true) so
+ *   it satisfies `allow read: if resource.data.isActive == true` for
+ *   unauthenticated visitors. Every public rate surface reads this stream.
+ * - The ADMIN stream lists the rates collection unfiltered, which only
+ *   satisfies the rules for a caller matching isAdmin(). It is started lazily
+ *   so a public visitor never issues a query that is guaranteed to be denied.
+ */
 class RatesRepository {
-  private ratesCache: RateItem[] = [];
-  private isLoaded = false;
+  private publicCache: RateItem[] = [];
+  private publicStatus: RepositoryStatus = 'ready';
+  private publicError: Error | null = null;
+  private publicListenerStarted = false;
 
-  constructor() {
-    if (isFirebaseConfigured && db) {
-      try {
-        const ratesRef = collection(db, 'rates');
-        onSnapshot(ratesRef, (snapshot) => {
-          const list: RateItem[] = [];
-          snapshot.forEach((d) => {
-            list.push({ id: d.id, ...d.data() } as RateItem);
-          });
-          this.ratesCache = list;
-          this.isLoaded = true;
-          this.dispatchStorageUpdate();
-        }, (err) => {
-          console.error('Firestore rates sync error:', err);
+  private adminCache: RateItem[] = [];
+  private adminStatus: RepositoryStatus = 'ready';
+  private adminError: Error | null = null;
+  private adminListenerStarted = false;
+
+  /** Public rates stream: active rates only, readable by anyone. */
+  private ensurePublicListener(): void {
+    if (!isFirebaseConfigured || !db || this.publicListenerStarted) return;
+    this.publicListenerStarted = true;
+    this.publicStatus = 'loading';
+
+    try {
+      const activeQuery = query(
+        collection(db, 'rates'),
+        where('isActive', '==', true)
+      );
+      onSnapshot(activeQuery, (snapshot) => {
+        const list: RateItem[] = [];
+        snapshot.forEach((d) => {
+          list.push({ id: d.id, ...d.data() } as RateItem);
         });
-      } catch (err) {
-        console.error('Failed setting up Firestore rates onSnapshot:', err);
-      }
+        this.publicCache = list;
+        this.publicStatus = 'ready';
+        this.publicError = null;
+        this.dispatchStorageUpdate();
+      }, (err) => {
+        console.error('Firestore public rates sync error:', err);
+        this.publicCache = [];
+        this.publicStatus = 'error';
+        this.publicError = err instanceof Error ? err : new Error(String(err));
+        this.dispatchStorageUpdate();
+      });
+    } catch (err) {
+      console.error('Failed setting up Firestore public rates listener:', err);
+      this.publicCache = [];
+      this.publicStatus = 'error';
+      this.publicError = err instanceof Error ? err : new Error(String(err));
+      this.dispatchStorageUpdate();
     }
+  }
+
+  /** Admin stream: the full rates collection, permitted only for isAdmin(). */
+  private ensureAdminListener(): void {
+    if (!isFirebaseConfigured || !db || this.adminListenerStarted) return;
+    this.adminListenerStarted = true;
+    this.adminStatus = 'loading';
+
+    try {
+      const ratesRef = collection(db, 'rates');
+      onSnapshot(ratesRef, (snapshot) => {
+        const list: RateItem[] = [];
+        snapshot.forEach((d) => {
+          list.push({ id: d.id, ...d.data() } as RateItem);
+        });
+        this.adminCache = list;
+        this.adminStatus = 'ready';
+        this.adminError = null;
+        this.dispatchStorageUpdate();
+      }, (err) => {
+        console.error('Firestore admin rates sync error:', err);
+        this.adminCache = [];
+        this.adminStatus = 'error';
+        this.adminError = err instanceof Error ? err : new Error(String(err));
+        this.dispatchStorageUpdate();
+      });
+    } catch (err) {
+      console.error('Failed setting up Firestore admin rates listener:', err);
+      this.adminCache = [];
+      this.adminStatus = 'error';
+      this.adminError = err instanceof Error ? err : new Error(String(err));
+      this.dispatchStorageUpdate();
+    }
+  }
+
+  /** Load state of the admin (unfiltered) Firestore rates listener. */
+  public getStatus(): RepositoryStatus {
+    if (isFirebaseConfigured && db) {
+      this.ensureAdminListener();
+      return this.adminStatus;
+    }
+    return 'ready';
+  }
+
+  /** The Firestore failure that put the admin stream into the 'error' state. */
+  public getLoadError(): Error | null {
+    return this.adminError;
+  }
+
+  /** Load state of the public active-rates Firestore listener. */
+  public getPublicStatus(): RepositoryStatus {
+    if (isFirebaseConfigured && db) {
+      this.ensurePublicListener();
+      return this.publicStatus;
+    }
+    return 'ready';
+  }
+
+  /** The Firestore failure that put the public stream into the 'error' state. */
+  public getPublicLoadError(): Error | null {
+    return this.publicError;
   }
 
   private dispatchStorageUpdate() {
@@ -46,9 +143,30 @@ class RatesRepository {
     }
   }
 
+  /**
+   * Wraps a Firestore write so failures surface to the caller with the operation
+   * named, instead of being swallowed into the console.
+   */
+  private async runWrite(action: string, operation: Promise<void>): Promise<void> {
+    try {
+      await operation;
+    } catch (err) {
+      console.error(`${action} failed in Firestore:`, err);
+      const detail = err instanceof Error ? err.message : String(err);
+      throw new Error(`${action} failed in Cloud Firestore: ${detail}`);
+    }
+  }
+
+  /**
+   * ADMIN scope. In Firebase mode this returns only Firestore-backed data from
+   * the unfiltered admin listener: empty while 'loading' and cleared on 'error'.
+   * Callers must consult getStatus() to tell "zero rates" from "Firestore
+   * failed to load". There is no localStorage fallback in Firebase mode.
+   */
   public getAllRates(): RateItem[] {
-    if (isFirebaseConfigured && db && this.isLoaded) {
-      return this.ratesCache;
+    if (isFirebaseConfigured && db) {
+      this.ensureAdminListener();
+      return this.adminCache;
     }
     if (typeof window === 'undefined') return [];
     try {
@@ -61,7 +179,16 @@ class RatesRepository {
     }
   }
 
+  /**
+   * PUBLIC scope. In Firebase mode this returns the where(isActive == true)
+   * Firestore stream and nothing else: empty while 'loading' and cleared on
+   * 'error'. Callers must consult getPublicStatus().
+   */
   public getActiveRates(): RateItem[] {
+    if (isFirebaseConfigured && db) {
+      this.ensurePublicListener();
+      return this.publicCache;
+    }
     return this.getAllRates().filter((r) => r.isActive && r.rate > 0);
   }
 
@@ -75,7 +202,11 @@ class RatesRepository {
     }
   }
 
-  public addRate(input: CreateRateInput): RateItem {
+  /**
+   * Resolves only after Firestore has accepted the write. A rejection propagates
+   * to the caller so the UI can never report a success that did not happen.
+   */
+  public async addRate(input: CreateRateInput): Promise<RateItem> {
     const trimmedLabel = input.label.trim();
     if (!trimmedLabel) throw new Error('Rate label is required.');
     if (typeof input.rate !== 'number' || input.rate <= 0) {
@@ -96,9 +227,7 @@ class RatesRepository {
 
     if (isFirebaseConfigured && db) {
       const docRef = doc(db, 'rates', id);
-      setDoc(docRef, newRate).catch((err) => {
-        console.error('Failed to add rate to Firestore:', err);
-      });
+      await this.runWrite('Rate creation', setDoc(docRef, newRate));
     } else {
       const current = this.getAllRates();
       this.saveRates([...current, newRate]);
@@ -107,7 +236,11 @@ class RatesRepository {
     return newRate;
   }
 
-  public updateRate(id: string, updates: Partial<CreateRateInput>): RateItem | null {
+  /**
+   * Resolves only after Firestore has accepted the write. A rejection propagates
+   * to the caller so the UI can never report a success that did not happen.
+   */
+  public async updateRate(id: string, updates: Partial<CreateRateInput>): Promise<RateItem | null> {
     const all = this.getAllRates();
     const target = all.find((r) => r.id === id);
     if (!target) return null;
@@ -133,16 +266,14 @@ class RatesRepository {
 
     if (isFirebaseConfigured && db) {
       const docRef = doc(db, 'rates', id);
-      updateDoc(docRef, {
+      await this.runWrite('Rate update', updateDoc(docRef, {
         ...updates,
         label: nextLabel,
         rate: nextRate,
         material: updates.material?.trim() || target.material,
         unit: updates.unit?.trim() || target.unit,
         lastUpdated: now
-      }).catch((err) => {
-        console.error('Failed to update rate in Firestore:', err);
-      });
+      }));
     } else {
       const next = all.map((r) => (r.id === id ? updated : r));
       this.saveRates(next);
@@ -151,12 +282,14 @@ class RatesRepository {
     return updated;
   }
 
-  public deleteRate(id: string): void {
+  /**
+   * Resolves only after Firestore has accepted the write. A rejection propagates
+   * to the caller so the UI can never report a success that did not happen.
+   */
+  public async deleteRate(id: string): Promise<void> {
     if (isFirebaseConfigured && db) {
       const docRef = doc(db, 'rates', id);
-      deleteDoc(docRef).catch((err) => {
-        console.error('Failed to delete rate from Firestore:', err);
-      });
+      await this.runWrite('Rate deletion', deleteDoc(docRef));
     } else {
       const current = this.getAllRates();
       const next = current.filter((r) => r.id !== id);
@@ -164,7 +297,7 @@ class RatesRepository {
     }
   }
 
-  public toggleActive(id: string): RateItem | null {
+  public async toggleActive(id: string): Promise<RateItem | null> {
     const all = this.getAllRates();
     const target = all.find((r) => r.id === id);
     if (!target) return null;

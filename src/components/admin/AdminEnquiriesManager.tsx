@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { CustomerEnquiry, EnquiryStatus } from '@/services/enquiries/enquiryTypes';
+import { RepositoryStatus } from '@/services/types';
 import { enquiryRepository } from '@/services/enquiries/enquiryRepository';
 import { useToast } from '@/context/ToastContext';
 import {
@@ -14,16 +15,19 @@ import {
   Calendar,
   Sparkles,
   Layers,
+  AlertTriangle,
 } from 'lucide-react';
 
 export const AdminEnquiriesManager: React.FC = () => {
   const { showToast } = useToast();
   const [enquiries, setEnquiries] = useState<CustomerEnquiry[]>([]);
+  const [status, setStatus] = useState<RepositoryStatus>('loading');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
 
   const loadEnquiries = useCallback(() => {
     setEnquiries(enquiryRepository.getAllEnquiries());
+    setStatus(enquiryRepository.getStatus());
   }, []);
 
   useEffect(() => {
@@ -39,11 +43,16 @@ export const AdminEnquiriesManager: React.FC = () => {
     };
   }, [loadEnquiries]);
 
-  const handleStatusChange = (id: string, newStatus: EnquiryStatus) => {
-    const updated = enquiryRepository.updateStatus(id, newStatus);
-    if (updated) {
-      loadEnquiries();
-      showToast('Inquiry Status Updated', `Status changed to ${newStatus}.`, 'success');
+  const handleStatusChange = async (id: string, newStatus: EnquiryStatus) => {
+    try {
+      const updated = await enquiryRepository.updateStatus(id, newStatus);
+      if (updated) {
+        loadEnquiries();
+        showToast('Inquiry Status Updated', `Status changed to ${newStatus}.`, 'success');
+      }
+    } catch (err: unknown) {
+      const detail = err instanceof Error ? err.message : 'Failed to update enquiry status.';
+      showToast('Update Failed', detail, 'error');
     }
   };
 
@@ -153,7 +162,29 @@ export const AdminEnquiriesManager: React.FC = () => {
       </div>
 
       {/* Enquiries List */}
-      {filteredEnquiries.length > 0 ? (
+      {status === 'error' ? (
+        <div
+          role="alert"
+          className="bg-cream-50 border border-maroon-300 rounded-3xl p-12 text-center shadow-card space-y-3"
+        >
+          <AlertTriangle className="w-12 h-12 text-maroon-700 mx-auto opacity-80" />
+          <h3 className="text-lg font-serif font-bold text-maroon-950">
+            Inquiries Could Not Be Loaded
+          </h3>
+          <p className="text-xs text-charcoal-600 font-sans max-w-md mx-auto">
+            Cloud Firestore returned an error for the enquiries collection. This is a load failure,
+            not an empty inbox — no inquiry has been lost and no local data is being substituted.
+          </p>
+        </div>
+      ) : status === 'loading' ? (
+        <div className="bg-cream-50 border border-gold-200/90 rounded-3xl p-12 text-center shadow-card space-y-3">
+          <MessageSquare className="w-12 h-12 text-gold-700 mx-auto opacity-70 animate-pulse" />
+          <h3 className="text-lg font-serif font-bold text-maroon-950">Loading Inquiries…</h3>
+          <p className="text-xs text-charcoal-600 font-sans">
+            Fetching customer inquiries from Cloud Firestore.
+          </p>
+        </div>
+      ) : filteredEnquiries.length > 0 ? (
         <div className="bg-cream-50 border border-gold-200/90 rounded-3xl shadow-card overflow-hidden divide-y divide-gold-200/60 font-sans">
           {filteredEnquiries.map((enq) => (
             <div key={enq.id} className="p-5 space-y-3 hover:bg-gold-50/40 transition-colors">

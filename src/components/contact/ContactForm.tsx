@@ -40,7 +40,7 @@ export const ContactForm: React.FC = () => {
 
     try {
       // 1. Save enquiry locally through repository
-      const enquiry = enquiryRepository.createEnquiry({
+      const enquiry = await enquiryRepository.createEnquiry({
         name,
         mobile,
         categoryOrProduct,

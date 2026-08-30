@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { RateItem, CreateRateInput } from '@/services/rates/ratesTypes';
+import { RepositoryStatus } from '@/services/types';
 import { ratesRepository } from '@/services/rates/ratesRepository';
 import { ConfirmationModal } from '@/components/common/ConfirmationModal';
 import { useToast } from '@/context/ToastContext';
@@ -16,11 +17,13 @@ import {
   Layers,
   X,
   Save,
+  AlertTriangle,
 } from 'lucide-react';
 
 export const AdminRatesManager: React.FC = () => {
   const { showToast } = useToast();
   const [rates, setRates] = useState<RateItem[]>([]);
+  const [loadStatus, setLoadStatus] = useState<RepositoryStatus>('loading');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -45,6 +48,7 @@ export const AdminRatesManager: React.FC = () => {
 
   const loadRates = useCallback(() => {
     setRates(ratesRepository.getAllRates());
+    setLoadStatus(ratesRepository.getStatus());
   }, []);
 
   useEffect(() => {
@@ -82,7 +86,7 @@ export const AdminRatesManager: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleSaveRate = (e: React.FormEvent) => {
+  const handleSaveRate = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
 
@@ -102,10 +106,10 @@ export const AdminRatesManager: React.FC = () => {
       };
 
       if (editingId) {
-        ratesRepository.updateRate(editingId, payload);
+        await ratesRepository.updateRate(editingId, payload);
         showToast('Rate Updated', `${label} updated successfully.`, 'success');
       } else {
-        ratesRepository.addRate(payload);
+        await ratesRepository.addRate(payload);
         showToast('Rate Added', `${label} created successfully.`, 'success');
       }
 
@@ -120,15 +124,20 @@ export const AdminRatesManager: React.FC = () => {
     }
   };
 
-  const handleToggleActive = (item: RateItem) => {
-    const updated = ratesRepository.toggleActive(item.id);
-    if (updated) {
-      loadRates();
-      showToast(
-        updated.isActive ? 'Rate Activated' : 'Rate Deactivated',
-        `${item.label} is now ${updated.isActive ? 'visible' : 'hidden'} on public /rates.`,
-        'info'
-      );
+  const handleToggleActive = async (item: RateItem) => {
+    try {
+      const updated = await ratesRepository.toggleActive(item.id);
+      if (updated) {
+        loadRates();
+        showToast(
+          updated.isActive ? 'Rate Activated' : 'Rate Deactivated',
+          `${item.label} is now ${updated.isActive ? 'visible' : 'hidden'} on public /rates.`,
+          'info'
+        );
+      }
+    } catch (err: unknown) {
+      const detail = err instanceof Error ? err.message : 'Failed to toggle rate status.';
+      showToast('Operation Failed', detail, 'error');
     }
   };
 
@@ -140,11 +149,17 @@ export const AdminRatesManager: React.FC = () => {
     });
   };
 
-  const handleConfirmDelete = () => {
-    ratesRepository.deleteRate(deleteConfirmConfig.rateId);
-    loadRates();
-    setDeleteConfirmConfig({ isOpen: false, rateId: '', rateLabel: '' });
-    showToast('Rate Deleted', 'Rate record removed successfully.', 'info');
+  const handleConfirmDelete = async () => {
+    try {
+      await ratesRepository.deleteRate(deleteConfirmConfig.rateId);
+      loadRates();
+      setDeleteConfirmConfig({ isOpen: false, rateId: '', rateLabel: '' });
+      showToast('Rate Deleted', 'Rate record removed successfully.', 'info');
+    } catch (err: unknown) {
+      setDeleteConfirmConfig({ isOpen: false, rateId: '', rateLabel: '' });
+      const detail = err instanceof Error ? err.message : 'Failed to delete rate.';
+      showToast('Delete Failed', detail, 'error');
+    }
   };
 
   return (
@@ -172,7 +187,30 @@ export const AdminRatesManager: React.FC = () => {
       </div>
 
       {/* Rates List */}
-      {rates.length > 0 ? (
+      {loadStatus === 'error' ? (
+        <div
+          role="alert"
+          className="bg-cream-50 border border-maroon-300 rounded-3xl p-12 text-center shadow-card space-y-3"
+        >
+          <AlertTriangle className="w-12 h-12 text-maroon-700 mx-auto opacity-80" />
+          <h3 className="text-lg font-serif font-bold text-maroon-950">
+            Rates Could Not Be Loaded
+          </h3>
+          <p className="text-xs text-charcoal-600 font-sans max-w-md mx-auto">
+            Cloud Firestore returned an error for the rates collection. This is a load failure, not
+            an empty rates list — do not re-enter rates until the connection is restored, or you may
+            create duplicates.
+          </p>
+        </div>
+      ) : loadStatus === 'loading' ? (
+        <div className="bg-cream-50 border border-gold-200/90 rounded-3xl p-12 text-center shadow-card space-y-3">
+          <Coins className="w-12 h-12 text-gold-700 mx-auto opacity-70 animate-pulse" />
+          <h3 className="text-lg font-serif font-bold text-maroon-950">Loading Rates…</h3>
+          <p className="text-xs text-charcoal-600 font-sans">
+            Fetching owner reference rates from Cloud Firestore.
+          </p>
+        </div>
+      ) : rates.length > 0 ? (
         <div className="bg-cream-50 border border-gold-200/90 rounded-3xl shadow-card overflow-hidden divide-y divide-gold-200/60 font-sans">
           {rates.map((item) => (
             <div

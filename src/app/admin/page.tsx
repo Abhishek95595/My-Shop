@@ -3,15 +3,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
-import { isMockAdmin } from '@/services/admin/adminAuthGuard';
+import { useAdminAuth } from '@/context/AdminAuthContext';
+import { isFirebaseConfigured } from '@/lib/firebase/client';
 import { AdminAccessDenied } from '@/components/admin/AdminAccessDenied';
 import { ProductFormModal } from '@/components/admin/ProductFormModal';
 import { ConfirmationModal } from '@/components/common/ConfirmationModal';
 import { AdminEnquiriesManager } from '@/components/admin/AdminEnquiriesManager';
 import { AdminRatesManager } from '@/components/admin/AdminRatesManager';
 import { Product } from '@/services/productTypes';
+import { RepositoryStatus } from '@/services/types';
 import { productRepository } from '@/services/products/productRepository';
 import { enquiryRepository } from '@/services/enquiries/enquiryRepository';
 import { ratesRepository } from '@/services/rates/ratesRepository';
@@ -32,16 +33,20 @@ import {
   Layers,
   MessageSquare,
   Coins,
+  LogOut,
+  AlertTriangle,
 } from 'lucide-react';
 
 type AdminTab = 'products' | 'enquiries' | 'rates';
 
 export default function AdminDashboardPage() {
-  const { user, isLoading } = useAuth();
+  const { adminUser, isAdminAuthenticated, isLoading, adminLogout } = useAdminAuth();
   const { showToast } = useToast();
 
   const [activeTab, setActiveTab] = useState<AdminTab>('products');
   const [products, setProducts] = useState<Product[]>([]);
+  const [productsStatus, setProductsStatus] = useState<RepositoryStatus>('loading');
+  const [failedCollections, setFailedCollections] = useState<string[]>([]);
   const [enquiriesCount, setEnquiriesCount] = useState<number>(0);
   const [ratesCount, setRatesCount] = useState<number>(0);
 
@@ -68,8 +73,18 @@ export default function AdminDashboardPage() {
 
   const loadData = useCallback(() => {
     setProducts(productRepository.getAllProducts());
+    setProductsStatus(productRepository.getStatus());
     setEnquiriesCount(enquiryRepository.getAllEnquiries().length);
     setRatesCount(ratesRepository.getAllRates().length);
+
+    // A Firestore load failure must never be presented as an empty collection.
+    setFailedCollections(
+      [
+        productRepository.getStatus() === 'error' ? 'Products' : null,
+        enquiryRepository.getStatus() === 'error' ? 'Customer Enquiries' : null,
+        ratesRepository.getStatus() === 'error' ? 'Owner Rates' : null,
+      ].filter((name): name is string => name !== null)
+    );
   }, []);
 
   useEffect(() => {
@@ -98,7 +113,7 @@ export default function AdminDashboardPage() {
   }
 
   // Admin Access Guard
-  if (!isMockAdmin(user)) {
+  if (!isAdminAuthenticated) {
     return <AdminAccessDenied />;
   }
 
@@ -135,9 +150,9 @@ export default function AdminDashboardPage() {
     setIsFormModalOpen(true);
   };
 
-  const handlePublish = (product: Product) => {
+  const handlePublish = async (product: Product) => {
     try {
-      productRepository.setStatus(product.id, 'published');
+      await productRepository.setStatus(product.id, 'published');
       loadData();
       showToast('Product Published', `${product.name} is now live in the Catalogue.`, 'success');
     } catch (err: unknown) {
@@ -147,10 +162,15 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const handleSetDraft = (product: Product) => {
-    productRepository.setStatus(product.id, 'draft');
-    loadData();
-    showToast('Moved to Drafts', `${product.name} is now hidden from public view.`, 'info');
+  const handleSetDraft = async (product: Product) => {
+    try {
+      await productRepository.setStatus(product.id, 'draft');
+      loadData();
+      showToast('Moved to Drafts', `${product.name} is now hidden from public view.`, 'info');
+    } catch (err: unknown) {
+      const detail = err instanceof Error ? err.message : 'Failed to set draft status.';
+      showToast('Operation Failed', detail, 'error');
+    }
   };
 
   const handleArchivePrompt = (product: Product) => {
@@ -160,11 +180,17 @@ export default function AdminDashboardPage() {
       message:
         'Archiving will remove this product from the public catalogue. You can restore it to Drafts at any time.',
       confirmLabel: 'Archive Product',
-      onConfirm: () => {
-        productRepository.setStatus(product.id, 'archived');
-        loadData();
-        setConfirmModalConfig((prev) => ({ ...prev, isOpen: false }));
-        showToast('Product Archived', `${product.name} has been archived.`, 'info');
+      onConfirm: async () => {
+        try {
+          await productRepository.setStatus(product.id, 'archived');
+          loadData();
+          setConfirmModalConfig((prev) => ({ ...prev, isOpen: false }));
+          showToast('Product Archived', `${product.name} has been archived.`, 'info');
+        } catch (err: unknown) {
+          setConfirmModalConfig((prev) => ({ ...prev, isOpen: false }));
+          const detail = err instanceof Error ? err.message : 'Failed to archive product.';
+          showToast('Archive Failed', detail, 'error');
+        }
       },
     });
   };
@@ -175,43 +201,85 @@ export default function AdminDashboardPage() {
       title: `Restore "${product.name}"?`,
       message: 'This product will be restored as a Draft. You can edit and publish it when ready.',
       confirmLabel: 'Restore to Drafts',
-      onConfirm: () => {
-        productRepository.setStatus(product.id, 'draft');
-        loadData();
-        setConfirmModalConfig((prev) => ({ ...prev, isOpen: false }));
-        showToast('Product Restored', `${product.name} restored to Draft status.`, 'success');
+      onConfirm: async () => {
+        try {
+          await productRepository.setStatus(product.id, 'draft');
+          loadData();
+          setConfirmModalConfig((prev) => ({ ...prev, isOpen: false }));
+          showToast('Product Restored', `${product.name} restored to Draft status.`, 'success');
+        } catch (err: unknown) {
+          setConfirmModalConfig((prev) => ({ ...prev, isOpen: false }));
+          const detail = err instanceof Error ? err.message : 'Failed to restore product.';
+          showToast('Restore Failed', detail, 'error');
+        }
       },
     });
   };
 
-  const handleToggleFeatured = (product: Product) => {
-    const updated = productRepository.toggleFeatured(product.id);
-    loadData();
-    if (updated) {
-      showToast(
-        updated.isFeatured ? 'Marked as Featured' : 'Unmarked as Featured',
-        `${product.name} featured state updated.`,
-        'info'
-      );
+  const handleToggleFeatured = async (product: Product) => {
+    try {
+      const updated = await productRepository.toggleFeatured(product.id);
+      loadData();
+      if (updated) {
+        showToast(
+          updated.isFeatured ? 'Marked as Featured' : 'Unmarked as Featured',
+          `${product.name} featured state updated.`,
+          'info'
+        );
+      }
+    } catch (err: unknown) {
+      const detail = err instanceof Error ? err.message : 'Failed to toggle featured status.';
+      showToast('Operation Failed', detail, 'error');
     }
   };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
+      {/* Firestore Load Failure Notice */}
+      {failedCollections.length > 0 && (
+        <div
+          role="alert"
+          className="bg-maroon-50 border border-maroon-300 rounded-2xl p-4 flex items-start gap-3 text-xs text-maroon-950 font-sans shadow-xs"
+        >
+          <AlertTriangle className="w-5 h-5 text-maroon-700 flex-shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <p className="font-bold">Store database could not be loaded</p>
+            <p className="text-charcoal-700 text-[11px] leading-relaxed">
+              {failedCollections.join(', ')} failed to load from Cloud Firestore (permission or
+              network failure). The counts and lists below are <strong>not</strong> a record of an
+              empty store and no local data is being substituted. Check your connection and
+              administrator permissions, then reload.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Top Banner Notice */}
       <div className="bg-gold-100/90 border border-gold-300 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-maroon-950 font-sans shadow-xs">
         <div className="flex items-center gap-2.5">
           <ShieldCheck className="w-5 h-5 text-gold-700 flex-shrink-0" />
           <div>
-            <p className="font-bold">Development Admin Mode • Local Demonstration Only</p>
+            <p className="font-bold">
+              {isFirebaseConfigured ? 'Firebase Admin Mode' : 'Development Admin Mode • Local Demonstration Only'}
+            </p>
             <p className="text-charcoal-600 text-[11px]">
-              Logged in as an authorized administrator: <strong className="text-maroon-900">{user?.email}</strong>.
+              Logged in as an authorized administrator: <strong className="text-maroon-900">{adminUser?.email}</strong>.
             </p>
           </div>
         </div>
-        <span className="bg-cream-50 border border-gold-300 text-maroon-900 text-[11px] font-bold px-3 py-1 rounded-full">
-          Local Storage &amp; IndexedDB Mode
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="bg-cream-50 border border-gold-300 text-maroon-900 text-[11px] font-bold px-3 py-1 rounded-full">
+            {isFirebaseConfigured ? 'Cloud Firestore Mode' : 'Local Storage & IndexedDB Mode'}
+          </span>
+          <button
+            type="button"
+            onClick={() => adminLogout()}
+            className="flex items-center gap-1.5 py-1 px-2.5 bg-maroon-800 hover:bg-maroon-900 text-cream-50 rounded-lg font-bold text-[11px] transition-colors shadow-sm cursor-pointer"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Sign Out</span>
+          </button>
+        </div>
       </div>
 
       {/* Header Bar */}
@@ -376,7 +444,30 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Products Table (Desktop) & Cards (Mobile) */}
-          {filteredProducts.length > 0 ? (
+          {productsStatus === 'error' ? (
+            <div
+              role="alert"
+              className="bg-cream-50 border border-maroon-300 rounded-3xl p-12 text-center shadow-card space-y-3"
+            >
+              <AlertTriangle className="w-12 h-12 text-maroon-700 mx-auto opacity-80" />
+              <h2 className="text-lg font-serif font-bold text-maroon-950">
+                Products Could Not Be Loaded
+              </h2>
+              <p className="text-xs text-charcoal-600 font-sans max-w-md mx-auto">
+                Cloud Firestore returned an error for the products collection. This is a load
+                failure, not an empty catalogue. Reload once connectivity and administrator
+                permissions are confirmed.
+              </p>
+            </div>
+          ) : productsStatus === 'loading' ? (
+            <div className="bg-cream-50 border border-gold-200/90 rounded-3xl p-12 text-center shadow-card space-y-3">
+              <Package className="w-12 h-12 text-gold-700 mx-auto opacity-70 animate-pulse" />
+              <h2 className="text-lg font-serif font-bold text-maroon-950">Loading Products…</h2>
+              <p className="text-xs text-charcoal-600 font-sans">
+                Fetching the catalogue from Cloud Firestore.
+              </p>
+            </div>
+          ) : filteredProducts.length > 0 ? (
             <div className="bg-cream-50 border border-gold-200/90 rounded-3xl shadow-card overflow-hidden">
               <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-left text-xs font-sans">

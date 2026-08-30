@@ -1,11 +1,37 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Sparkles, ArrowRight, HeartHandshake, ShieldCheck } from 'lucide-react';
-import { getWeddingProducts, formatWeight, getPrimaryImage } from '@/services/mockProducts';
+import { Product } from '@/services/productTypes';
+import { productRepository } from '@/services/products/productRepository';
+import { formatWeight, getPrimaryImage } from '@/services/mockProducts';
 
 export const WeddingCollectionPreview: React.FC = () => {
-  const weddingProducts = getWeddingProducts().slice(0, 3);
+  const [weddingProducts, setWeddingProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    const load = () => {
+      setWeddingProducts(productRepository.getWeddingPublishedProducts().slice(0, 3));
+    };
+
+    load();
+
+    const handleUpdate = () => load();
+    window.addEventListener('koh_products_updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+
+    return () => {
+      window.removeEventListener('koh_products_updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
+  }, []);
+
+  // Hidden when no wedding products available
+  if (weddingProducts.length === 0) {
+    return null;
+  }
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6">

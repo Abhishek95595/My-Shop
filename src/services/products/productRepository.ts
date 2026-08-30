@@ -1,12 +1,15 @@
 import { Product, ProductCategory } from '../productTypes';
+import { RepositoryStatus } from '../types';
 import { SAMPLE_PRODUCTS } from '../mockProducts';
 import { db, isFirebaseConfigured } from '@/lib/firebase/client';
-import { 
-  collection, 
-  onSnapshot, 
-  doc, 
-  setDoc, 
-  updateDoc
+import {
+  collection,
+  onSnapshot,
+  doc,
+  setDoc,
+  updateDoc,
+  query,
+  where
 } from 'firebase/firestore';
 
 const CUSTOM_PRODUCTS_STORAGE_KEY = 'koh_admin_custom_products';
@@ -25,28 +28,142 @@ export interface ProductValidationResult {
   errors: string[];
 }
 
+/**
+ * Two independent Firestore streams back this repository, because Firestore
+ * security rules are not filters:
+ *
+ * - The PUBLIC stream is constrained with where('status', '==', 'published') so
+ *   it satisfies `allow read: if resource.data.status == 'published'` for
+ *   unauthenticated visitors. Every public catalogue surface reads this stream.
+ * - The ADMIN stream lists the products collection unfiltered, which only
+ *   satisfies the rules for a caller matching isAdmin(). It is started lazily so
+ *   a public visitor never issues a query that is guaranteed to be denied.
+ */
 class ProductRepository {
-  private productsCache: Product[] = [];
-  private isLoaded = false;
+  private publishedCache: Product[] = [];
+  private publishedStatus: RepositoryStatus = 'ready';
+  private publishedError: Error | null = null;
+  private publishedListenerStarted = false;
 
-  constructor() {
-    if (isFirebaseConfigured && db) {
-      try {
-        const productsRef = collection(db, 'products');
-        onSnapshot(productsRef, (snapshot) => {
-          const list: Product[] = [];
-          snapshot.forEach((d) => {
-            list.push({ id: d.id, ...d.data() } as Product);
-          });
-          this.productsCache = list;
-          this.isLoaded = true;
-          this.dispatchStorageUpdate();
-        }, (err) => {
-          console.error('Firestore products sync error:', err);
+  private adminCache: Product[] = [];
+  private adminStatus: RepositoryStatus = 'ready';
+  private adminError: Error | null = null;
+  private adminListenerStarted = false;
+
+  /** Public catalogue stream: published products only, readable by anyone. */
+  private ensurePublishedListener(): void {
+    if (!isFirebaseConfigured || !db || this.publishedListenerStarted) return;
+    this.publishedListenerStarted = true;
+    this.publishedStatus = 'loading';
+
+    try {
+      const publishedQuery = query(
+        collection(db, 'products'),
+        where('status', '==', 'published')
+      );
+      onSnapshot(publishedQuery, (snapshot) => {
+        const list: Product[] = [];
+        snapshot.forEach((d) => {
+          list.push({ ...(d.data() as Product), id: d.id });
         });
-      } catch (err) {
-        console.error('Failed setting up Firestore onSnapshot:', err);
-      }
+        this.publishedCache = list;
+        this.publishedStatus = 'ready';
+        this.publishedError = null;
+        this.dispatchStorageUpdate();
+      }, (err) => {
+        console.error('Firestore published products sync error:', err);
+        this.publishedCache = [];
+        this.publishedStatus = 'error';
+        this.publishedError = err instanceof Error ? err : new Error(String(err));
+        this.dispatchStorageUpdate();
+      });
+    } catch (err) {
+      console.error('Failed setting up Firestore published products listener:', err);
+      this.publishedCache = [];
+      this.publishedStatus = 'error';
+      this.publishedError = err instanceof Error ? err : new Error(String(err));
+      this.dispatchStorageUpdate();
+    }
+  }
+
+  /** Admin stream: the full products collection, permitted only for isAdmin(). */
+  private ensureAdminListener(): void {
+    if (!isFirebaseConfigured || !db || this.adminListenerStarted) return;
+    this.adminListenerStarted = true;
+    this.adminStatus = 'loading';
+
+    try {
+      const productsRef = collection(db, 'products');
+      onSnapshot(productsRef, (snapshot) => {
+        const list: Product[] = [];
+        snapshot.forEach((d) => {
+          list.push({ ...(d.data() as Product), id: d.id });
+        });
+        this.adminCache = list;
+        this.adminStatus = 'ready';
+        this.adminError = null;
+        this.dispatchStorageUpdate();
+      }, (err) => {
+        console.error('Firestore admin products sync error:', err);
+        this.setAdminLoadFailure(err);
+      });
+    } catch (err) {
+      console.error('Failed setting up Firestore admin products listener:', err);
+      this.setAdminLoadFailure(err);
+    }
+  }
+
+  /**
+   * Records a Firestore load failure. The cache is cleared so callers can never
+   * mistake a failed load for an empty collection, and no local or sample data
+   * is substituted in Firebase mode.
+   */
+  private setAdminLoadFailure(err: unknown): void {
+    this.adminCache = [];
+    this.adminStatus = 'error';
+    this.adminError = err instanceof Error ? err : new Error(String(err));
+    this.dispatchStorageUpdate();
+  }
+
+  /** Load state of the admin (unfiltered) Firestore products listener. */
+  public getStatus(): RepositoryStatus {
+    if (isFirebaseConfigured && db) {
+      this.ensureAdminListener();
+      return this.adminStatus;
+    }
+    return 'ready';
+  }
+
+  /** The Firestore failure that put the admin stream into the 'error' state. */
+  public getLoadError(): Error | null {
+    return this.adminError;
+  }
+
+  /** Load state of the public published-products Firestore listener. */
+  public getPublishedStatus(): RepositoryStatus {
+    if (isFirebaseConfigured && db) {
+      this.ensurePublishedListener();
+      return this.publishedStatus;
+    }
+    return 'ready';
+  }
+
+  /** The Firestore failure that put the public stream into the 'error' state. */
+  public getPublishedLoadError(): Error | null {
+    return this.publishedError;
+  }
+
+  /**
+   * Wraps a Firestore write so failures surface to the caller with the operation
+   * named, instead of being swallowed into the console.
+   */
+  private async runWrite(action: string, operation: Promise<void>): Promise<void> {
+    try {
+      await operation;
+    } catch (err) {
+      console.error(`${action} failed in Firestore:`, err);
+      const detail = err instanceof Error ? err.message : String(err);
+      throw new Error(`${action} failed in Cloud Firestore: ${detail}`);
     }
   }
 
@@ -70,7 +187,7 @@ class ProductRepository {
       this.dispatchStorageUpdate();
     } catch (err) {
       console.warn('Failed saving custom products to localStorage:', err);
-      throw new Error('Failed to save product metadata in browser storage.');
+      throw new Error('Failed to save product database updates.');
     }
   }
 
@@ -107,28 +224,70 @@ class ProductRepository {
     }
   }
 
-  public getAllProducts(): Product[] {
-    if (isFirebaseConfigured && db && this.isLoaded) {
-      return this.productsCache;
-    }
+  /**
+   * Sample + localStorage catalogue used ONLY when Firebase is not configured
+   * (local development without credentials). Never consulted in Firebase mode.
+   */
+  private getLocalModeProducts(): Product[] {
     const overrides = this.getStoredSampleOverrides();
     const baseline = SAMPLE_PRODUCTS.map((p) => overrides[p.id] || p);
     const custom = this.getStoredCustomProducts();
     return [...baseline, ...custom];
   }
 
-  public getPublishedProducts(): Product[] {
-    return this.getAllProducts().filter((p) => p.status === 'published');
+  /**
+   * ADMIN scope. In Firebase mode this returns only Firestore-backed data from
+   * the unfiltered admin listener: empty while 'loading' and cleared on 'error'.
+   * Callers must consult getStatus() to tell "zero products" from "Firestore
+   * failed to load". There is no localStorage or SAMPLE_PRODUCTS fallback in
+   * Firebase mode.
+   */
+  public getAllProducts(): Product[] {
+    if (isFirebaseConfigured && db) {
+      this.ensureAdminListener();
+      return this.adminCache;
+    }
+    return this.getLocalModeProducts();
   }
 
+  /**
+   * PUBLIC scope. In Firebase mode this returns the where(status == 'published')
+   * Firestore stream and nothing else: empty while 'loading' and cleared on
+   * 'error'. An empty published collection yields an empty catalogue — samples
+   * are never resurrected. Callers must consult getPublishedStatus().
+   */
+  public getPublishedProducts(): Product[] {
+    if (isFirebaseConfigured && db) {
+      this.ensurePublishedListener();
+      return this.publishedCache;
+    }
+    return this.getLocalModeProducts().filter((p) => p.status === 'published');
+  }
+
+  /** PUBLIC scope: featured products drawn from the published stream. */
+  public getFeaturedPublishedProducts(): Product[] {
+    return this.getPublishedProducts().filter((p) => p.isFeatured);
+  }
+
+  /** PUBLIC scope: wedding collection derived from occasion or tags. */
+  public getWeddingPublishedProducts(): Product[] {
+    return this.getPublishedProducts().filter(
+      (p) =>
+        (p.occasion || '').toLowerCase() === 'wedding' ||
+        (Array.isArray(p.tags) &&
+          p.tags.some((t) => t.toLowerCase() === 'wedding' || t.toLowerCase() === 'bridal'))
+    );
+  }
+
+  /** PUBLIC scope: slug lookup restricted to the published stream. */
+  public getPublishedProductBySlug(slug: string): Product | null {
+    return this.getPublishedProducts().find((p) => p.slug === slug) || null;
+  }
+
+  /** ADMIN scope: id lookup across all statuses. */
   public getProductById(id: string): Product | null {
     const all = this.getAllProducts();
     return all.find((p) => p.id === id) || null;
-  }
-
-  public getProductBySlug(slug: string): Product | null {
-    const all = this.getAllProducts();
-    return all.find((p) => p.slug === slug) || null;
   }
 
   public generateUniqueSku(category: ProductCategory): string {
@@ -225,7 +384,13 @@ class ProductRepository {
     };
   }
 
-  public createProduct(data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Product {
+  /**
+   * Resolves only after Firestore has accepted the write. A rejection propagates
+   * to the caller so the UI can never report a success that did not happen.
+   */
+  public async createProduct(
+    data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<Product> {
     const id = `prod-custom-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
     const now = new Date().toISOString();
 
@@ -238,9 +403,7 @@ class ProductRepository {
 
     if (isFirebaseConfigured && db) {
       const docRef = doc(db, 'products', id);
-      setDoc(docRef, newProduct).catch((err) => {
-        console.error('Failed to create product in Firestore:', err);
-      });
+      await this.runWrite('Product creation', setDoc(docRef, newProduct));
     } else {
       const current = this.getStoredCustomProducts();
       this.saveCustomProducts([...current, newProduct]);
@@ -249,7 +412,10 @@ class ProductRepository {
     return newProduct;
   }
 
-  public updateProduct(id: string, updates: Partial<Omit<Product, 'id' | 'sku' | 'createdAt'>>): Product | null {
+  public async updateProduct(
+    id: string,
+    updates: Partial<Omit<Product, 'id' | 'sku' | 'createdAt'>>
+  ): Promise<Product | null> {
     const all = this.getAllProducts();
     const existing = all.find((p) => p.id === id);
     if (!existing) return null;
@@ -266,12 +432,13 @@ class ProductRepository {
 
     if (isFirebaseConfigured && db) {
       const docRef = doc(db, 'products', id);
-      updateDoc(docRef, {
-        ...updates,
-        updatedAt: now
-      }).catch((err) => {
-        console.error('Failed to update product in Firestore:', err);
-      });
+      await this.runWrite(
+        'Product update',
+        updateDoc(docRef, {
+          ...updates,
+          updatedAt: now
+        })
+      );
     } else {
       const isBaseline = SAMPLE_PRODUCTS.some((p) => p.id === id);
       if (isBaseline) {
@@ -288,7 +455,10 @@ class ProductRepository {
     return updated;
   }
 
-  public setStatus(id: string, status: 'draft' | 'published' | 'archived'): Product | null {
+  public async setStatus(
+    id: string,
+    status: 'draft' | 'published' | 'archived'
+  ): Promise<Product | null> {
     const existing = this.getProductById(id);
     if (!existing) return null;
 
@@ -302,7 +472,7 @@ class ProductRepository {
     return this.updateProduct(id, { status });
   }
 
-  public toggleFeatured(id: string): Product | null {
+  public async toggleFeatured(id: string): Promise<Product | null> {
     const existing = this.getProductById(id);
     if (!existing) return null;
     return this.updateProduct(id, { isFeatured: !existing.isFeatured });

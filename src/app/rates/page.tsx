@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ratesRepository } from '@/services/rates/ratesRepository';
 import { RateItem } from '@/services/rates/ratesTypes';
+import { RepositoryStatus } from '@/services/types';
 import {
   STORE_NAME,
   STORE_TAGLINE,
@@ -21,13 +22,13 @@ import {
 
 export default function RatesPage() {
   const [rates, setRates] = useState<RateItem[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [loadStatus, setLoadStatus] = useState<RepositoryStatus>('loading');
 
   useEffect(() => {
     const loadRates = () => {
       const active = ratesRepository.getActiveRates();
       setRates(active);
-      setIsLoaded(true);
+      setLoadStatus(ratesRepository.getPublicStatus());
     };
 
     loadRates();
@@ -51,7 +52,7 @@ export default function RatesPage() {
           <span>Showroom Indicative Rates</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-serif font-bold text-maroon-950">
-          {isLoaded && rates.length > 0
+          {loadStatus === 'ready' && rates.length > 0
             ? 'Owner-Updated Current Rates'
             : 'Showroom Reference Rates'}
         </h1>
@@ -60,8 +61,45 @@ export default function RatesPage() {
         </p>
       </div>
 
-      {/* When Rates are Active */}
-      {isLoaded && rates.length > 0 ? (
+      {/* Rate Load Failure: explicitly distinct from "no rates published" */}
+      {loadStatus === 'error' ? (
+        <div
+          role="alert"
+          className="bg-cream-50 border border-maroon-300 rounded-3xl p-10 sm:p-14 text-center shadow-card space-y-4 max-w-xl mx-auto"
+        >
+          <div className="w-16 h-16 rounded-full bg-maroon-100 text-maroon-800 flex items-center justify-center mx-auto">
+            <ShieldAlert className="w-8 h-8 text-maroon-700" />
+          </div>
+          <h2 className="text-xl font-serif font-bold text-maroon-950">
+            Rates could not be loaded right now.
+          </h2>
+          <p className="text-xs sm:text-sm text-charcoal-600 font-sans leading-relaxed">
+            We could not reach the store rate database, so we are not showing any figure rather than
+            risk showing a stale one. This is a temporary technical issue, not a statement about
+            today&apos;s rates. Please contact our Gorakhpur showroom directly for current gold
+            bullion rates.
+          </p>
+          <div className="pt-2 flex flex-wrap justify-center gap-3">
+            <a
+              href={`tel:${CONTACT_CONFIG.primaryPhoneRaw}`}
+              className="inline-flex items-center gap-1.5 bg-maroon-800 hover:bg-maroon-900 text-cream-50 text-xs font-bold px-4 py-2.5 rounded-xl transition-colors shadow-sm"
+            >
+              <span>Call Showroom</span>
+            </a>
+            <a
+              href={`https://wa.me/${CONTACT_CONFIG.whatsappNumberRaw}?text=${encodeURIComponent(
+                'Hello Khushi Ornament House, I would like to inquire about today\'s gold rates.'
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-colors shadow-xs"
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span>Inquire on WhatsApp</span>
+            </a>
+          </div>
+        </div>
+      ) : loadStatus === 'ready' && rates.length > 0 ? (
         <div className="space-y-6">
           {/* Rates Table / Cards Grid */}
           <div className="bg-cream-50 border border-gold-300 rounded-3xl shadow-card overflow-hidden">

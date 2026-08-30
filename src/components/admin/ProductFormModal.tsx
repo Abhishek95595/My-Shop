@@ -226,7 +226,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
     setIsSubmitting(true);
     try {
       if (isEditing && productToEdit) {
-        const updated = productRepository.updateProduct(productToEdit.id, payload);
+        const updated = await productRepository.updateProduct(productToEdit.id, payload);
         if (updated) {
           const nextImageIds = new Set(payload.images.map((image) => image.id));
           const removedImageIds = productToEdit.images
@@ -239,7 +239,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
           onSave(updated);
         }
       } else {
-        const created = productRepository.createProduct(payload);
+        const created = await productRepository.createProduct(payload);
         onSave(created);
       }
       onClose();

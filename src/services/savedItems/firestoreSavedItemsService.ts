@@ -77,6 +77,15 @@ class FirestoreSavedItemsService implements ISavedItemsService {
     }
 
     try {
+      // Do not migrate while the Firestore published-products cache is still
+      // loading. A temporary [] must NOT be interpreted as "no valid products"
+      // and accidentally discard legacy wishlist/shortlist IDs.
+      const publishedStatus = productRepository.getPublishedStatus();
+      if (publishedStatus !== 'ready') {
+        // Retry migration on the next 'koh_products_updated' event.
+        return;
+      }
+
       const publishedProducts = productRepository.getPublishedProducts();
       const publishedIds = new Set(publishedProducts.map((p) => p.id));
 

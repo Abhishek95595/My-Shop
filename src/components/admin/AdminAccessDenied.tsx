@@ -1,19 +1,24 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { PRESET_ADMIN_PERSONAS } from '@/services/admin/adminAuthGuard';
-import { ShieldAlert, Lock, ArrowLeft, UserCheck, Sparkles } from 'lucide-react';
+import { useAdminAuth } from '@/context/AdminAuthContext';
+import { isFirebaseConfigured } from '@/lib/firebase/client';
+import { ShieldAlert, Lock, ArrowLeft, UserCheck } from 'lucide-react';
 
 export const AdminAccessDenied: React.FC = () => {
-  const { user, login } = useAuth();
+  const { user } = useAuth();
+  const { adminLogin } = useAdminAuth();
+  const [isSigningIn, setIsSigningIn] = useState(false);
 
-  const handleAdminSignIn = async (adminPersona: { name: string; email: string }) => {
-    await login({
-      name: adminPersona.name,
-      email: adminPersona.email,
-    });
+  const handleAdminSignIn = async () => {
+    setIsSigningIn(true);
+    try {
+      await adminLogin();
+    } finally {
+      setIsSigningIn(false);
+    }
   };
 
   return (
@@ -31,11 +36,11 @@ export const AdminAccessDenied: React.FC = () => {
           Admin Dashboard Access Denied
         </h1>
         <p className="text-sm text-charcoal-600 font-sans leading-relaxed max-w-lg mx-auto">
-          The Admin Dashboard is strictly restricted to authorized administrators.
+          The Admin Dashboard is strictly restricted to authorized store owners.
           {user ? (
             <>
               {' '}
-              Currently logged in as <strong className="text-maroon-950">{user.email}</strong>, which does not have administrative privileges.
+              Currently signed in as <strong className="text-maroon-950">{user.email}</strong>, which does not have administrative privileges.
             </>
           ) : (
             ' You are currently not signed in.'
@@ -43,38 +48,32 @@ export const AdminAccessDenied: React.FC = () => {
         </p>
       </div>
 
-      {/* Local Development Quick Switch Action */}
-      <div className="bg-cream-50 border border-gold-300 rounded-3xl p-6 shadow-card space-y-4 text-left">
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-maroon-900 border-b border-gold-200/80 pb-2">
-          <Sparkles className="w-4 h-4 text-gold-700" />
-          <span>Development Admin Mode (Testing Quick-Switch)</span>
-        </div>
-        <p className="text-xs text-charcoal-600 font-sans">
-          In this mock local development phase, you can switch to one of the authorized mock owner identities:
-        </p>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-          {PRESET_ADMIN_PERSONAS.map((admin) => (
+      {/* Admin Sign-In: Google account must additionally hold an admins/{uid} record */}
+      <div className="bg-cream-50 border border-gold-300 rounded-3xl p-6 shadow-card space-y-4">
+        {isFirebaseConfigured ? (
+          <>
+            <p className="text-xs text-charcoal-600 font-sans leading-relaxed">
+              Sign in with the authorized store owner Google account. Access is granted only if that
+              account holds an administrator record in the store database; there is no local or
+              development override.
+            </p>
             <button
-              key={admin.email}
               type="button"
-              onClick={() => handleAdminSignIn(admin)}
-              className="flex items-center gap-3 p-3 bg-cream-100/80 hover:bg-gold-100 border border-gold-300 rounded-xl text-left transition-all group cursor-pointer"
+              onClick={handleAdminSignIn}
+              disabled={isSigningIn}
+              className="inline-flex items-center gap-2 bg-maroon-800 hover:bg-maroon-900 disabled:opacity-60 disabled:cursor-not-allowed text-cream-50 font-bold px-6 py-3 rounded-xl shadow-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 cursor-pointer"
             >
-              <div className="w-9 h-9 rounded-full bg-maroon-800 text-cream-50 font-serif font-bold text-xs flex items-center justify-center flex-shrink-0">
-                {admin.name.charAt(0)}
-              </div>
-              <div className="space-y-0.5">
-                <p className="text-xs font-bold text-maroon-950 group-hover:text-maroon-800">
-                  {admin.name}
-                </p>
-                <p className="text-[11px] font-mono text-charcoal-500 truncate max-w-[170px]">
-                  {admin.email}
-                </p>
-              </div>
+              <UserCheck className="w-4 h-4 text-gold-300" />
+              <span>{isSigningIn ? 'Opening Google Sign-In…' : 'Sign In as Administrator'}</span>
             </button>
-          ))}
-        </div>
+          </>
+        ) : (
+          <p className="text-xs text-charcoal-600 font-sans leading-relaxed">
+            Administrator sign-in is unavailable because this build has no Firebase project
+            configured. Admin access requires a verified Firebase account with an administrator
+            record in the store database.
+          </p>
+        )}
       </div>
 
       {/* Return to Home Action */}

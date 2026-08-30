@@ -1,5 +1,5 @@
 import { Product } from '../productTypes';
-import { getAllPublishedProducts } from '../mockProducts';
+import { productRepository } from '../products/productRepository';
 import { ISavedItemsService, SavedListType } from './savedItemsTypes';
 
 function getStorageKey(userId: string, listType: SavedListType): string {
@@ -73,7 +73,7 @@ class LocalStorageSavedItemsService implements ISavedItemsService {
           }
 
           // Merge without duplicates and filter against published products
-          const published = getAllPublishedProducts();
+          const published = productRepository.getPublishedProducts();
           const publishedIdSet = new Set(published.map((p) => p.id));
           const merged = Array.from(new Set([...currentIds, ...legacyIds])).filter(
             (id) => publishedIdSet.has(id)
@@ -120,7 +120,7 @@ class LocalStorageSavedItemsService implements ISavedItemsService {
     const savedIds = this.getSavedProductIds(userId, listType);
     if (savedIds.length === 0) return [];
 
-    const published = getAllPublishedProducts();
+    const published = productRepository.getPublishedProducts();
     const productMap = new Map<string, Product>();
     published.forEach((p) => productMap.set(p.id, p));
 
@@ -139,7 +139,7 @@ class LocalStorageSavedItemsService implements ISavedItemsService {
     if (!userId || !productId || typeof window === 'undefined') return false;
 
     // Verify product exists and is published
-    const published = getAllPublishedProducts();
+    const published = productRepository.getPublishedProducts();
     const exists = published.some((p) => p.id === productId);
     if (!exists) return false;
 

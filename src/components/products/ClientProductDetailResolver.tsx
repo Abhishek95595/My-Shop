@@ -35,8 +35,8 @@ export const ClientProductDetailResolver: React.FC<ClientProductDetailResolverPr
 
   useEffect(() => {
     const resolveProduct = () => {
-      const found = productRepository.getProductBySlug(slug);
-      if (found && found.status === 'published') {
+      const found = productRepository.getPublishedProductBySlug(slug);
+      if (found) {
         setProduct(found);
       } else {
         setProduct(null);

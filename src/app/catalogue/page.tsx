@@ -3,14 +3,15 @@
 import React, { useState, useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Product } from '@/services/productTypes';
-import { getAllPublishedProducts } from '@/services/mockProducts';
+import { productRepository } from '@/services/products/productRepository';
+import { RepositoryStatus } from '@/services/types';
 import { ProductCard } from '@/components/products/ProductCard';
 import {
   ProductFilterBar,
   FilterState,
 } from '@/components/products/ProductFilterBar';
 import { WEIGHT_RANGES, STORE_NAME } from '@/lib/constants';
-import { Sparkles, PackageSearch, RotateCcw } from 'lucide-react';
+import { Sparkles, PackageSearch, RotateCcw, ShieldAlert } from 'lucide-react';
 
 function CatalogueContent() {
   const searchParams = useSearchParams();
@@ -35,12 +36,16 @@ function CatalogueContent() {
   });
 
   const [publishedProducts, setPublishedProducts] = useState<Product[]>(() =>
-    getAllPublishedProducts()
+    productRepository.getPublishedProducts()
+  );
+  const [loadStatus, setLoadStatus] = useState<RepositoryStatus>(() =>
+    productRepository.getPublishedStatus()
   );
 
   React.useEffect(() => {
     const handleUpdate = () => {
-      setPublishedProducts(getAllPublishedProducts());
+      setPublishedProducts(productRepository.getPublishedProducts());
+      setLoadStatus(productRepository.getPublishedStatus());
     };
 
     window.addEventListener('koh_products_updated', handleUpdate);
@@ -192,49 +197,78 @@ function CatalogueContent() {
         </p>
       </div>
 
-      {/* Filter and Search Controls */}
-      <ProductFilterBar
-        filters={filters}
-        onFilterChange={handleFilterChange}
-        onResetFilters={handleResetFilters}
-        availableOccasions={availableOccasions}
-        totalResults={filteredProducts.length}
-      />
-
-      {/* Product Results Grid */}
-      {filteredProducts.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {filteredProducts.map((product, index) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              eagerImage={index < 5}
-            />
-          ))}
-        </div>
-      ) : (
-        /* Empty Results State */
-        <div className="bg-cream-50 border border-gold-200/90 rounded-2xl p-10 sm:p-14 text-center shadow-card space-y-4 max-w-xl mx-auto">
-          <div className="w-16 h-16 rounded-full bg-gold-100 text-maroon-700 flex items-center justify-center mx-auto">
-            <PackageSearch className="w-8 h-8 text-gold-700" />
+      {/* Firestore Load Error State */}
+      {loadStatus === 'error' ? (
+        <div
+          role="alert"
+          className="bg-cream-50 border border-maroon-300 rounded-2xl p-10 sm:p-14 text-center shadow-card space-y-4 max-w-xl mx-auto"
+        >
+          <div className="w-16 h-16 rounded-full bg-maroon-100 text-maroon-800 flex items-center justify-center mx-auto">
+            <ShieldAlert className="w-8 h-8 text-maroon-700" />
           </div>
           <h2 className="text-xl font-serif font-bold text-maroon-950">
-            No Jewellery Matches Your Selection
+            Catalogue could not be loaded right now.
           </h2>
-          <p className="text-sm text-charcoal-600 font-sans leading-relaxed">
-            We couldn’t find any gold jewellery matching all your current filters. Try loosening your search criteria or resetting filters.
+          <p className="text-xs sm:text-sm text-charcoal-600 font-sans leading-relaxed">
+            We could not reach the product database. This is a temporary technical issue.
+            Please try again later or visit our Gorakhpur showroom directly.
           </p>
-          <div className="pt-2">
-            <button
-              type="button"
-              onClick={handleResetFilters}
-              className="inline-flex items-center gap-2 bg-maroon-700 hover:bg-maroon-800 text-cream-50 font-semibold px-5 py-2.5 rounded-lg text-sm transition-colors shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
-            >
-              <RotateCcw className="w-4 h-4 text-gold-300" />
-              <span>Clear All Filters</span>
-            </button>
-          </div>
         </div>
+      ) : loadStatus === 'loading' ? (
+        <div className="bg-cream-50 border border-gold-200/90 rounded-2xl p-12 text-center shadow-card space-y-3 max-w-xl mx-auto">
+          <PackageSearch className="w-12 h-12 text-gold-700 mx-auto opacity-70 animate-pulse" />
+          <h2 className="text-lg font-serif font-bold text-maroon-950">Loading Catalogue…</h2>
+          <p className="text-xs text-charcoal-600 font-sans">
+            Fetching gold jewellery from Cloud Firestore.
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* Filter and Search Controls */}
+          <ProductFilterBar
+            filters={filters}
+            onFilterChange={handleFilterChange}
+            onResetFilters={handleResetFilters}
+            availableOccasions={availableOccasions}
+            totalResults={filteredProducts.length}
+          />
+
+          {/* Product Results Grid */}
+          {filteredProducts.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+              {filteredProducts.map((product, index) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  eagerImage={index < 5}
+                />
+              ))}
+            </div>
+          ) : (
+            /* Empty Results State */
+            <div className="bg-cream-50 border border-gold-200/90 rounded-2xl p-10 sm:p-14 text-center shadow-card space-y-4 max-w-xl mx-auto">
+              <div className="w-16 h-16 rounded-full bg-gold-100 text-maroon-700 flex items-center justify-center mx-auto">
+                <PackageSearch className="w-8 h-8 text-gold-700" />
+              </div>
+              <h2 className="text-xl font-serif font-bold text-maroon-950">
+                No Jewellery Matches Your Selection
+              </h2>
+              <p className="text-sm text-charcoal-600 font-sans leading-relaxed">
+                We couldn't find any gold jewellery matching all your current filters. Try loosening your search criteria or resetting filters.
+              </p>
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={handleResetFilters}
+                  className="inline-flex items-center gap-2 bg-maroon-700 hover:bg-maroon-800 text-cream-50 font-semibold px-5 py-2.5 rounded-lg text-sm transition-colors shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
+                >
+                  <RotateCcw className="w-4 h-4 text-gold-300" />
+                  <span>Clear All Filters</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

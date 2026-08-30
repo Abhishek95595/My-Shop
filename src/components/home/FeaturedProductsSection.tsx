@@ -1,11 +1,36 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Sparkles } from 'lucide-react';
-import { getFeaturedProducts } from '@/services/mockProducts';
+import { Product } from '@/services/productTypes';
+import { productRepository } from '@/services/products/productRepository';
 import { ProductCard } from '@/components/products/ProductCard';
 
 export const FeaturedProductsSection: React.FC = () => {
-  const featuredProducts = getFeaturedProducts();
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    const load = () => {
+      setFeaturedProducts(productRepository.getFeaturedPublishedProducts());
+    };
+
+    load();
+
+    const handleUpdate = () => load();
+    window.addEventListener('koh_products_updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+
+    return () => {
+      window.removeEventListener('koh_products_updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
+  }, []);
+
+  // Hidden when no featured published products available
+  if (featuredProducts.length === 0) {
+    return null;
+  }
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 space-y-8">
@@ -20,7 +45,7 @@ export const FeaturedProductsSection: React.FC = () => {
             Featured Gold Jewellery
           </h2>
           <p className="text-sm sm:text-base text-charcoal-600 font-sans max-w-2xl">
-            Sample products showcasing our craftsmanship across wedding sets, daily rings, sacred mangalsutras, and solid curb chains.
+            Showcasing our craftsmanship across wedding sets, daily rings, sacred mangalsutras, and solid curb chains.
           </p>
         </div>
 
