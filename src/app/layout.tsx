@@ -6,6 +6,7 @@ import { Footer } from '@/components/layout/Footer';
 import { FloatingWhatsApp } from '@/components/layout/FloatingWhatsApp';
 import { ToastProvider } from '@/context/ToastContext';
 import { AuthProvider } from '@/context/AuthContext';
+import { AdminAuthProvider } from '@/context/AdminAuthContext';
 import { SavedItemsProvider } from '@/context/SavedItemsContext';
 import { MockLoginModal } from '@/components/auth/MockLoginModal';
 import {
@@ -88,13 +89,15 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col bg-cream-100 text-charcoal-900 font-sans selection:bg-maroon-700 selection:text-cream-50">
         <ToastProvider>
           <AuthProvider>
-            <SavedItemsProvider>
-              <Header />
-              <main className="flex-1">{children}</main>
-              <Footer />
-              <FloatingWhatsApp />
-              <MockLoginModal />
-            </SavedItemsProvider>
+            <AdminAuthProvider>
+              <SavedItemsProvider>
+                <Header />
+                <main className="flex-1">{children}</main>
+                <Footer />
+                <FloatingWhatsApp />
+                <MockLoginModal />
+              </SavedItemsProvider>
+            </AdminAuthProvider>
           </AuthProvider>
         </ToastProvider>
       </body>
