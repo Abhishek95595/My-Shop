@@ -10,7 +10,7 @@ import { Shield, FileText, AlertTriangle, Info } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy (Draft)',
-  description: `Privacy policy draft describing local storage, customer privacy, and data handling practices at ${STORE_NAME}.`,
+  description: `Privacy policy draft describing Firebase, local storage, customer privacy, and data handling practices at ${STORE_NAME}.`,
   alternates: { canonical: '/privacy' },
 };
 
@@ -25,7 +25,7 @@ export default function PrivacyPolicyPage() {
             Draft — Pending Legal Approval
           </strong>
           <span>
-            This document represents a working draft outlining the mock and local data handling architecture of the Khushi Ornament House web platform.
+            This document is a working draft describing the Firebase and browser-local data used by the Khushi Ornament House web platform.
           </span>
         </div>
       </div>
@@ -36,7 +36,7 @@ export default function PrivacyPolicyPage() {
           Privacy Policy
         </h1>
         <p className="text-xs font-mono text-charcoal-500">
-          Last Updated: 29 August 2026 • Khushi Ornament House ({GSTIN})
+          Last Updated: 4 September 2026 • Khushi Ornament House ({GSTIN})
         </p>
       </div>
 
@@ -44,32 +44,32 @@ export default function PrivacyPolicyPage() {
       <div className="bg-cream-50 border border-gold-200/90 rounded-3xl p-6 sm:p-10 shadow-card space-y-8 text-charcoal-800 font-sans text-xs sm:text-sm leading-relaxed">
         <section className="space-y-2">
           <h2 className="text-base font-serif font-bold text-maroon-950 border-b border-gold-200/60 pb-1">
-            1. Overview &amp; Local Storage Architecture
+            1. Overview &amp; Data Architecture
           </h2>
           <p>
-            Khushi Ornament House operates this web platform as a digital catalogue and customer consultation tool. In this development and demonstration phase, the application operates entirely using <strong>browser-local storage (LocalStorage and IndexedDB)</strong>.
+            Khushi Ornament House operates this web platform as a digital catalogue and customer consultation tool. Customer authentication is provided by <strong>Google through Firebase Authentication</strong>, while catalogue data, saved lists, inquiries, and owner-entered rates are stored in <strong>Cloud Firestore</strong>.
           </p>
           <p>
-            The local repositories do not send saved data to a Khushi Ornament House backend, cloud database, Firebase, Cloudinary, or third-party analytics service. WhatsApp and phone actions are separate external handoffs described below.
+            Product images uploaded through the current admin interface may also use browser-local IndexedDB storage. WhatsApp and phone actions are separate external handoffs described below.
           </p>
         </section>
 
         <section className="space-y-2">
           <h2 className="text-base font-serif font-bold text-maroon-950 border-b border-gold-200/60 pb-1">
-            2. Information Stored Locally in Your Browser
+            2. Information Processed and Stored
           </h2>
           <ul className="list-disc list-inside space-y-1.5 text-charcoal-700 pl-2">
             <li>
-              <strong>Mock Session Identity:</strong> When you test sign-in with a mock Gmail address, your name and email are stored locally in your browser to maintain your session.
+              <strong>Google Account Identity:</strong> Firebase Authentication processes your Google account identifier, display name, email address, and profile photo when available to maintain your signed-in session.
             </li>
             <li>
-              <strong>Wishlist &amp; Buying Shortlist:</strong> Product identifiers saved for consultation are stored under isolated local storage keys tied to your mock account ID.
+              <strong>Wishlist &amp; Buying Shortlist:</strong> Saved product identifiers are stored in Cloud Firestore under your Firebase user ID and are accessible only to that authenticated account.
             </li>
             <li>
-              <strong>Customer Inquiries:</strong> Inquiries submitted through the contact form are stored in local storage and used to format a prefilled WhatsApp message.
+              <strong>Customer Inquiries:</strong> Contact details and inquiry content submitted through the form are stored in Cloud Firestore and may also be used to prepare a WhatsApp message.
             </li>
             <li>
-              <strong>Admin Demonstrations &amp; Images:</strong> Custom catalogue products and image files are stored in browser LocalStorage and IndexedDB (<code className="bg-cream-200 px-1 py-0.5 rounded">KOH_ImageDB</code>).
+              <strong>Catalogue Administration &amp; Images:</strong> Catalogue records and rates are stored in Cloud Firestore. Admin-uploaded image files currently use browser IndexedDB (<code className="bg-cream-200 px-1 py-0.5 rounded">KOH_ImageDB</code>).
             </li>
           </ul>
         </section>
@@ -94,10 +94,10 @@ export default function PrivacyPolicyPage() {
 
         <section className="space-y-2">
           <h2 className="text-base font-serif font-bold text-maroon-950 border-b border-gold-200/60 pb-1">
-            5. Clearing Your Local Data
+            5. Your Data Controls
           </h2>
           <p>
-            You can clear all stored mock data, wishlists, and IndexedDB images through your browser&apos;s site-data controls. Signing out removes only the current mock session; it does not erase saved lists, catalogue data, enquiries, rates, or images.
+            Signing out ends your Firebase Authentication session but does not delete your saved lists from Cloud Firestore. You can remove individual saved products or clear a list in the application. Clearing browser site data removes local caches and IndexedDB images but does not delete cloud records. Contact the store for requests concerning inquiry or account-linked data.
           </p>
         </section>
 
