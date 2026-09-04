@@ -1,16 +1,20 @@
 import { Product, ProductCategory } from '../productTypes';
 import { RepositoryStatus } from '../types';
 import { SAMPLE_PRODUCTS } from '../mockProducts';
-import { db, isFirebaseConfigured } from '@/lib/firebase/client';
+import { db, isFirebaseConfigured } from '../../lib/firebase/client';
 import {
   collection,
   onSnapshot,
   doc,
-  setDoc,
   updateDoc,
+  runTransaction,
   query,
   where
 } from 'firebase/firestore';
+import {
+  generateStableProductId,
+  isValidPreallocatedProductId,
+} from '../images/productImageLifecycle';
 
 const CUSTOM_PRODUCTS_STORAGE_KEY = 'koh_admin_custom_products';
 const SAMPLE_OVERRIDES_STORAGE_KEY = 'koh_admin_sample_overrides';
@@ -167,20 +171,23 @@ class ProductRepository {
     }
   }
 
+  private localCustomProducts: Product[] = [];
+
   private getStoredCustomProducts(): Product[] {
-    if (typeof window === 'undefined') return [];
+    if (typeof window === 'undefined') return this.localCustomProducts;
     try {
       const raw = localStorage.getItem(CUSTOM_PRODUCTS_STORAGE_KEY);
-      if (!raw) return [];
+      if (!raw) return this.localCustomProducts;
       const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? (parsed as Product[]) : [];
+      return Array.isArray(parsed) ? (parsed as Product[]) : this.localCustomProducts;
     } catch (err) {
       console.warn('Failed reading custom products from localStorage:', err);
-      return [];
+      return this.localCustomProducts;
     }
   }
 
   private saveCustomProducts(products: Product[]): void {
+    this.localCustomProducts = products;
     if (typeof window === 'undefined') return;
     try {
       localStorage.setItem(CUSTOM_PRODUCTS_STORAGE_KEY, JSON.stringify(products));
@@ -385,13 +392,35 @@ class ProductRepository {
   }
 
   /**
+   * Allocates a stable, collision-resistant product ID before any storage
+   * uploads begin.
+   */
+  public generateProductId(): string {
+    return generateStableProductId();
+  }
+
+  /**
    * Resolves only after Firestore has accepted the write. A rejection propagates
    * to the caller so the UI can never report a success that did not happen.
+   *
+   * If a preallocatedId is provided, it is validated for safe format and checked
+   * to ensure it cannot overwrite an existing product.
    */
   public async createProduct(
-    data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>
+    data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>,
+    preallocatedId?: string
   ): Promise<Product> {
-    const id = `prod-custom-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+    let id: string;
+
+    if (preallocatedId) {
+      if (!isValidPreallocatedProductId(preallocatedId)) {
+        throw new Error(`Invalid preallocated product ID format: "${preallocatedId}".`);
+      }
+      id = preallocatedId;
+    } else {
+      id = this.generateProductId();
+    }
+
     const now = new Date().toISOString();
 
     const newProduct: Product = {
@@ -403,9 +432,23 @@ class ProductRepository {
 
     if (isFirebaseConfigured && db) {
       const docRef = doc(db, 'products', id);
-      await this.runWrite('Product creation', setDoc(docRef, newProduct));
+
+      // Atomic overwrite protection in Cloud Firestore via transaction
+      await this.runWrite(
+        'Product creation',
+        runTransaction(db, async (transaction) => {
+          const docSnap = await transaction.get(docRef);
+          if (docSnap.exists()) {
+            throw new Error(`Product with ID "${id}" already exists in Cloud Firestore. Overwrite prevented.`);
+          }
+          transaction.set(docRef, newProduct);
+        })
+      );
     } else {
       const current = this.getStoredCustomProducts();
+      if (current.some((p) => p.id === id) || SAMPLE_PRODUCTS.some((p) => p.id === id)) {
+        throw new Error(`Product with ID "${id}" already exists. Overwrite prevented.`);
+      }
       this.saveCustomProducts([...current, newProduct]);
     }
 
