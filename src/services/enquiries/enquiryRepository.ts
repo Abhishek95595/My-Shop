@@ -26,6 +26,64 @@ export function normalizeIndianMobile(raw: string): string | null {
   return null;
 }
 
+export type PersistedEnquiryDocument = {
+  name: string;
+  mobile: string;
+  categoryOrProduct: string;
+  message: string;
+  status: 'new';
+  createdAt: string;
+};
+
+/**
+ * Validates enquiry input and constructs the exact document payload expected
+ * by Firestore security rules.
+ *
+ * Requirements:
+ * - Document keys must strictly match ['name', 'mobile', 'categoryOrProduct', 'message', 'status', 'createdAt']
+ * - Document data must NOT contain 'id' (the Firestore document ID already carries the unique identifier)
+ * - Blank/whitespace-only optional messages are normalized to an empty string '', never undefined
+ */
+export function buildEnquiryDocument(
+  input: CreateEnquiryInput,
+  createdAt: string = new Date().toISOString()
+): PersistedEnquiryDocument {
+  const trimmedName = input.name.trim();
+  if (!trimmedName) {
+    throw new Error('Name is required.');
+  }
+  if (trimmedName.length > 100) {
+    throw new Error('Name must be 100 characters or fewer.');
+  }
+
+  const normalizedMobile = normalizeIndianMobile(input.mobile);
+  if (!normalizedMobile) {
+    throw new Error('Please enter a valid 10-digit Indian mobile number.');
+  }
+
+  const categoryOrProduct = input.categoryOrProduct.trim();
+  if (!categoryOrProduct) {
+    throw new Error('Please select or specify your jewellery interest.');
+  }
+  if (categoryOrProduct.length > 200) {
+    throw new Error('Jewellery interest must be 200 characters or fewer.');
+  }
+
+  const trimmedMessage = input.message ? input.message.trim() : '';
+  if (trimmedMessage.length > 1000) {
+    throw new Error('Optional message must be 1000 characters or fewer.');
+  }
+
+  return {
+    name: trimmedName,
+    mobile: `+91 ${normalizedMobile}`,
+    categoryOrProduct,
+    message: trimmedMessage,
+    status: 'new',
+    createdAt,
+  };
+}
+
 /**
  * Enquiry repository with admin-lazy Firestore listener.
  *
@@ -163,53 +221,31 @@ class EnquiryRepository {
     }
   }
 
+
+
   /**
    * Resolves only after Firestore has accepted the write. A rejection propagates
    * to the caller so the UI can never report a success that did not happen.
    */
   public async createEnquiry(input: CreateEnquiryInput): Promise<CustomerEnquiry> {
-    const trimmedName = input.name.trim();
-    if (!trimmedName) {
-      throw new Error('Name is required.');
-    }
-
-    const normalizedMobile = normalizeIndianMobile(input.mobile);
-    if (!normalizedMobile) {
-      throw new Error('Please enter a valid 10-digit Indian mobile number.');
-    }
-
-    const categoryOrProduct = input.categoryOrProduct.trim();
-    if (!categoryOrProduct) {
-      throw new Error('Please select or specify your jewellery interest.');
-    }
-
-    const trimmedMessage = input.message ? input.message.trim() : undefined;
-    if (trimmedMessage && trimmedMessage.length > 1000) {
-      throw new Error('Optional message must be 1000 characters or fewer.');
-    }
-
     const id = `enq-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
     const now = new Date().toISOString();
+    const persistedDoc = buildEnquiryDocument(input, now);
 
-    const newEnquiry: CustomerEnquiry = {
+    const domainEnquiry: CustomerEnquiry = {
       id,
-      name: trimmedName,
-      mobile: `+91 ${normalizedMobile}`,
-      categoryOrProduct,
-      message: trimmedMessage,
-      status: 'new',
-      createdAt: now,
+      ...persistedDoc,
     };
 
     if (isFirebaseConfigured && db) {
       const docRef = doc(db, 'enquiries', id);
-      await this.runWrite('Enquiry submission', setDoc(docRef, newEnquiry));
+      await this.runWrite('Enquiry submission', setDoc(docRef, persistedDoc));
     } else {
       const current = this.getAllEnquiries();
-      this.saveEnquiries([newEnquiry, ...current]);
+      this.saveEnquiries([domainEnquiry, ...current]);
     }
 
-    return newEnquiry;
+    return domainEnquiry;
   }
 
   /**
