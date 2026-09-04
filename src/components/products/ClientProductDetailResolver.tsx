@@ -19,7 +19,14 @@ import {
   Info,
   PackageSearch,
   ArrowRight,
+  AlertCircle,
+  RotateCcw,
 } from 'lucide-react';
+
+import {
+  ProductDetailResolutionState,
+  resolveProductDetailState,
+} from '@/services/products/productDetailResolver';
 
 interface ClientProductDetailResolverProps {
   slug: string;
@@ -30,23 +37,26 @@ export const ClientProductDetailResolver: React.FC<ClientProductDetailResolverPr
   slug,
   initialProduct,
 }) => {
-  const [product, setProduct] = useState<Product | null>(initialProduct);
-  const [hasResolved, setHasResolved] = useState<boolean>(!!initialProduct);
+  // Deterministic initial state for SSR and first client render
+  const [state, setState] = useState<ProductDetailResolutionState>(() =>
+    initialProduct
+      ? { status: 'ready_with_product', product: initialProduct }
+      : { status: 'loading' }
+  );
 
   useEffect(() => {
-    const resolveProduct = () => {
-      const found = productRepository.getPublishedProductBySlug(slug);
-      if (found) {
-        setProduct(found);
-      } else {
-        setProduct(null);
-      }
-      setHasResolved(true);
+    const syncProduct = () => {
+      const repoStatus = productRepository.getPublishedStatus();
+      const found = repoStatus === 'ready' ? productRepository.getPublishedProductBySlug(slug) : null;
+      const error = repoStatus === 'error' ? productRepository.getPublishedLoadError() : null;
+
+      const nextState = resolveProductDetailState(repoStatus, found, error);
+      setState(nextState);
     };
 
-    resolveProduct();
+    syncProduct();
 
-    const handleUpdate = () => resolveProduct();
+    const handleUpdate = () => syncProduct();
     window.addEventListener('koh_products_updated', handleUpdate);
     window.addEventListener('storage', handleUpdate);
 
@@ -57,7 +67,7 @@ export const ClientProductDetailResolver: React.FC<ClientProductDetailResolverPr
   }, [slug]);
 
   // Loading state during client storage resolution
-  if (!hasResolved) {
+  if (state.status === 'loading') {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 text-center text-charcoal-600 font-sans animate-pulse">
         <p className="text-sm">Loading jewellery specifications...</p>
@@ -65,8 +75,48 @@ export const ClientProductDetailResolver: React.FC<ClientProductDetailResolverPr
     );
   }
 
-  // Not Found / Unavailable state
-  if (!product) {
+  // Error state for network / Firestore connection failures
+  if (state.status === 'error') {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-6">
+        <div className="w-16 h-16 rounded-full bg-red-100 text-red-800 flex items-center justify-center mx-auto">
+          <AlertCircle className="w-8 h-8 text-red-700" />
+        </div>
+        <div className="space-y-2">
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-maroon-950">
+            Unable to Load Jewellery Piece
+          </h1>
+          <p className="text-sm text-charcoal-600 font-sans leading-relaxed">
+            We couldn't load this jewellery piece right now due to a network or connection issue.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              const repoStatus = productRepository.getPublishedStatus();
+              const found = repoStatus === 'ready' ? productRepository.getPublishedProductBySlug(slug) : null;
+              const error = repoStatus === 'error' ? productRepository.getPublishedLoadError() : null;
+              setState(resolveProductDetailState(repoStatus, found, error));
+            }}
+            className="inline-flex items-center gap-2 bg-maroon-800 hover:bg-maroon-900 text-cream-50 font-bold px-5 py-2.5 rounded-xl shadow-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
+          >
+            <RotateCcw className="w-4 h-4 text-gold-300" />
+            <span>Try Again</span>
+          </button>
+          <Link
+            href="/catalogue"
+            className="inline-flex items-center gap-2 bg-cream-100 hover:bg-gold-100 text-maroon-900 font-semibold px-5 py-2.5 rounded-xl border border-gold-300 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
+          >
+            <span>Explore Catalogue</span>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Not Found / Unavailable state (strictly when repository is ready and product is missing/archived/draft)
+  if (state.status === 'ready_missing') {
     return (
       <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-6">
         <div className="w-16 h-16 rounded-full bg-gold-100 text-maroon-800 flex items-center justify-center mx-auto">
@@ -92,6 +142,8 @@ export const ClientProductDetailResolver: React.FC<ClientProductDetailResolverPr
       </div>
     );
   }
+
+  const product = state.product;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-10">
