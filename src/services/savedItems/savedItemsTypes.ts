@@ -1,12 +1,14 @@
-import { Product } from '../productTypes';
+import { RepositoryStatus } from '../types';
 
 export type SavedListType = 'wishlist' | 'shortlist';
 
 export interface ISavedItemsService {
+  startUserSync(userId: string, onUpdate: () => void): void;
+  stopUserSync(userId: string): void;
   getSavedProductIds(userId: string, listType: SavedListType): string[];
-  getSavedProducts(userId: string, listType: SavedListType): Product[];
-  addProduct(userId: string, listType: SavedListType, productId: string): boolean;
-  removeProduct(userId: string, listType: SavedListType, productId: string): boolean;
-  clearList(userId: string, listType: SavedListType): void;
-  isProductSaved(userId: string, listType: SavedListType, productId: string): boolean;
+  getStatus(userId: string, listType: SavedListType): RepositoryStatus;
+  getLoadError(userId: string, listType: SavedListType): Error | null;
+  addProduct(userId: string, listType: SavedListType, productId: string): Promise<boolean>;
+  removeProduct(userId: string, listType: SavedListType, productId: string): Promise<boolean>;
+  clearList(userId: string, listType: SavedListType): Promise<void>;
 }

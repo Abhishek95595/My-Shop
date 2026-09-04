@@ -12,7 +12,9 @@ import { MobileNav } from './MobileNav';
 export const Header: React.FC = () => {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const { user, isAuthenticated, openLoginModal } = useAuth();
-  const { wishlistIds, shortlistIds } = useSavedItems();
+  const { wishlistProducts, shortlistProducts } = useSavedItems();
+  const wishlistCount = wishlistProducts.length;
+  const shortlistCount = shortlistProducts.length;
 
   return (
     <>
@@ -85,12 +87,12 @@ export const Header: React.FC = () => {
             <Link
               href="/wishlist"
               className="relative p-2 text-charcoal-700 hover:text-maroon-800 hover:bg-gold-100/60 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
-              aria-label={`Wishlist with ${wishlistIds.length} items`}
+              aria-label={`Wishlist with ${wishlistCount} items`}
             >
               <Heart className="w-5 h-5" />
-              {wishlistIds.length > 0 && (
+              {wishlistCount > 0 && (
                 <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-maroon-700 text-cream-50 text-[10px] font-bold rounded-full flex items-center justify-center shadow-xs">
-                  {wishlistIds.length}
+                  {wishlistCount}
                 </span>
               )}
             </Link>
@@ -99,12 +101,12 @@ export const Header: React.FC = () => {
             <Link
               href="/shortlist"
               className="relative p-2 text-charcoal-700 hover:text-maroon-800 hover:bg-gold-100/60 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
-              aria-label={`Buying Shortlist with ${shortlistIds.length} items`}
+              aria-label={`Buying Shortlist with ${shortlistCount} items`}
             >
               <ShoppingBag className="w-5 h-5" />
-              {shortlistIds.length > 0 && (
+              {shortlistCount > 0 && (
                 <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-gold-600 text-cream-50 text-[10px] font-bold rounded-full flex items-center justify-center shadow-xs">
-                  {shortlistIds.length}
+                  {shortlistCount}
                 </span>
               )}
             </Link>

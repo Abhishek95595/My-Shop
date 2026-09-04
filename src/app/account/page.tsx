@@ -20,7 +20,7 @@ import {
 
 export default function AccountPage() {
   const { user, isAuthenticated, isLoading, openLoginModal, logout } = useAuth();
-  const { wishlistIds, shortlistIds } = useSavedItems();
+  const { wishlistProducts, shortlistProducts } = useSavedItems();
   // Shortcut visibility only — /admin re-verifies authorization independently.
   const { isAdminAuthenticated } = useAdminAuth();
 
@@ -43,7 +43,7 @@ export default function AccountPage() {
             Sign In to Access Your Account
           </h1>
           <p className="text-sm text-charcoal-600 font-sans leading-relaxed">
-            Please sign in with your mock Google account to manage your saved Wishlist and Buying Shortlist.
+            Please sign in with your Google account to manage your saved Wishlist and Buying Shortlist.
           </p>
         </div>
         <div>
@@ -53,7 +53,7 @@ export default function AccountPage() {
             className="inline-flex items-center gap-2 bg-maroon-800 hover:bg-maroon-900 text-cream-50 font-bold px-6 py-3 rounded-xl shadow-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
           >
             <UserCheck className="w-4 h-4 text-gold-300" />
-            <span>Sign In (Mock Google)</span>
+            <span>Sign In with Google</span>
           </button>
         </div>
       </div>
@@ -71,7 +71,7 @@ export default function AccountPage() {
           <div className="space-y-1">
             <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
               <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Signed In (Mock Google Session)</span>
+              <span>Signed In with Google</span>
             </div>
             <h1 className="text-2xl font-serif font-bold text-maroon-950">
               {user.name}
@@ -124,7 +124,7 @@ export default function AccountPage() {
                 <Heart className="w-6 h-6 fill-current text-maroon-700" />
               </div>
               <span className="text-2xl font-serif font-bold text-maroon-950">
-                {wishlistIds.length}
+                {wishlistProducts.length}
               </span>
             </div>
 
@@ -153,7 +153,7 @@ export default function AccountPage() {
                 <ShoppingBag className="w-6 h-6 fill-current text-gold-700" />
               </div>
               <span className="text-2xl font-serif font-bold text-maroon-950">
-                {shortlistIds.length}
+                {shortlistProducts.length}
               </span>
             </div>
 

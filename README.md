@@ -9,8 +9,8 @@ Official web showcase and customer consultation application for **Khushi Ornamen
 This platform is a showcase catalogue and customer inquiry application designed to:
 - Showcase handcrafted gold jewellery (18K, 22K, and 24K purities).
 - Facilitate bespoke custom order inquiries and physical showroom consultations.
-- Support personal customer Wishlists and Buying Shortlists with local mock authentication.
-- Enable approved mock administrators to manage catalogue products, customer inquiries, and owner-entered reference rates.
+- Support personal customer Wishlists and Buying Shortlists with Firebase Google authentication.
+- Enable approved administrators to manage catalogue products, customer inquiries, and owner-entered reference rates.
 
 ---
 
@@ -20,7 +20,7 @@ This platform is a showcase catalogue and customer inquiry application designed 
 - **Core**: React 19, TypeScript 5
 - **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) with custom luxury theme tokens (Ivory/Cream, Maroon, Restrained Gold)
 - **Icons**: [Lucide React](https://lucide.dev/)
-- **Local Persistence**: Browser `localStorage` and `IndexedDB` (`KOH_ImageDB`)
+- **Persistence**: Cloud Firestore, with IndexedDB (`KOH_ImageDB`) for current admin image uploads
 - **Node Requirement**: **Node.js 24+**
 
 ---
@@ -60,10 +60,10 @@ npm run lint
 - **Filtering & Search**: Live multi-criteria filter by Category, Gender, Purity, Availability, Occasion, and Gram Weight.
 - **Dynamic Product Details**: Multi-image showcase gallery, specifications table, and weight disclaimer.
 
-### B. Mock Google-Style Authentication & Saved Items
-- **Mock Google Sign-In**: Lightweight, passwordless demonstration sign-in requiring a valid Gmail address ending in `@gmail.com`.
-- **Deterministic Customer ID**: Collisions-free encoding (`mock-user-gmail-${encodeURIComponent(email)}`).
-- **Wishlist & Shortlist**: Isolated per customer profile in local browser storage.
+### B. Google Authentication & Saved Items
+- **Google Sign-In**: Real Google account authentication through Firebase Authentication.
+- **Firebase Customer ID**: Saved lists are isolated by the authenticated Firebase UID.
+- **Wishlist & Shortlist**: Firestore-backed lists available across signed-in devices.
 
 ### C. Contact & Customer Inquiries
 - **Showroom Inquiries Form**: Collects customer name, validated 10-digit Indian mobile number, jewellery category, and message.
@@ -93,21 +93,22 @@ npm run lint
 
 ---
 
-## 5. Mock Storage Architecture & Boundaries
+## 5. Storage Architecture & Boundaries
 
-1. **Local Storage**:
-   - `koh_mock_auth_session`: Active mock session.
-   - `koh_saved_wishlist_mock-user-*`: Customer wishlist items.
-   - `koh_saved_shortlist_mock-user-*`: Customer buying shortlist items.
+1. **Cloud Firestore**:
+   - `users/{uid}/wishlist`: Customer wishlist product IDs.
+   - `users/{uid}/shortlist`: Customer shortlist product IDs.
+   - `products`, `enquiries`, and `rates`: Catalogue and showroom operations.
+2. **Local Storage fallback for unconfigured development environments**:
    - `koh_admin_custom_products`: Locally created custom catalogue products.
    - `koh_admin_sample_overrides`: Local edits to baseline sample products.
    - `koh_customer_enquiries`: Saved customer contact inquiries.
    - `koh_owner_rates`: Owner-entered bullion reference rates.
-2. **IndexedDB (`KOH_ImageDB`)**:
+3. **IndexedDB (`KOH_ImageDB`)**:
    - `product_images`: Raw image blobs for admin-uploaded product images (JPG/PNG/WEBP ≤ 5MB).
-3. **No External Backends Connected**:
-   - Firebase and Firestore are **intentionally not configured**.
-   - Cloudinary, Gmail API, and real Google OAuth SDK are **not connected**.
+4. **External Service Boundaries**:
+   - Firebase Authentication and Cloud Firestore are connected.
+   - Cloudinary, payment gateways, cart checkouts, and shipping delivery systems are not connected.
    - Payment gateways, cart checkouts, and shipping delivery systems are **strictly excluded**.
    - Hosting, deployment, and a purchased production domain are **not configured**.
 
@@ -115,10 +116,10 @@ npm run lint
 
 ## 6. How to Clear Local Demo Data
 
-To reset all local test data (custom products, enquiries, saved wishlists, and IndexedDB images):
+To clear browser-local development data and IndexedDB images:
 1. In your browser DevTools, go to **Application > Storage**.
 2. Click **Clear site data** (clears LocalStorage and IndexedDB).
-3. **Sign Out** clears only the active mock session. It does not erase saved lists, catalogue data, enquiries, rates, or IndexedDB images.
+3. **Sign Out** ends the Firebase session. It does not erase saved lists or other Cloud Firestore records.
 
 ---
 

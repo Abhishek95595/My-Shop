@@ -1,17 +1,17 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { MockUser } from '@/services/auth/authTypes';
+import { AuthUser } from '@/services/auth/authTypes';
 import { firebaseAuthService as authService } from '@/services/auth/firebaseAuthService';
 
 interface AuthContextType {
-  user: MockUser | null;
+  user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   isLoginModalOpen: boolean;
-  openLoginModal: (onSuccessCallback?: () => void, triggerEl?: HTMLElement | null) => void;
+  openLoginModal: (triggerEl?: HTMLElement | null) => void;
   closeLoginModal: () => void;
-  login: (profile?: { name: string; email: string; avatarUrl?: string }) => Promise<MockUser>;
+  login: () => Promise<AuthUser>;
   logout: () => Promise<void>;
   getTriggerElement: () => HTMLElement | null;
 }
@@ -19,12 +19,10 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<MockUser | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
-  // In-memory pending action callback (strictly ephemeral, never persisted to localStorage)
-  const pendingActionRef = useRef<(() => void) | null>(null);
   const triggerElementRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -35,10 +33,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => unsubscribe();
   }, []);
 
-  const openLoginModal = useCallback((onSuccessCallback?: () => void, triggerEl?: HTMLElement | null) => {
-    // Only one pending action at a time
-    pendingActionRef.current = onSuccessCallback || null;
-
+  const openLoginModal = useCallback((triggerEl?: HTMLElement | null) => {
     // Store triggering element for focus return
     if (triggerEl) {
       triggerElementRef.current = triggerEl;
@@ -53,8 +48,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const closeLoginModal = useCallback(() => {
     setIsLoginModalOpen(false);
-    // Discard pending action on cancel/close
-    pendingActionRef.current = null;
 
     // Restore focus to trigger element
     if (triggerElementRef.current && typeof triggerElementRef.current.focus === 'function') {
@@ -65,21 +58,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = useCallback(
-    async (profile?: { name: string; email: string; avatarUrl?: string }) => {
-      const loggedInUser = await authService.signInWithMockGoogle(profile);
+    async () => {
+      const loggedInUser = await authService.signInWithGoogle();
+      setUser(loggedInUser);
       setIsLoginModalOpen(false);
-
-      // Execute pending action once if present, then safely clear it
-      const callback = pendingActionRef.current;
-      pendingActionRef.current = null;
-
-      if (callback) {
-        try {
-          callback();
-        } catch (err) {
-          console.error('Error executing pending action after login:', err);
-        }
-      }
 
       // Return focus to triggering element if possible
       if (triggerElementRef.current && typeof triggerElementRef.current.focus === 'function') {
@@ -94,7 +76,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 
   const logout = useCallback(async () => {
-    pendingActionRef.current = null;
     triggerElementRef.current = null;
     await authService.signOut();
   }, []);

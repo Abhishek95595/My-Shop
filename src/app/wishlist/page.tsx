@@ -6,14 +6,20 @@ import { useAuth } from '@/context/AuthContext';
 import { useSavedItems } from '@/context/SavedItemsContext';
 import { ProductCard } from '@/components/products/ProductCard';
 import { ConfirmationModal } from '@/components/common/ConfirmationModal';
-import { Heart, Trash2, ArrowRight, Sparkles, UserCheck } from 'lucide-react';
+import { Heart, Trash2, ArrowRight, Sparkles, UserCheck, AlertCircle } from 'lucide-react';
 
 export default function WishlistPage() {
   const { user, isAuthenticated, isLoading, openLoginModal } = useAuth();
-  const { wishlistProducts, clearWishlist } = useSavedItems();
+  const {
+    wishlistProducts,
+    wishlistStatus,
+    wishlistError,
+    missingWishlistProductIds,
+    clearWishlist,
+  } = useSavedItems();
   const [isClearModalOpen, setIsClearModalOpen] = useState(false);
 
-  if (isLoading) {
+  if (isLoading || (isAuthenticated && wishlistStatus === 'loading')) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 text-center text-charcoal-600 font-sans">
         Loading Wishlist...
@@ -32,7 +38,7 @@ export default function WishlistPage() {
             Sign In to View Your Wishlist
           </h1>
           <p className="text-sm text-charcoal-600 font-sans leading-relaxed">
-            Please sign in with your mock Google account to access your saved favourite gold jewellery pieces.
+            Please sign in with your Google account to access your saved favourite gold jewellery pieces.
           </p>
         </div>
         <div>
@@ -42,9 +48,25 @@ export default function WishlistPage() {
             className="inline-flex items-center gap-2 bg-maroon-800 hover:bg-maroon-900 text-cream-50 font-bold px-6 py-3 rounded-xl shadow-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
           >
             <UserCheck className="w-4 h-4 text-gold-300" />
-            <span>Sign In (Mock Google)</span>
+            <span>Sign In with Google</span>
           </button>
         </div>
+      </div>
+    );
+  }
+
+  if (wishlistStatus === 'error') {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-4">
+        <div className="w-16 h-16 rounded-full bg-red-50 text-red-700 flex items-center justify-center mx-auto">
+          <AlertCircle className="w-8 h-8" />
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-serif font-bold text-maroon-950">
+          Wishlist Could Not Be Loaded
+        </h1>
+        <p className="text-sm text-charcoal-600 font-sans leading-relaxed">
+          {wishlistError?.message || 'Cloud Firestore did not return your saved items. Please refresh and try again.'}
+        </p>
       </div>
     );
   }
@@ -77,6 +99,12 @@ export default function WishlistPage() {
           </button>
         )}
       </div>
+
+      {missingWishlistProductIds.length > 0 && (
+        <div className="bg-gold-50 border border-gold-200 rounded-xl px-4 py-3 text-xs text-charcoal-700 font-sans">
+          {missingWishlistProductIds.length} saved {missingWishlistProductIds.length === 1 ? 'item is' : 'items are'} currently unavailable in the published catalogue. The saved reference has been kept safely.
+        </div>
+      )}
 
       {/* Wishlist Items Grid */}
       {wishlistProducts.length > 0 ? (
