@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, Suspense } from 'react';
+import React, { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Product } from '@/services/productTypes';
 import { productRepository } from '@/services/products/productRepository';
@@ -35,25 +35,26 @@ function CatalogueContent() {
     sortBy: 'name-asc',
   });
 
-  const [publishedProducts, setPublishedProducts] = useState<Product[]>(() =>
-    productRepository.getPublishedProducts()
-  );
-  const [loadStatus, setLoadStatus] = useState<RepositoryStatus>(() =>
-    productRepository.getPublishedStatus()
-  );
+  // Initialize both server and client to the exact same deterministic loading state
+  // to avoid React hydration mismatches between SSR and browser initial render.
+  const [publishedProducts, setPublishedProducts] = useState<Product[]>([]);
+  const [loadStatus, setLoadStatus] = useState<RepositoryStatus>('loading');
 
-  React.useEffect(() => {
-    const handleUpdate = () => {
+  useEffect(() => {
+    const syncCatalogue = () => {
       setPublishedProducts(productRepository.getPublishedProducts());
       setLoadStatus(productRepository.getPublishedStatus());
     };
 
-    window.addEventListener('koh_products_updated', handleUpdate);
-    window.addEventListener('storage', handleUpdate);
+    // Load initial products on client mount
+    syncCatalogue();
+
+    window.addEventListener('koh_products_updated', syncCatalogue);
+    window.addEventListener('storage', syncCatalogue);
 
     return () => {
-      window.removeEventListener('koh_products_updated', handleUpdate);
-      window.removeEventListener('storage', handleUpdate);
+      window.removeEventListener('koh_products_updated', syncCatalogue);
+      window.removeEventListener('storage', syncCatalogue);
     };
   }, []);
 
