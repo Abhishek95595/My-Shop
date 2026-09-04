@@ -1,4 +1,4 @@
-export interface MockUser {
+export interface AuthUser {
   id: string;
   name: string;
   email: string;
@@ -6,14 +6,14 @@ export interface MockUser {
 }
 
 export interface AuthState {
-  user: MockUser | null;
+  user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
 }
 
 export interface IAuthService {
-  getCurrentUser(): MockUser | null;
-  signInWithMockGoogle(profile?: { name: string; email: string; avatarUrl?: string }): Promise<MockUser>;
+  getCurrentUser(): AuthUser | null;
+  signInWithGoogle(): Promise<AuthUser>;
   signOut(): Promise<void>;
-  onAuthStateChanged(callback: (user: MockUser | null) => void): () => void;
+  onAuthStateChanged(callback: (user: AuthUser | null) => void): () => void;
 }

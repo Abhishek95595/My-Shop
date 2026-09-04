@@ -8,7 +8,7 @@ import { ToastProvider } from '@/context/ToastContext';
 import { AuthProvider } from '@/context/AuthContext';
 import { AdminAuthProvider } from '@/context/AdminAuthContext';
 import { SavedItemsProvider } from '@/context/SavedItemsContext';
-import { MockLoginModal } from '@/components/auth/MockLoginModal';
+import { GoogleLoginModal } from '@/components/auth/GoogleLoginModal';
 import {
   STORE_NAME,
   STORE_TAGLINE,
@@ -95,7 +95,7 @@ export default function RootLayout({
                 <main className="flex-1">{children}</main>
                 <Footer />
                 <FloatingWhatsApp />
-                <MockLoginModal />
+                <GoogleLoginModal />
               </SavedItemsProvider>
             </AdminAuthProvider>
           </AuthProvider>
