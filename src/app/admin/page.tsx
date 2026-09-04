@@ -766,13 +766,23 @@ export default function AdminDashboardPage() {
         isOpen={isFormModalOpen}
         onClose={() => setIsFormModalOpen(false)}
         productToEdit={editingProduct}
-        onSave={() => {
+        onSave={(savedProduct, cleanupNotice) => {
           loadData();
-          showToast(
-            editingProduct ? 'Product Updated' : 'Product Created',
-            'Catalogue updated successfully.',
-            'success'
-          );
+          if (cleanupNotice && cleanupNotice.failedPaths.length > 0) {
+            const count = cleanupNotice.failedPaths.length;
+            const noun = count === 1 ? 'image' : 'images';
+            showToast(
+              'Product saved successfully.',
+              `${count} unused ${noun} could not be removed from cloud storage.\nThe catalogue is unaffected.\n\nFailed cleanup:\n${cleanupNotice.failedPaths.join('\n')}`,
+              'warning'
+            );
+          } else {
+            showToast(
+              editingProduct ? 'Product Updated' : 'Product Created',
+              'Catalogue updated successfully.',
+              'success'
+            );
+          }
         }}
       />
 

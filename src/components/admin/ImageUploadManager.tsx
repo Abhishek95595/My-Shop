@@ -4,10 +4,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { ProductImage } from '@/services/productTypes';
 import {
-  imageStorageService,
+  firebaseStorageService,
   MAX_IMAGE_SIZE_BYTES,
   ALLOWED_IMAGE_TYPES,
-} from '@/services/images/imageStorageService';
+} from '@/services/images/firebaseStorageService';
+import { cleanupUploadedImages } from '@/services/images/productImageLifecycle';
+import { imageStorageService } from '@/services/images/imageStorageService';
 import {
   Upload,
   Image as ImageIcon,
@@ -21,17 +23,25 @@ import {
 } from 'lucide-react';
 
 interface ImageUploadManagerProps {
+  productId: string;
   images: ProductImage[];
   onChange: (images: ProductImage[]) => void;
   persistedImageIds?: string[];
+  persistedStoragePaths?: string[];
+  onImageUploaded?: (image: ProductImage) => void;
+  onSessionUploadSuperseded?: (storagePath: string) => void;
   onBusyChange?: (busy: boolean) => void;
   disabled?: boolean;
 }
 
 export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
+  productId,
   images,
   onChange,
   persistedImageIds = [],
+  persistedStoragePaths = [],
+  onImageUploaded,
+  onSessionUploadSuperseded,
   onBusyChange,
   disabled = false,
 }) => {
@@ -105,7 +115,7 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
       return;
     }
 
-    const createdImageIds: string[] = [];
+    const uploadedPathsInBatch: string[] = [];
     setUploadBusy(true);
     try {
       const newImages: ProductImage[] = [...images];
@@ -118,29 +128,33 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
           continue;
         }
 
-        const imageId = `img-blob-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
-        const storageUrl = await imageStorageService.saveImage(imageId, file);
-        createdImageIds.push(imageId);
+        const imageId = `img-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+        const stored = await firebaseStorageService.uploadProductImage(productId, file, imageId);
+        uploadedPathsInBatch.push(stored.storagePath);
 
         // First image added is primary if no primary exists
         const hasPrimary = newImages.some((img) => img.isPrimary);
 
         const newImage: ProductImage = {
           id: imageId,
-          url: storageUrl,
+          url: stored.url,
+          storagePath: stored.storagePath,
           altText: file.name.replace(/\.[^/.]+$/, '').replace(/[-_]+/g, ' '),
           sortOrder: newImages.length + 1,
           isPrimary: !hasPrimary && newImages.length === 0,
         };
 
         newImages.push(newImage);
+        onImageUploaded?.(newImage);
       }
 
       onChange(newImages);
     } catch (err: unknown) {
-      await Promise.all(
-        createdImageIds.map((id) => imageStorageService.deleteImage(id))
-      );
+      // Roll back any successful uploads from this batch
+      if (uploadedPathsInBatch.length > 0) {
+        await cleanupUploadedImages(uploadedPathsInBatch, productId);
+        uploadedPathsInBatch.forEach((path) => onSessionUploadSuperseded?.(path));
+      }
       if (err instanceof Error) {
         setErrorMsg(err.message);
       } else {
@@ -206,11 +220,27 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
   const removeImage = async (id: string) => {
     if (disabled || isUploading) return;
 
+    const targetImg = images.find((img) => img.id === id);
+    if (!targetImg) return;
+
     setUploadBusy(true);
     try {
-      if (!persistedImageIds.includes(id)) {
+      if (targetImg.storagePath) {
+        const wasPersisted = persistedStoragePaths.includes(targetImg.storagePath);
+        if (!wasPersisted) {
+          // Newly uploaded in this session: clean immediately from cloud storage
+          const cleanup = await cleanupUploadedImages([targetImg.storagePath], productId);
+          if (cleanup.failed.length > 0) {
+            setErrorMsg(`Warning: Failed to clean up removed image from storage: ${cleanup.failed[0].error}`);
+          }
+          onSessionUploadSuperseded?.(targetImg.storagePath);
+        }
+        // If wasPersisted: do NOT delete now; only remove from state. Post-save cleanup handles it.
+      } else if (!persistedImageIds.includes(id)) {
+        // Legacy IndexedDB cleanup
         await imageStorageService.deleteImage(id);
       }
+
       const filtered = images.filter((img) => img.id !== id);
 
       // If removed image was primary, make the first remaining image primary
@@ -251,24 +281,46 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
       return;
     }
 
+    const targetImg = images.find((img) => img.id === targetId);
+
     setUploadBusy(true);
     try {
-      const replacementId = `img-blob-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-      const newStorageUrl = await imageStorageService.saveImage(replacementId, file);
+      const replacementId = `img-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+      const stored = await firebaseStorageService.uploadProductImage(productId, file, replacementId);
+
+      const replacementImage: ProductImage = {
+        id: replacementId,
+        url: stored.url,
+        storagePath: stored.storagePath,
+        altText: targetImg?.altText || file.name.replace(/\.[^/.]+$/, '').replace(/[-_]+/g, ' '),
+        sortOrder: targetImg?.sortOrder || 1,
+        isPrimary: targetImg?.isPrimary || false,
+      };
 
       const updated = images.map((img) =>
-        img.id === targetId
-          ? { ...img, id: replacementId, url: newStorageUrl }
-          : img
+        img.id === targetId ? replacementImage : img
       );
       onChange(updated);
+      onImageUploaded?.(replacementImage);
 
-      if (!persistedImageIds.includes(targetId)) {
+      // Handle superseded image:
+      if (targetImg?.storagePath) {
+        const wasPersisted = persistedStoragePaths.includes(targetImg.storagePath);
+        if (!wasPersisted) {
+          // Superseded image was uploaded during this session -> clean immediately
+          await cleanupUploadedImages([targetImg.storagePath], productId);
+          onSessionUploadSuperseded?.(targetImg.storagePath);
+        }
+        // If it was persisted, we leave it intact until Firestore save succeeds
+      } else if (!persistedImageIds.includes(targetId)) {
+        // Legacy IndexedDB cleanup
         await imageStorageService.deleteImage(targetId);
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
         setErrorMsg(err.message);
+      } else {
+        setErrorMsg('Failed to replace image.');
       }
     } finally {
       setUploadBusy(false);
@@ -364,11 +416,11 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
             <div>
               <p className="text-xs font-bold text-maroon-950">
                 {isUploading
-                  ? 'Saving image to local storage...'
+                  ? 'Uploading image to secure storage...'
                   : 'Drag & drop image files here, or browse'}
               </p>
               <p className="text-[11px] text-charcoal-500">
-                Supports up to 5 images • Max 5MB each
+                Supports up to 5 images • Max 5MB each (JPG, PNG, WebP)
               </p>
             </div>
           </div>

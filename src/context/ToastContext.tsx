@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
 
-export type ToastType = 'success' | 'info' | 'error';
+export type ToastType = 'success' | 'info' | 'error' | 'warning';
 
 export interface ToastMessage {
   id: string;
@@ -30,9 +30,10 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
 
       setToasts((prev) => [...prev, newToast]);
 
+      const timeoutMs = type === 'warning' ? 8000 : 4000;
       setTimeout(() => {
         setToasts((prev) => prev.filter((t) => t.id !== id));
-      }, 4000);
+      }, timeoutMs);
     },
     []
   );
@@ -53,7 +54,9 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className="pointer-events-auto bg-cream-50 border border-gold-300 rounded-xl p-3.5 shadow-card-hover flex items-start justify-between gap-3 text-xs font-sans transition-all animate-in fade-in slide-in-from-bottom-2 duration-200"
+            className={`pointer-events-auto bg-cream-50 rounded-xl p-3.5 shadow-card-hover flex items-start justify-between gap-3 text-xs font-sans transition-all animate-in fade-in slide-in-from-bottom-2 duration-200 ${
+              toast.type === 'warning' ? 'border border-amber-400' : 'border border-gold-300'
+            }`}
             role="status"
           >
             <div className="flex items-start gap-2.5">
@@ -66,10 +69,13 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
               {toast.type === 'info' && (
                 <Info className="w-4 h-4 text-gold-700 flex-shrink-0 mt-0.5" />
               )}
+              {toast.type === 'warning' && (
+                <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+              )}
               <div className="space-y-0.5">
                 <p className="font-semibold text-maroon-950">{toast.title}</p>
                 {toast.description && (
-                  <p className="text-charcoal-600">{toast.description}</p>
+                  <p className="text-charcoal-600 whitespace-pre-line">{toast.description}</p>
                 )}
               </div>
             </div>
