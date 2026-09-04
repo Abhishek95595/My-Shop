@@ -8,6 +8,7 @@ import { useAdminAuth } from '@/context/AdminAuthContext';
 import { isFirebaseConfigured } from '@/lib/firebase/client';
 import { AdminAccessDenied } from '@/components/admin/AdminAccessDenied';
 import { ProductFormModal } from '@/components/admin/ProductFormModal';
+import { DeleteProductConfirmationModal } from '@/components/admin/DeleteProductConfirmationModal';
 import { ConfirmationModal } from '@/components/common/ConfirmationModal';
 import { AdminEnquiriesManager } from '@/components/admin/AdminEnquiriesManager';
 import { AdminRatesManager } from '@/components/admin/AdminRatesManager';
@@ -35,6 +36,7 @@ import {
   Coins,
   LogOut,
   AlertTriangle,
+  Trash2,
 } from 'lucide-react';
 
 type AdminTab = 'products' | 'enquiries' | 'rates';
@@ -55,6 +57,11 @@ export default function AdminDashboardPage() {
 
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+
+  // Deletion state for permanently deleting archived products
+  const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteErrorMessage, setDeleteErrorMessage] = useState<string | null>(null);
 
   // Confirmation Modal state for Archive / Restore
   const [confirmModalConfig, setConfirmModalConfig] = useState<{
@@ -214,6 +221,37 @@ export default function AdminDashboardPage() {
         }
       },
     });
+  };
+
+  const handleDeletePrompt = (product: Product) => {
+    setDeleteErrorMessage(null);
+    setDeletingProduct(product);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingProduct || isDeleting) return;
+
+    setIsDeleting(true);
+    setDeleteErrorMessage(null);
+
+    try {
+      await productRepository.deleteProductPermanently(deletingProduct);
+      const deletedName = deletingProduct.name;
+      setDeletingProduct(null);
+      setIsDeleting(false);
+      loadData();
+      showToast(
+        'Product Deleted',
+        `"${deletedName}" and its uploaded media were permanently deleted.`,
+        'success'
+      );
+    } catch (err: unknown) {
+      setIsDeleting(false);
+      const detail =
+        err instanceof Error ? err.message : 'Failed to permanently delete product.';
+      setDeleteErrorMessage(detail);
+      showToast('Delete Failed', detail, 'error');
+    }
   };
 
   const handleToggleFeatured = async (product: Product) => {
@@ -596,18 +634,31 @@ export default function AdminDashboardPage() {
                                 onClick={() => handleArchivePrompt(p)}
                                 className="p-1.5 text-charcoal-400 hover:text-maroon-800 hover:bg-maroon-50 rounded-lg transition-colors cursor-pointer"
                                 aria-label={`Archive ${p.name}`}
+                                title="Archive product"
                               >
                                 <Archive className="w-4 h-4" />
                               </button>
                             ) : (
-                              <button
-                                type="button"
-                                onClick={() => handleRestorePrompt(p)}
-                                className="inline-flex items-center gap-1 py-1.5 px-2.5 bg-gold-100 hover:bg-gold-200 text-maroon-900 border border-gold-300 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
-                              >
-                                <RotateCcw className="w-3.5 h-3.5" />
-                                <span>Restore</span>
-                              </button>
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRestorePrompt(p)}
+                                  className="inline-flex items-center gap-1 py-1.5 px-2.5 bg-gold-100 hover:bg-gold-200 text-maroon-900 border border-gold-300 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                                >
+                                  <RotateCcw className="w-3.5 h-3.5" />
+                                  <span>Restore</span>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeletePrompt(p)}
+                                  className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                                  aria-label={`Delete ${p.name} permanently`}
+                                  title="Delete permanently"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </>
                             )}
 
                             {p.status === 'published' && (
@@ -722,17 +773,30 @@ export default function AdminDashboardPage() {
                               onClick={() => handleArchivePrompt(p)}
                               className="p-1.5 text-charcoal-400 hover:text-maroon-800 rounded"
                               aria-label="Archive"
+                              title="Archive product"
                             >
                               <Archive className="w-4 h-4" />
                             </button>
                           ) : (
-                            <button
-                              type="button"
-                              onClick={() => handleRestorePrompt(p)}
-                              className="py-1.5 px-3 bg-gold-100 border border-gold-300 text-maroon-900 rounded-lg text-xs font-bold"
-                            >
-                              Restore
-                            </button>
+                            <div className="flex items-center gap-1">
+                              <button
+                                type="button"
+                                onClick={() => handleRestorePrompt(p)}
+                                className="py-1.5 px-3 bg-gold-100 border border-gold-300 text-maroon-900 rounded-lg text-xs font-bold"
+                              >
+                                Restore
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleDeletePrompt(p)}
+                                className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                                aria-label={`Delete ${p.name} permanently`}
+                                title="Delete permanently"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
                           )}
                         </div>
                       </div>
@@ -794,6 +858,21 @@ export default function AdminDashboardPage() {
         confirmLabel={confirmModalConfig.confirmLabel}
         onConfirm={confirmModalConfig.onConfirm}
         onCancel={() => setConfirmModalConfig((prev) => ({ ...prev, isOpen: false }))}
+      />
+
+      {/* Dedicated Destructive Confirmation Modal for Permanent Delete */}
+      <DeleteProductConfirmationModal
+        isOpen={!!deletingProduct}
+        product={deletingProduct}
+        isDeleting={isDeleting}
+        errorMessage={deleteErrorMessage}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => {
+          if (!isDeleting) {
+            setDeletingProduct(null);
+            setDeleteErrorMessage(null);
+          }
+        }}
       />
     </div>
   );

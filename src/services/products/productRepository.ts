@@ -7,6 +7,8 @@ import {
   onSnapshot,
   doc,
   updateDoc,
+  deleteDoc,
+  getDoc,
   runTransaction,
   query,
   where
@@ -14,7 +16,10 @@ import {
 import {
   generateStableProductId,
   isValidPreallocatedProductId,
+  validateProductStoragePath,
 } from '../images/productImageLifecycle';
+import { firebaseStorageService } from '../images/firebaseStorageService';
+import { imageStorageService } from '../images/imageStorageService';
 
 const CUSTOM_PRODUCTS_STORAGE_KEY = 'koh_admin_custom_products';
 const SAMPLE_OVERRIDES_STORAGE_KEY = 'koh_admin_sample_overrides';
@@ -30,6 +35,40 @@ export const CATEGORY_CODES: Record<ProductCategory, string> = {
 export interface ProductValidationResult {
   isValid: boolean;
   errors: string[];
+}
+
+export type ProductDeletionErrorCode =
+  | 'PRODUCT_NOT_FOUND'
+  | 'PRODUCT_NOT_ARCHIVED'
+  | 'INVALID_STORAGE_PATH'
+  | 'STORAGE_CLEANUP_FAILED'
+  | 'FIRESTORE_DELETE_FAILED_AFTER_STORAGE_CLEANUP';
+
+export class ProductDeletionError extends Error {
+  public readonly code: ProductDeletionErrorCode;
+  public readonly productId: string;
+  public readonly failedPaths?: { path: string; error: string }[];
+  public readonly cleanedPaths?: string[];
+  public readonly originalError?: unknown;
+
+  constructor(
+    code: ProductDeletionErrorCode,
+    message: string,
+    details: {
+      productId: string;
+      failedPaths?: { path: string; error: string }[];
+      cleanedPaths?: string[];
+      originalError?: unknown;
+    }
+  ) {
+    super(message);
+    this.name = 'ProductDeletionError';
+    this.code = code;
+    this.productId = details.productId;
+    this.failedPaths = details.failedPaths;
+    this.cleanedPaths = details.cleanedPaths;
+    this.originalError = details.originalError;
+  }
 }
 
 /**
@@ -237,7 +276,9 @@ class ProductRepository {
    */
   private getLocalModeProducts(): Product[] {
     const overrides = this.getStoredSampleOverrides();
-    const baseline = SAMPLE_PRODUCTS.map((p) => overrides[p.id] || p);
+    const baseline = SAMPLE_PRODUCTS
+      .map((p) => overrides[p.id] || p)
+      .filter((p) => (p as unknown as { isDeleted?: boolean })?.isDeleted !== true);
     const custom = this.getStoredCustomProducts();
     return [...baseline, ...custom];
   }
@@ -519,6 +560,185 @@ class ProductRepository {
     const existing = this.getProductById(id);
     if (!existing) return null;
     return this.updateProduct(id, { isFeatured: !existing.isFeatured });
+  }
+
+  /**
+   * Permanently deletes an archived product and all of its owned media.
+   *
+   * Execution Sequence:
+   * 1. Extract product ID from argument.
+   * 2. Re-read authoritative Firestore document to verify current state (guards against stale UI).
+   * 3. Validate status === 'archived'. Draft or published products cannot be deleted.
+   * 4. Collect and validate owned Firebase Storage paths. Reject foreign/traversal paths.
+   * 5. Attempt deletion of all owned Firebase Storage paths.
+   * 6. If any genuine Storage deletion fails, ABORT Firestore deletion to avoid orphaned files.
+   * 7. Delete the Firestore document (/products/{productId}).
+   * 8. Reconcile in-memory/local repository structures (adminCache, publishedCache, custom/sample storage).
+   * 9. Perform best-effort cleanup for legacy IndexedDB images (non-fatal if local cleanup fails).
+   * 10. Dispatch 'koh_products_updated' event to notify dashboard listeners.
+   */
+  public async deleteProductPermanently(
+    productOrId: string | Product
+  ): Promise<void> {
+    const productId = typeof productOrId === 'string' ? productOrId.trim() : productOrId?.id;
+    if (!productId) {
+      throw new ProductDeletionError(
+        'PRODUCT_NOT_FOUND',
+        'A valid product ID is required to permanently delete a product.',
+        { productId: '' }
+      );
+    }
+
+    let authoritativeProduct: Product;
+
+    if (isFirebaseConfigured && db) {
+      const docRef = doc(db, 'products', productId);
+      const snapshot = await getDoc(docRef);
+      if (!snapshot.exists()) {
+        throw new ProductDeletionError(
+          'PRODUCT_NOT_FOUND',
+          `Product "${productId}" no longer exists in Cloud Firestore.`,
+          { productId }
+        );
+      }
+      authoritativeProduct = { ...(snapshot.data() as Product), id: snapshot.id };
+    } else {
+      const local = this.getProductById(productId);
+      if (!local) {
+        throw new ProductDeletionError(
+          'PRODUCT_NOT_FOUND',
+          `Product "${productId}" no longer exists in product database.`,
+          { productId }
+        );
+      }
+      authoritativeProduct = local;
+    }
+
+    // Strict lifecycle gate: only archived products can be permanently deleted
+    if (authoritativeProduct.status !== 'archived') {
+      throw new ProductDeletionError(
+        'PRODUCT_NOT_ARCHIVED',
+        `Cannot delete product "${authoritativeProduct.name}". Only archived products can be permanently deleted (current status: ${authoritativeProduct.status}).`,
+        { productId: authoritativeProduct.id }
+      );
+    }
+
+    // Strict Storage Ownership Validation:
+    // Only delete storage objects belonging to this product. Reject foreign/traversal paths.
+    const declaredStoragePaths = (authoritativeProduct.images || [])
+      .map((img) => img.storagePath)
+      .filter((path): path is string => Boolean(path && typeof path === 'string' && path.trim().length > 0));
+
+    for (const path of declaredStoragePaths) {
+      const validation = validateProductStoragePath(path, authoritativeProduct.id);
+      if (!validation.isValid) {
+        throw new ProductDeletionError(
+          'INVALID_STORAGE_PATH',
+          `Cannot delete product "${authoritativeProduct.name}". Invalid storage path "${path}": ${validation.error || 'Foreign or invalid storage path'}. Firestore document was preserved.`,
+          {
+            productId: authoritativeProduct.id,
+            failedPaths: [{ path, error: validation.error || 'Invalid path' }],
+          }
+        );
+      }
+    }
+
+    const uniqueStoragePaths = Array.from(new Set(declaredStoragePaths));
+
+    // Attempt deletion of all owned Firebase Storage objects
+    const storageResults = await Promise.allSettled(
+      uniqueStoragePaths.map((path) => firebaseStorageService.deleteProductImage(path))
+    );
+
+    const failedItems: { path: string; error: string }[] = [];
+    let succeededCount = 0;
+
+    storageResults.forEach((result, idx) => {
+      const path = uniqueStoragePaths[idx];
+      if (result.status === 'rejected') {
+        const error = result.reason instanceof Error ? result.reason.message : String(result.reason);
+        failedItems.push({ path, error });
+      } else {
+        succeededCount++;
+      }
+    });
+
+    if (failedItems.length > 0) {
+      const reasons = failedItems.map((f) => `${f.path}: ${f.error}`).join('; ');
+      const partialWarning =
+        succeededCount > 0
+          ? ` (${succeededCount} media object(s) were removed before failure; some cloud media may already have been deleted)`
+          : '';
+      throw new ProductDeletionError(
+        'STORAGE_CLEANUP_FAILED',
+        `Product was not deleted because media cleanup was incomplete: ${failedItems.length} file(s) failed (${reasons}).${partialWarning} The product document was preserved in Firestore. You can safely retry permanent deletion.`,
+        {
+          productId: authoritativeProduct.id,
+          failedPaths: failedItems,
+        }
+      );
+    }
+
+    // Delete Firestore document only after all required Storage cleanups succeed
+    try {
+      if (isFirebaseConfigured && db) {
+        const docRef = doc(db, 'products', authoritativeProduct.id);
+        await this.runWrite('Product deletion', deleteDoc(docRef));
+      } else {
+        if (SAMPLE_PRODUCTS.some((p) => p.id === authoritativeProduct.id)) {
+          const overrides = this.getStoredSampleOverrides();
+          overrides[authoritativeProduct.id] = {
+            ...authoritativeProduct,
+            isDeleted: true,
+          } as unknown as Product;
+          this.saveSampleOverrides(overrides);
+        } else {
+          const overrides = this.getStoredSampleOverrides();
+          if (overrides[authoritativeProduct.id]) {
+            delete overrides[authoritativeProduct.id];
+            this.saveSampleOverrides(overrides);
+          }
+        }
+        const custom = this.getStoredCustomProducts();
+        this.saveCustomProducts(custom.filter((p) => p.id !== authoritativeProduct.id));
+      }
+    } catch (err: unknown) {
+      const cleaned = uniqueStoragePaths;
+      throw new ProductDeletionError(
+        'FIRESTORE_DELETE_FAILED_AFTER_STORAGE_CLEANUP',
+        `Cloud media cleanup completed (${cleaned.length} file(s) removed), but removing the Firestore document failed: ${err instanceof Error ? err.message : String(err)}. The product remains in the catalogue with missing media. Please retry.`,
+        {
+          productId: authoritativeProduct.id,
+          cleanedPaths: cleaned,
+          originalError: err,
+        }
+      );
+    }
+
+    // Reconcile repository in-memory caches
+    this.adminCache = this.adminCache.filter((p) => p.id !== authoritativeProduct.id);
+    this.publishedCache = this.publishedCache.filter((p) => p.id !== authoritativeProduct.id);
+
+    // Best-effort IndexedDB cleanup for legacy/local images
+    const legacyIndexedDbImages = (authoritativeProduct.images || []).filter(
+      (img) => img.url && img.url.startsWith('indexeddb://')
+    );
+
+    if (legacyIndexedDbImages.length > 0) {
+      try {
+        await Promise.all(
+          legacyIndexedDbImages.map((img) => imageStorageService.deleteImage(img.id))
+        );
+      } catch (err) {
+        console.warn(
+          `Product "${authoritativeProduct.name}" was deleted from Firestore, but some IndexedDB images could not be cleaned:`,
+          err
+        );
+      }
+    }
+
+    // Notify dashboard subscribers
+    this.dispatchStorageUpdate();
   }
 }
 
