@@ -15,7 +15,9 @@ interface MobileNavProps {
 
 export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
   const { user, isAuthenticated, openLoginModal, logout } = useAuth();
-  const { wishlistIds, shortlistIds } = useSavedItems();
+  const { wishlistProducts, shortlistProducts } = useSavedItems();
+  const wishlistCount = wishlistProducts.length;
+  const shortlistCount = shortlistProducts.length;
 
   useEffect(() => {
     if (isOpen) {
@@ -110,7 +112,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
               className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-gold-100 hover:bg-gold-200 border border-gold-300 rounded-lg text-xs font-bold text-maroon-900 transition-colors"
             >
               <UserIcon className="w-4 h-4 text-gold-700" />
-              <span>Sign In (Mock Google)</span>
+              <span>Sign In with Google</span>
             </button>
           )}
         </div>
@@ -139,9 +141,9 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
                 <Heart className="w-4 h-4 text-maroon-700" />
                 <span>Wishlist</span>
               </div>
-              {wishlistIds.length > 0 && (
+              {wishlistCount > 0 && (
                 <span className="bg-maroon-700 text-cream-50 text-xs px-2 py-0.5 rounded-full font-bold">
-                  {wishlistIds.length}
+                  {wishlistCount}
                 </span>
               )}
             </Link>
@@ -155,9 +157,9 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
                 <ShoppingBag className="w-4 h-4 text-gold-700" />
                 <span>Buying Shortlist</span>
               </div>
-              {shortlistIds.length > 0 && (
+              {shortlistCount > 0 && (
                 <span className="bg-gold-600 text-cream-50 text-xs px-2 py-0.5 rounded-full font-bold">
-                  {shortlistIds.length}
+                  {shortlistCount}
                 </span>
               )}
             </Link>
