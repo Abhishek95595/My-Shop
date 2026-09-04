@@ -19,6 +19,7 @@ export interface ProductImage {
   altText: string;
   sortOrder: number;
   isPrimary: boolean;
+  storagePath?: string;
 }
 
 export interface Product {
