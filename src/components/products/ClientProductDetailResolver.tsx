@@ -146,7 +146,7 @@ export const ClientProductDetailResolver: React.FC<ClientProductDetailResolverPr
   const product = state.product;
 
   return (
-    <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8 lg:py-12 space-y-5 sm:space-y-8 pb-28 md:pb-0">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8 lg:py-12 space-y-5 sm:space-y-8 pb-[calc(9rem+env(safe-area-inset-bottom,0px))] md:pb-0">
       {/* Back to Catalogue Navigation Breadcrumb */}
       <nav aria-label="Breadcrumb">
         <Link

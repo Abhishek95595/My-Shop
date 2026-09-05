@@ -15,7 +15,7 @@ export const FloatingWhatsApp: React.FC = () => {
       aria-label="Quick WhatsApp Support"
       className={`fixed ${
         isProductDetail
-          ? 'bottom-[calc(7.5rem+env(safe-area-inset-bottom,0px))] md:bottom-6'
+          ? 'hidden md:block bottom-6'
           : 'bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:bottom-6'
       } right-4 sm:right-6 z-30`}
     >

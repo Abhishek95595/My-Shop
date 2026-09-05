@@ -145,7 +145,7 @@ export const Footer: React.FC = () => {
               <div className="flex items-center gap-2 pt-1">
                 <Phone className="w-4 h-4 text-maroon-800 flex-shrink-0" />
                 <a
-                  href={`tel:${CONTACT_CONFIG.primaryPhoneRaw}`}
+                  href={`tel:+${CONTACT_CONFIG.primaryPhoneRaw}`}
                   className="font-bold text-maroon-900 hover:underline"
                 >
                   {CONTACT_CONFIG.primaryPhone}

@@ -74,7 +74,7 @@ export const Header: React.FC = () => {
             <div className="flex items-center gap-4 font-sans">
               <span className="text-cream-200/90">{CONTACT_CONFIG.hours}</span>
               <a
-                href={`tel:${CONTACT_CONFIG.primaryPhoneRaw}`}
+                href={`tel:+${CONTACT_CONFIG.primaryPhoneRaw}`}
                 className="flex items-center gap-1.5 text-gold-300 hover:text-white transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-gold-300 rounded px-1"
                 aria-label={`Call Store at ${CONTACT_CONFIG.primaryPhone}`}
               >

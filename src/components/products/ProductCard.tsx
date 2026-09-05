@@ -10,7 +10,7 @@ import {
   formatWeight,
   formatAvailability,
 } from '@/services/mockProducts';
-import { CONTACT_CONFIG, EXACT_WEIGHT_DISCLAIMER } from '@/lib/constants';
+import { CONTACT_CONFIG, EXACT_WEIGHT_DISCLAIMER, SITE_URL } from '@/lib/constants';
 import { useSavedItems } from '@/context/SavedItemsContext';
 
 interface ProductCardProps {
@@ -67,8 +67,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const isFav = isInWishlist(product.id);
   const isShortlisted = isInShortlist(product.id);
 
+  const productUrl = `${SITE_URL}/catalogue/${product.slug}`;
   const whatsappMessage = encodeURIComponent(
-    `Hello Khushi Ornament House, I am inquiring about the ${product.name} (SKU: ${product.sku}).`
+    `Hello Khushi Ornament House, I am inquiring about the ${product.name} (SKU: ${product.sku}): ${productUrl}`
   );
 
   return (

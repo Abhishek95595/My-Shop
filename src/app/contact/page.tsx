@@ -89,7 +89,7 @@ export default function ContactPage() {
                 <div className="space-y-1">
                   <p className="font-bold text-maroon-950">Primary Contact (Call / WhatsApp)</p>
                   <a
-                    href={`tel:${CONTACT_CONFIG.primaryPhoneRaw}`}
+                    href={`tel:+${CONTACT_CONFIG.primaryPhoneRaw}`}
                     className="block text-maroon-900 font-mono font-bold hover:underline"
                   >
                     {CONTACT_CONFIG.primaryPhone}
@@ -103,7 +103,7 @@ export default function ContactPage() {
                 <div>
                   <p className="font-bold text-maroon-950">Secondary Store Line</p>
                   <a
-                    href={`tel:${CONTACT_CONFIG.secondaryPhoneRaw}`}
+                    href={`tel:+${CONTACT_CONFIG.secondaryPhoneRaw}`}
                     className="block text-charcoal-700 font-mono hover:underline"
                   >
                     {CONTACT_CONFIG.secondaryPhone}

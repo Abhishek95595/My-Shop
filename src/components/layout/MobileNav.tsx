@@ -257,7 +257,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
           </a>
 
           <a
-            href={`tel:${CONTACT_CONFIG.primaryPhoneRaw}`}
+            href={`tel:+${CONTACT_CONFIG.primaryPhoneRaw}`}
             className="w-full min-h-[44px] flex items-center justify-center gap-2 bg-maroon-700 hover:bg-maroon-800 active:scale-[0.98] text-cream-50 py-2.5 px-4 rounded-lg font-semibold text-xs shadow-xs transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-maroon-500"
             aria-label={`Call Store at ${CONTACT_CONFIG.primaryPhone}`}
           >

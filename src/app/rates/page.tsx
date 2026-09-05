@@ -81,7 +81,7 @@ export default function RatesPage() {
           </p>
           <div className="pt-2 flex flex-wrap justify-center gap-3">
             <a
-              href={`tel:${CONTACT_CONFIG.primaryPhoneRaw}`}
+              href={`tel:+${CONTACT_CONFIG.primaryPhoneRaw}`}
               className="inline-flex items-center gap-1.5 bg-maroon-800 hover:bg-maroon-900 text-cream-50 text-xs font-bold px-4 py-2.5 rounded-xl transition-colors shadow-sm"
             >
               <span>Call Showroom</span>
@@ -173,7 +173,7 @@ export default function RatesPage() {
           </p>
           <div className="pt-2 flex flex-wrap justify-center gap-3">
             <a
-              href={`tel:${CONTACT_CONFIG.primaryPhoneRaw}`}
+              href={`tel:+${CONTACT_CONFIG.primaryPhoneRaw}`}
               className="inline-flex items-center gap-1.5 bg-maroon-800 hover:bg-maroon-900 text-cream-50 text-xs font-bold px-4 py-2.5 rounded-xl transition-colors shadow-sm"
             >
               <span>Call Showroom</span>
