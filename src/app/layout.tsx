@@ -4,6 +4,7 @@ import './globals.css';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { FloatingWhatsApp } from '@/components/layout/FloatingWhatsApp';
+import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
 import { ToastProvider } from '@/context/ToastContext';
 import { AuthProvider } from '@/context/AuthContext';
 import { AdminAuthProvider } from '@/context/AdminAuthContext';
@@ -92,9 +93,10 @@ export default function RootLayout({
             <AdminAuthProvider>
               <SavedItemsProvider>
                 <Header />
-                <main className="flex-1">{children}</main>
+                <main className="flex-1 pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:pb-0">{children}</main>
                 <Footer />
                 <FloatingWhatsApp />
+                <MobileBottomNav />
                 <GoogleLoginModal />
               </SavedItemsProvider>
             </AdminAuthProvider>

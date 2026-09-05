@@ -6,7 +6,10 @@ import { CONTACT_CONFIG } from '@/lib/constants';
 
 export const FloatingWhatsApp: React.FC = () => {
   return (
-    <aside aria-label="Quick WhatsApp Support" className="fixed bottom-6 right-6 z-50">
+    <aside
+      aria-label="Quick WhatsApp Support"
+      className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:bottom-6 right-4 sm:right-6 z-30"
+    >
       <a
         href={`https://wa.me/${CONTACT_CONFIG.whatsappNumberRaw}?text=${encodeURIComponent(
           'Hello Khushi Ornament House, I would like to inquire about your jewellery.'
