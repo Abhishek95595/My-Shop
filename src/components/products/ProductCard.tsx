@@ -102,18 +102,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         </Link>
 
         {/* Top Left Badges */}
-        <div className="absolute top-3 left-3 flex flex-col items-start gap-1.5 pointer-events-none">
+        <div className="absolute top-2 left-2 sm:top-3 sm:left-3 flex flex-col items-start gap-1 pointer-events-none z-10">
           {/* Sample Product Badge */}
           {isSample && (
-            <span className="inline-flex items-center gap-1 bg-maroon-900/90 text-cream-50 text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-sm backdrop-blur-xs">
-              <Sparkles className="w-3 h-3 text-gold-300" />
-              <span>Sample Product</span>
+            <span className="inline-flex items-center gap-1 bg-maroon-900/90 text-cream-50 text-[9px] sm:text-[11px] font-semibold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full shadow-xs backdrop-blur-xs">
+              <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-gold-300" />
+              <span className="hidden xs:inline">Sample Product</span>
+              <span className="xs:hidden">Sample</span>
             </span>
           )}
 
           {/* Availability Badge */}
           <span
-            className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full shadow-sm backdrop-blur-xs ${
+            className={`text-[9px] sm:text-[11px] font-semibold px-2 py-0.5 rounded-full shadow-xs backdrop-blur-xs ${
               product.availability === 'available'
                 ? 'bg-emerald-800/90 text-cream-50'
                 : 'bg-gold-800/90 text-cream-50'
@@ -124,7 +125,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         </div>
 
         {/* Top Right Quick Action Buttons */}
-        <div className="absolute top-3 right-3 flex flex-col items-center gap-1.5 z-10">
+        <div className="absolute top-2 right-2 sm:top-3 sm:right-3 flex flex-col items-center gap-1 sm:gap-1.5 z-10">
           {/* Wishlist Button */}
           <button
             type="button"
@@ -132,7 +133,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               e.preventDefault();
               toggleWishlist(product.id, product.name);
             }}
-            className={`p-2 rounded-full shadow-sm backdrop-blur-xs transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 ${
+            className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full shadow-xs backdrop-blur-xs transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 active:scale-95 ${
               isFav
                 ? 'bg-maroon-800 text-white hover:bg-maroon-900'
                 : 'bg-cream-50/90 text-charcoal-700 hover:text-maroon-800 hover:bg-white'
@@ -145,7 +146,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             aria-pressed={isFav}
           >
             <Heart
-              className={`w-4 h-4 ${isFav ? 'fill-current' : ''}`}
+              className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isFav ? 'fill-current' : ''}`}
             />
           </button>
 
@@ -156,7 +157,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               e.preventDefault();
               toggleShortlist(product.id, product.name);
             }}
-            className={`p-2 rounded-full shadow-sm backdrop-blur-xs transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 ${
+            className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full shadow-xs backdrop-blur-xs transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 active:scale-95 ${
               isShortlisted
                 ? 'bg-gold-600 text-white hover:bg-gold-700'
                 : 'bg-cream-50/90 text-charcoal-700 hover:text-gold-800 hover:bg-white'
@@ -169,35 +170,35 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             aria-pressed={isShortlisted}
           >
             <ShoppingBag
-              className={`w-4 h-4 ${isShortlisted ? 'fill-current' : ''}`}
+              className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isShortlisted ? 'fill-current' : ''}`}
             />
           </button>
         </div>
 
         {/* Bottom Purity Pill */}
-        <div className="absolute bottom-3 left-3 pointer-events-none">
-          <span className="inline-flex items-center gap-1 bg-cream-50/95 border border-gold-300 text-maroon-900 text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-xs">
-            <Shield className="w-3 h-3 text-gold-700" />
+        <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 pointer-events-none">
+          <span className="inline-flex items-center gap-1 bg-cream-50/95 border border-gold-300 text-maroon-900 text-[9px] sm:text-[11px] font-bold px-1.5 sm:px-2.5 py-0.5 rounded-full shadow-xs">
+            <Shield className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-gold-700" />
             <span>{product.purity} Gold</span>
           </span>
         </div>
       </div>
 
-      {/* Card Content Area */}
-      <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-        <div className="space-y-2">
+      {/* Card Content Area - Compact for 2-column mobile */}
+      <div className="p-2.5 sm:p-4 md:p-5 flex-1 flex flex-col justify-between space-y-2 sm:space-y-3">
+        <div className="space-y-1 sm:space-y-1.5">
           {/* Category & Gender & Occasion Meta */}
-          <div className="flex items-center justify-between text-xs text-charcoal-600 font-sans">
-            <span className="uppercase tracking-wider font-medium text-gold-800">
-              {product.category} • {product.gender}
+          <div className="flex items-center justify-between text-[10px] sm:text-xs text-charcoal-600 font-sans">
+            <span className="uppercase tracking-wider font-medium text-gold-800 truncate max-w-[65%]">
+              {product.category}
             </span>
-            <span className="bg-gold-50 border border-gold-200 text-maroon-800 px-2 py-0.5 rounded-full text-[11px]">
+            <span className="bg-gold-50 border border-gold-200 text-maroon-800 px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[11px] truncate">
               {product.occasion}
             </span>
           </div>
 
           {/* Product Name */}
-          <h3 className="font-serif font-bold text-lg text-maroon-950 leading-snug group-hover:text-maroon-700 transition-colors">
+          <h3 className="font-serif font-bold text-xs sm:text-base md:text-lg text-maroon-950 leading-snug group-hover:text-maroon-700 transition-colors line-clamp-2">
             <Link
               href={`/catalogue/${product.slug}`}
               className="focus:outline-none focus-visible:ring-1 focus-visible:ring-gold-500 rounded"
@@ -207,49 +208,49 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </h3>
 
           {/* SKU & Short Description */}
-          <p className="text-xs font-mono text-charcoal-500 tracking-wide">
+          <p className="text-[10px] sm:text-xs font-mono text-charcoal-500 tracking-wide truncate">
             SKU: {product.sku}
           </p>
-          <p className="text-xs text-charcoal-700 line-clamp-2 leading-relaxed font-sans">
+          <p className="hidden sm:block text-xs text-charcoal-700 line-clamp-2 leading-relaxed font-sans">
             {product.shortDescription}
           </p>
         </div>
 
         {/* Specifications & Weight Block */}
-        <div className="pt-3 border-t border-gold-200/80 space-y-2">
-          <div className="flex items-center justify-between text-xs">
+        <div className="pt-1.5 sm:pt-2.5 border-t border-gold-200/80 space-y-1 sm:space-y-1.5">
+          <div className="flex items-center justify-between text-[11px] sm:text-xs">
             <span className="text-charcoal-600 font-sans font-medium">
               Approx. Weight:
             </span>
-            <span className="font-serif font-bold text-maroon-900 text-sm">
+            <span className="font-serif font-bold text-maroon-900 text-xs sm:text-sm">
               {formatWeight(product.approxWeight)}
             </span>
           </div>
 
           {/* Exact Required Weight Disclaimer on Cards */}
-          <p className="text-[11px] text-charcoal-500 italic leading-snug font-sans">
+          <p className="hidden sm:block text-[10px] text-charcoal-500 italic leading-tight font-sans">
             {EXACT_WEIGHT_DISCLAIMER}
           </p>
         </div>
 
         {/* Card Actions */}
-        <div className="grid grid-cols-2 gap-2 pt-2">
+        <div className="grid grid-cols-2 gap-1.5 sm:gap-2 pt-1 sm:pt-1.5">
           <Link
             href={`/catalogue/${product.slug}`}
-            className="inline-flex items-center justify-center gap-1 text-xs font-semibold text-maroon-900 bg-gold-100/90 hover:bg-gold-200 border border-gold-300 py-2.5 px-3 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
+            className="inline-flex items-center justify-center gap-1 text-[11px] sm:text-xs font-semibold text-maroon-900 bg-gold-100/90 hover:bg-gold-200 border border-gold-300 py-1.5 sm:py-2.5 px-2 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 active:scale-95"
           >
             <span>Details</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
           </Link>
 
           <a
             href={`https://wa.me/${CONTACT_CONFIG.whatsappNumberRaw}?text=${whatsappMessage}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-1 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 py-2.5 px-3 rounded-lg transition-colors shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+            className="inline-flex items-center justify-center gap-1 text-[11px] sm:text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 py-1.5 sm:py-2.5 px-2 rounded-lg transition-colors shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 active:scale-95"
             aria-label={`Inquire about ${product.name} on WhatsApp`}
           >
-            <MessageCircle className="w-3.5 h-3.5" />
+            <MessageCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             <span>Enquire</span>
           </a>
         </div>

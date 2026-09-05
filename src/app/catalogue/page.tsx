@@ -192,17 +192,17 @@ function CatalogueContent() {
   }, [publishedProducts, filters]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8 space-y-5 sm:space-y-8">
       {/* Page Header */}
-      <div className="space-y-3 max-w-3xl">
+      <div className="space-y-2 sm:space-y-3 max-w-3xl">
         <div className="inline-flex items-center gap-2 bg-gold-100/90 border border-gold-300 text-maroon-900 text-xs font-semibold px-3 py-1 rounded-full shadow-xs">
           <Sparkles className="w-3.5 h-3.5 text-gold-700" />
           <span>18K, 22K and 24K Gold Jewellery</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-serif font-bold text-maroon-950">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif font-bold text-maroon-950">
           Gold Jewellery Catalogue
         </h1>
-        <p className="text-sm sm:text-base text-charcoal-700 font-sans leading-relaxed">
+        <p className="text-xs sm:text-sm md:text-base text-charcoal-700 font-sans leading-relaxed">
           Browse our bridal sets, classic rings, mangalsutras, chains, and bangles. Each piece is crafted with quality and care at {STORE_NAME} in Gorakhpur.
         </p>
       </div>
@@ -243,9 +243,9 @@ function CatalogueContent() {
             totalResults={filteredProducts.length}
           />
 
-          {/* Product Results Grid */}
+          {/* Product Results Grid - 2 columns on mobile, 3 on tablet, 4 on desktop */}
           {filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
               {filteredProducts.map((product, index) => (
                 <ProductCard
                   key={product.id}
