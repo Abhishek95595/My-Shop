@@ -50,7 +50,7 @@ export default function PrivacyPolicyPage() {
             Khushi Ornament House operates this web platform as a digital catalogue and customer consultation tool. Customer authentication is provided by <strong>Google through Firebase Authentication</strong>, while catalogue data, saved lists, inquiries, and owner-entered rates are stored in <strong>Cloud Firestore</strong>.
           </p>
           <p>
-            Product images uploaded through the current admin interface may also use browser-local IndexedDB storage. WhatsApp and phone actions are separate external handoffs described below.
+            Product images uploaded through the admin interface are stored in Firebase Cloud Storage. WhatsApp and phone actions are separate external handoffs described below.
           </p>
         </section>
 
@@ -69,7 +69,7 @@ export default function PrivacyPolicyPage() {
               <strong>Customer Inquiries:</strong> Contact details and inquiry content submitted through the form are stored in Cloud Firestore and may also be used to prepare a WhatsApp message.
             </li>
             <li>
-              <strong>Catalogue Administration &amp; Images:</strong> Catalogue records and rates are stored in Cloud Firestore. Admin-uploaded image files currently use browser IndexedDB (<code className="bg-cream-200 px-1 py-0.5 rounded">KOH_ImageDB</code>).
+              <strong>Catalogue Administration &amp; Images:</strong> Catalogue records and rates are stored in Cloud Firestore, while uploaded product images are stored in Firebase Cloud Storage.
             </li>
           </ul>
         </section>
@@ -97,7 +97,7 @@ export default function PrivacyPolicyPage() {
             5. Your Data Controls
           </h2>
           <p>
-            Signing out ends your Firebase Authentication session but does not delete your saved lists from Cloud Firestore. You can remove individual saved products or clear a list in the application. Clearing browser site data removes local caches and IndexedDB images but does not delete cloud records. Contact the store for requests concerning inquiry or account-linked data.
+            Signing out ends your Firebase Authentication session but does not delete your saved lists from Cloud Firestore. You can remove individual saved products or clear a list in the application. Clearing browser site data removes local caches and site settings but does not delete cloud records. Contact the store for requests concerning inquiry or account-linked data.
           </p>
         </section>
 
