@@ -58,6 +58,15 @@ function CatalogueContent() {
     };
   }, []);
 
+  // Synchronize search query filter if URL parameter 'q' updates while viewing catalogue
+  useEffect(() => {
+    const currentQ = searchParams.get('q') || '';
+    setFilters((prev) => {
+      if (prev.search === currentQ) return prev;
+      return { ...prev, search: currentQ };
+    });
+  }, [searchParams]);
+
   // Extract unique occasions dynamically
   const availableOccasions = useMemo(() => {
     const set = new Set<string>();

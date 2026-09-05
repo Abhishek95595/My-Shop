@@ -42,3 +42,4 @@ next-env.d.ts
 # Ruflo runtime files
 .swarm/
 ruvector.db
+.vercel
