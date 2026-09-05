@@ -18,51 +18,51 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <div className="space-y-16 sm:space-y-20 pb-16">
-      {/* 1. Approved Hero Section */}
+    <div className="space-y-8 sm:space-y-12 md:space-y-16 pb-12 sm:pb-16">
+      {/* 1. Mobile-Optimized Hero Section */}
       <HeroSection />
 
-      {/* 2. Approved Trust Strip */}
-      <section id="trust" className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="bg-cream-50 border border-gold-200/90 rounded-2xl p-6 sm:p-8 shadow-card grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-gold-100 flex items-center justify-center text-maroon-700 flex-shrink-0">
-              <Shield className="w-6 h-6 text-gold-700" />
+      {/* 2. Compact Scannable Trust Strip */}
+      <section id="trust" className="max-w-7xl mx-auto px-3 sm:px-6">
+        <div className="bg-cream-50 border border-gold-200/90 rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-card grid grid-cols-3 gap-2 sm:gap-6">
+          <div className="flex flex-col sm:flex-row items-center text-center sm:text-left gap-1.5 sm:gap-4">
+            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-gold-100 flex items-center justify-center text-maroon-700 flex-shrink-0">
+              <Shield className="w-4 h-4 sm:w-6 sm:h-6 text-gold-700" />
             </div>
             <div>
-              <h4 className="font-serif font-bold text-maroon-900 text-sm">
-                25+ Years of Trust
+              <h4 className="font-serif font-bold text-maroon-900 text-xs sm:text-sm">
+                25+ Years Trust
               </h4>
-              <p className="text-xs text-charcoal-600 font-sans">
-                Serving customers in Gorakhpur for over 25 years
+              <p className="hidden sm:block text-xs text-charcoal-600 font-sans">
+                Serving Gorakhpur over 25 years
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-gold-100 flex items-center justify-center text-maroon-700 flex-shrink-0">
-              <Sparkles className="w-6 h-6 text-gold-700" />
+          <div className="flex flex-col sm:flex-row items-center text-center sm:text-left gap-1.5 sm:gap-4 border-x border-gold-200/60 sm:border-none px-1 sm:px-0">
+            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-gold-100 flex items-center justify-center text-maroon-700 flex-shrink-0">
+              <Sparkles className="w-4 h-4 sm:w-6 sm:h-6 text-gold-700" />
             </div>
             <div>
-              <h4 className="font-serif font-bold text-maroon-900 text-sm">
-                Custom Jewellery
+              <h4 className="font-serif font-bold text-maroon-900 text-xs sm:text-sm">
+                Custom Orders
               </h4>
-              <p className="text-xs text-charcoal-600 font-sans">
-                Bespoke manufacturing to order
+              <p className="hidden sm:block text-xs text-charcoal-600 font-sans">
+                Bespoke design to order
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-gold-100 flex items-center justify-center text-maroon-700 flex-shrink-0">
-              <MapPin className="w-6 h-6 text-gold-700" />
+          <div className="flex flex-col sm:flex-row items-center text-center sm:text-left gap-1.5 sm:gap-4">
+            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-gold-100 flex items-center justify-center text-maroon-700 flex-shrink-0">
+              <MapPin className="w-4 h-4 sm:w-6 sm:h-6 text-gold-700" />
             </div>
             <div>
-              <h4 className="font-serif font-bold text-maroon-900 text-sm">
-                Gorakhpur Store
+              <h4 className="font-serif font-bold text-maroon-900 text-xs sm:text-sm">
+                Showroom Visit
               </h4>
-              <p className="text-xs text-charcoal-600 font-sans">
-                Visit us for personal consultation
+              <p className="hidden sm:block text-xs text-charcoal-600 font-sans">
+                Personal in-store consultation
               </p>
             </div>
           </div>
