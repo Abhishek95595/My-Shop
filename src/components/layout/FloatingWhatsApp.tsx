@@ -1,14 +1,23 @@
 'use client';
 
 import React from 'react';
+import { usePathname } from 'next/navigation';
 import { MessageCircle } from 'lucide-react';
 import { CONTACT_CONFIG } from '@/lib/constants';
 
 export const FloatingWhatsApp: React.FC = () => {
+  const pathname = usePathname();
+  const isProductDetail =
+    pathname.startsWith('/catalogue/') && pathname !== '/catalogue';
+
   return (
     <aside
       aria-label="Quick WhatsApp Support"
-      className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:bottom-6 right-4 sm:right-6 z-30"
+      className={`fixed ${
+        isProductDetail
+          ? 'bottom-[calc(7.5rem+env(safe-area-inset-bottom,0px))] md:bottom-6'
+          : 'bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:bottom-6'
+      } right-4 sm:right-6 z-30`}
     >
       <a
         href={`https://wa.me/${CONTACT_CONFIG.whatsappNumberRaw}?text=${encodeURIComponent(

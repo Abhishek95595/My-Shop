@@ -146,21 +146,21 @@ export const ClientProductDetailResolver: React.FC<ClientProductDetailResolverPr
   const product = state.product;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-10">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8 lg:py-12 space-y-5 sm:space-y-8 pb-28 md:pb-0">
       {/* Back to Catalogue Navigation Breadcrumb */}
       <nav aria-label="Breadcrumb">
         <Link
           href="/catalogue"
-          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-maroon-800 hover:text-maroon-950 bg-cream-50 hover:bg-gold-100 border border-gold-200 px-3.5 py-1.5 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
+          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-maroon-800 hover:text-maroon-950 bg-cream-50 hover:bg-gold-100 border border-gold-200 px-3 py-1.5 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 active:scale-95"
         >
           <ChevronLeft className="w-4 h-4 text-gold-700" />
           <span>Back to Catalogue</span>
         </Link>
       </nav>
 
-      {/* Main Product Details Two-Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-        {/* Left Column: Image Gallery */}
+      {/* Main Product Details Two-Column Layout (Image first on mobile) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start">
+        {/* Left Column: Image Gallery (Appears immediately first on mobile) */}
         <div className="lg:col-span-6 space-y-4">
           <ProductImageGallery
             images={product.images}
@@ -169,12 +169,12 @@ export const ClientProductDetailResolver: React.FC<ClientProductDetailResolverPr
         </div>
 
         {/* Right Column: Specifications, Information & Actions */}
-        <div className="lg:col-span-6 space-y-6">
+        <div className="lg:col-span-6 space-y-5 sm:space-y-6">
           {/* Header Badges & SKU */}
-          <div className="space-y-3">
-            <div className="flex flex-wrap items-center gap-2">
+          <div className="space-y-2 sm:space-y-3">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
               <span
-                className={`text-xs font-semibold px-3 py-1 rounded-full shadow-xs ${
+                className={`text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full shadow-xs ${
                   product.availability === 'available'
                     ? 'bg-emerald-800 text-cream-50'
                     : 'bg-gold-800 text-cream-50'
@@ -183,20 +183,20 @@ export const ClientProductDetailResolver: React.FC<ClientProductDetailResolverPr
                 {formatAvailability(product.availability)}
               </span>
 
-              <span className="text-xs font-bold text-gold-800 bg-gold-100/90 border border-gold-300 px-2.5 py-1 rounded-full">
+              <span className="text-[11px] sm:text-xs font-bold text-gold-800 bg-gold-100/90 border border-gold-300 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full">
                 {product.purity} Yellow Gold
               </span>
 
               {product.isFeatured && (
-                <span className="inline-flex items-center gap-1 bg-maroon-900 text-cream-50 text-xs font-semibold px-2.5 py-1 rounded-full shadow-xs">
-                  <Sparkles className="w-3.5 h-3.5 text-gold-300" />
+                <span className="inline-flex items-center gap-1 bg-maroon-900 text-cream-50 text-[11px] sm:text-xs font-semibold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full shadow-xs">
+                  <Sparkles className="w-3 h-3 text-gold-300" />
                   <span>Featured Collection</span>
                 </span>
               )}
             </div>
 
             {/* Product Title */}
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-maroon-950 leading-tight">
+            <h1 className="text-xl sm:text-3xl lg:text-4xl font-serif font-bold text-maroon-950 leading-tight">
               {product.name}
             </h1>
 
@@ -207,12 +207,12 @@ export const ClientProductDetailResolver: React.FC<ClientProductDetailResolverPr
           </div>
 
           {/* Short Description Overview */}
-          <p className="text-sm sm:text-base text-charcoal-700 font-sans leading-relaxed">
+          <p className="text-xs sm:text-sm md:text-base text-charcoal-700 font-sans leading-relaxed">
             {product.shortDescription}
           </p>
 
           {/* Specifications Table Grid */}
-          <div className="bg-cream-50 border border-gold-200/90 rounded-2xl p-5 shadow-card space-y-3">
+          <div className="bg-cream-50 border border-gold-200/90 rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-card space-y-3">
             <h2 className="text-xs font-bold uppercase tracking-wider text-maroon-900 border-b border-gold-200/60 pb-2">
               Product Specifications
             </h2>

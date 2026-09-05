@@ -112,7 +112,7 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
       {/* Ordered Thumbnails Strip */}
       {sortedImages.length > 1 && (
         <div
-          className="flex items-center gap-3 overflow-x-auto pb-2 focus:outline-none"
+          className="flex items-center gap-2 sm:gap-3 overflow-x-auto pb-1.5 focus:outline-none scrollbar-none"
           role="region"
           aria-label="Product Image Thumbnails"
         >
@@ -126,7 +126,7 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
                 key={img.id}
                 type="button"
                 onClick={() => setSelectedIndex(index)}
-                className={`relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 ${
+                className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg sm:rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 active:scale-95 ${
                   isSelected
                     ? 'border-maroon-700 shadow-md ring-2 ring-gold-400/50 scale-102'
                     : 'border-gold-200 hover:border-gold-400 opacity-80 hover:opacity-100'
