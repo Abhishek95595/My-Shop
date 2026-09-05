@@ -88,11 +88,11 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           </p>
         </div>
 
-        <div className="pt-2 flex items-center justify-end gap-2.5">
+        <div className="pt-2 flex flex-col xs:flex-row items-stretch xs:items-center justify-end gap-2.5">
           <button
             type="button"
             onClick={onCancel}
-            className="py-2 px-3.5 rounded-lg text-xs font-semibold text-charcoal-700 hover:bg-gold-100 transition-colors"
+            className="min-h-[44px] py-2.5 px-4 rounded-xl text-xs font-semibold text-charcoal-700 hover:bg-gold-100 transition-colors text-center cursor-pointer"
           >
             {cancelLabel}
           </button>
@@ -100,7 +100,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             ref={confirmBtnRef}
             type="button"
             onClick={onConfirm}
-            className="py-2 px-4 rounded-lg text-xs font-bold bg-maroon-700 hover:bg-maroon-800 text-cream-50 shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
+            className="min-h-[44px] py-2.5 px-5 rounded-xl text-xs font-bold bg-maroon-800 hover:bg-maroon-900 text-cream-50 shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 text-center cursor-pointer"
           >
             {confirmLabel}
           </button>

@@ -453,9 +453,9 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
                     : 'border-gold-200'
                 }`}
               >
-                {/* Thumbnail Preview */}
-                <div className="flex items-center gap-3.5 w-full sm:w-auto">
-                  <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-cream-200/60 border border-gold-200 flex-shrink-0">
+                {/* Thumbnail Preview & Alt Text Input */}
+                <div className="flex flex-col xs:flex-row items-start xs:items-center gap-3 w-full sm:w-auto flex-1">
+                  <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-cream-200/60 border border-gold-200 flex-shrink-0 shadow-2xs">
                     {previewUrl ? (
                       <Image
                         src={previewUrl}
@@ -478,7 +478,7 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
                   </div>
 
                   {/* Alt Text Input */}
-                  <div className="flex-1 space-y-1">
+                  <div className="w-full flex-1 space-y-1">
                     <label
                       htmlFor={`image-alt-${img.id}`}
                       className="block text-[10px] font-bold text-charcoal-700 uppercase"
@@ -493,74 +493,76 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
                       value={img.altText}
                       onChange={(e) => updateAltText(img.id, e.target.value)}
                       disabled={disabled || isUploading}
-                      className="w-full text-xs px-2.5 py-1.5 bg-cream-100 border border-gold-200 rounded-lg text-charcoal-900 focus:outline-none focus:border-gold-500"
+                      className="w-full text-xs px-3 py-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500 min-h-[44px]"
                     />
                   </div>
                 </div>
 
-                {/* Controls Action Row */}
-                <div className="flex items-center justify-between sm:justify-end gap-1.5 w-full sm:w-auto border-t sm:border-t-0 pt-2 sm:pt-0 border-gold-200/60">
+                {/* Controls Action Row (touch-friendly >=40px targets) */}
+                <div className="flex items-center justify-between sm:justify-end gap-1.5 w-full sm:w-auto border-t sm:border-t-0 pt-2.5 sm:pt-0 border-gold-200/60 flex-wrap">
                   {/* Primary Selector Toggle */}
                   <button
                     type="button"
                     disabled={disabled || isUploading}
                     onClick={() => setPrimaryImage(img.id)}
-                    className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors ${
+                    className={`min-h-[40px] px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
                       img.isPrimary
                         ? 'bg-gold-500 text-maroon-950 shadow-xs'
-                        : 'bg-gold-100/70 hover:bg-gold-200 text-maroon-900 border border-gold-300'
+                        : 'bg-gold-100/80 hover:bg-gold-200 text-maroon-900 border border-gold-300'
                     }`}
                     aria-label={`Set slot ${idx + 1} as primary cover`}
                   >
                     <Star
                       className={`w-3.5 h-3.5 ${img.isPrimary ? 'fill-current' : ''}`}
                     />
-                    <span>{img.isPrimary ? 'Primary' : 'Make Cover'}</span>
+                    <span>{img.isPrimary ? 'Primary Cover' : 'Make Cover'}</span>
                   </button>
 
-                  {/* Reorder Up */}
-                  <button
-                    type="button"
-                    disabled={disabled || isUploading || idx === 0}
-                    onClick={() => moveImage(idx, 'up')}
-                    className="p-1.5 text-charcoal-600 hover:text-maroon-800 disabled:opacity-30 disabled:cursor-not-allowed rounded"
-                    aria-label={`Move image ${idx + 1} up`}
-                  >
-                    <ArrowUp className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    {/* Reorder Up */}
+                    <button
+                      type="button"
+                      disabled={disabled || isUploading || idx === 0}
+                      onClick={() => moveImage(idx, 'up')}
+                      className="min-h-[40px] min-w-[40px] p-2 text-charcoal-600 hover:text-maroon-800 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg border border-gold-200 bg-cream-100 hover:bg-gold-100 inline-flex items-center justify-center transition-colors cursor-pointer"
+                      aria-label={`Move image ${idx + 1} up`}
+                    >
+                      <ArrowUp className="w-4 h-4" />
+                    </button>
 
-                  {/* Reorder Down */}
-                  <button
-                    type="button"
-                    disabled={disabled || isUploading || idx === images.length - 1}
-                    onClick={() => moveImage(idx, 'down')}
-                    className="p-1.5 text-charcoal-600 hover:text-maroon-800 disabled:opacity-30 disabled:cursor-not-allowed rounded"
-                    aria-label={`Move image ${idx + 1} down`}
-                  >
-                    <ArrowDown className="w-4 h-4" />
-                  </button>
+                    {/* Reorder Down */}
+                    <button
+                      type="button"
+                      disabled={disabled || isUploading || idx === images.length - 1}
+                      onClick={() => moveImage(idx, 'down')}
+                      className="min-h-[40px] min-w-[40px] p-2 text-charcoal-600 hover:text-maroon-800 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg border border-gold-200 bg-cream-100 hover:bg-gold-100 inline-flex items-center justify-center transition-colors cursor-pointer"
+                      aria-label={`Move image ${idx + 1} down`}
+                    >
+                      <ArrowDown className="w-4 h-4" />
+                    </button>
 
-                  {/* Replace Button */}
-                  <button
-                    type="button"
-                    disabled={disabled || isUploading}
-                    onClick={() => triggerReplace(img.id)}
-                    className="p-1.5 text-charcoal-600 hover:text-maroon-800 rounded"
-                    aria-label={`Replace image ${idx + 1}`}
-                  >
-                    <RefreshCw className="w-4 h-4" />
-                  </button>
+                    {/* Replace Button */}
+                    <button
+                      type="button"
+                      disabled={disabled || isUploading}
+                      onClick={() => triggerReplace(img.id)}
+                      className="min-h-[40px] min-w-[40px] p-2 text-charcoal-600 hover:text-maroon-800 rounded-lg border border-gold-200 bg-cream-100 hover:bg-gold-100 inline-flex items-center justify-center transition-colors cursor-pointer"
+                      aria-label={`Replace image ${idx + 1}`}
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                    </button>
 
-                  {/* Remove Button */}
-                  <button
-                    type="button"
-                    disabled={disabled || isUploading}
-                    onClick={() => removeImage(img.id)}
-                    className="p-1.5 text-maroon-700 hover:text-maroon-950 hover:bg-maroon-50 rounded"
-                    aria-label={`Remove image ${idx + 1}`}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                    {/* Remove Button */}
+                    <button
+                      type="button"
+                      disabled={disabled || isUploading}
+                      onClick={() => removeImage(img.id)}
+                      className="min-h-[40px] min-w-[40px] p-2 text-red-700 hover:text-red-900 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 inline-flex items-center justify-center transition-colors cursor-pointer"
+                      aria-label={`Remove image ${idx + 1}`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             );

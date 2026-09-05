@@ -163,12 +163,12 @@ export const AdminRatesManager: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6">
       {/* Top Header & Add Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-cream-50 border border-gold-200/90 rounded-2xl p-4 shadow-card">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 bg-cream-50 border border-gold-200/90 rounded-2xl p-3.5 sm:p-4 shadow-card">
         <div className="space-y-0.5">
-          <h2 className="text-base font-serif font-bold text-maroon-950 flex items-center gap-2">
-            <Coins className="w-5 h-5 text-gold-700" />
+          <h2 className="text-sm sm:text-base font-serif font-bold text-maroon-950 flex items-center gap-2">
+            <Coins className="w-5 h-5 text-gold-700 flex-shrink-0" />
             <span>Owner-Updated Bullion Reference Rates</span>
           </h2>
           <p className="text-xs text-charcoal-600 font-sans">
@@ -179,7 +179,7 @@ export const AdminRatesManager: React.FC = () => {
         <button
           type="button"
           onClick={handleOpenAdd}
-          className="inline-flex items-center gap-2 bg-maroon-800 hover:bg-maroon-900 text-cream-50 text-xs font-bold py-2.5 px-4 rounded-xl shadow-xs transition-colors self-start sm:self-auto cursor-pointer"
+          className="inline-flex items-center justify-center gap-2 bg-maroon-800 hover:bg-maroon-900 text-cream-50 text-xs font-bold py-2.5 px-4 rounded-xl shadow-xs transition-colors w-full sm:w-auto min-h-[44px] cursor-pointer flex-shrink-0"
         >
           <Plus className="w-4 h-4 text-gold-300" />
           <span>Add New Rate</span>
@@ -190,7 +190,7 @@ export const AdminRatesManager: React.FC = () => {
       {loadStatus === 'error' ? (
         <div
           role="alert"
-          className="bg-cream-50 border border-maroon-300 rounded-3xl p-12 text-center shadow-card space-y-3"
+          className="bg-cream-50 border border-maroon-300 rounded-2xl sm:rounded-3xl p-8 sm:p-12 text-center shadow-card space-y-3"
         >
           <AlertTriangle className="w-12 h-12 text-maroon-700 mx-auto opacity-80" />
           <h3 className="text-lg font-serif font-bold text-maroon-950">
@@ -203,7 +203,7 @@ export const AdminRatesManager: React.FC = () => {
           </p>
         </div>
       ) : loadStatus === 'loading' ? (
-        <div className="bg-cream-50 border border-gold-200/90 rounded-3xl p-12 text-center shadow-card space-y-3">
+        <div className="bg-cream-50 border border-gold-200/90 rounded-2xl sm:rounded-3xl p-8 sm:p-12 text-center shadow-card space-y-3">
           <Coins className="w-12 h-12 text-gold-700 mx-auto opacity-70 animate-pulse" />
           <h3 className="text-lg font-serif font-bold text-maroon-950">Loading Rates…</h3>
           <p className="text-xs text-charcoal-600 font-sans">
@@ -211,17 +211,125 @@ export const AdminRatesManager: React.FC = () => {
           </p>
         </div>
       ) : rates.length > 0 ? (
-        <div className="bg-cream-50 border border-gold-200/90 rounded-3xl shadow-card overflow-hidden divide-y divide-gold-200/60 font-sans">
-          {rates.map((item) => (
-            <div
-              key={item.id}
-              className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-gold-50/40 transition-colors"
-            >
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-serif font-bold text-maroon-950 text-base">{item.label}</h3>
+        <div className="space-y-4">
+          {/* Desktop Table View */}
+          <div className="hidden md:block bg-cream-50 border border-gold-200/90 rounded-2xl sm:rounded-3xl shadow-card overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs font-sans">
+                <thead className="bg-cream-200/60 border-b border-gold-200 text-maroon-950 font-bold uppercase tracking-wider text-[11px]">
+                  <tr>
+                    <th className="py-3.5 px-4">Rate Label &amp; Material</th>
+                    <th className="py-3.5 px-4">Unit</th>
+                    <th className="py-3.5 px-4">Numeric Rate</th>
+                    <th className="py-3.5 px-4">Status</th>
+                    <th className="py-3.5 px-4">Last Updated</th>
+                    <th className="py-3.5 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gold-200/60 text-charcoal-800">
+                  {rates.map((item) => (
+                    <tr key={item.id} className="hover:bg-gold-50/50 transition-colors">
+                      <td className="py-3.5 px-4">
+                        <p className="font-serif font-bold text-maroon-950 text-sm">{item.label}</p>
+                        <p className="text-[11px] text-charcoal-500 font-sans">{item.material}</p>
+                      </td>
+
+                      <td className="py-3.5 px-4 font-semibold text-charcoal-800">
+                        {item.unit}
+                      </td>
+
+                      <td className="py-3.5 px-4">
+                        <span className="font-serif font-bold text-maroon-950 text-base">
+                          ₹{item.rate.toLocaleString('en-IN')}
+                        </span>
+                      </td>
+
+                      <td className="py-3.5 px-4">
+                        <span
+                          className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full ${
+                            item.isActive
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : 'bg-charcoal-200 text-charcoal-700'
+                          }`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              item.isActive ? 'bg-emerald-600' : 'bg-charcoal-500'
+                            }`}
+                          />
+                          <span>{item.isActive ? 'Active (Public)' : 'Inactive'}</span>
+                        </span>
+                      </td>
+
+                      <td className="py-3.5 px-4 font-mono text-[11px] text-charcoal-500 whitespace-nowrap">
+                        {new Date(item.lastUpdated).toLocaleDateString('en-IN', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </td>
+
+                      <td className="py-3.5 px-4 text-right whitespace-nowrap space-x-1">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleActive(item)}
+                          aria-pressed={item.isActive}
+                          className={`py-1.5 px-2.5 rounded-lg text-xs font-semibold border transition-colors cursor-pointer ${
+                            item.isActive
+                              ? 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
+                              : 'bg-cream-100 text-charcoal-600 border-gold-300 hover:bg-gold-100'
+                          }`}
+                        >
+                          {item.isActive ? 'Deactivate' : 'Activate'}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEdit(item)}
+                          className="p-1.5 text-charcoal-500 hover:text-maroon-900 hover:bg-gold-100 rounded-lg transition-colors cursor-pointer"
+                          aria-label={`Edit ${item.label}`}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDeletePrompt(item)}
+                          className="p-1.5 text-charcoal-400 hover:text-maroon-800 hover:bg-maroon-50 rounded-lg transition-colors cursor-pointer"
+                          aria-label={`Delete ${item.label}`}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Mobile Cards View (>=44px touch targets, clear wrap, no horizontal scroll) */}
+          <div className="md:hidden space-y-3 font-sans">
+            {rates.map((item) => (
+              <div
+                key={item.id}
+                className="bg-cream-50 border border-gold-200/90 rounded-2xl p-3.5 sm:p-4 shadow-card space-y-3"
+              >
+                {/* Header: Label, Material, Status Badge */}
+                <div className="flex items-start justify-between gap-2.5">
+                  <div className="space-y-0.5 min-w-0">
+                    <h3 className="font-serif font-bold text-maroon-950 text-base leading-snug break-words">
+                      {item.label}
+                    </h3>
+                    <p className="text-xs text-charcoal-600">
+                      {item.material} • Unit: <strong className="text-charcoal-800">{item.unit}</strong>
+                    </p>
+                  </div>
+
                   <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    className={`text-[10px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap flex-shrink-0 ${
                       item.isActive
                         ? 'bg-emerald-100 text-emerald-800'
                         : 'bg-charcoal-200 text-charcoal-700'
@@ -230,71 +338,72 @@ export const AdminRatesManager: React.FC = () => {
                     {item.isActive ? 'Active (Public)' : 'Inactive'}
                   </span>
                 </div>
-                <p className="text-xs text-charcoal-600">
-                  {item.material} • Unit: <strong className="text-charcoal-800">{item.unit}</strong>
-                </p>
-                <p className="text-[11px] font-mono text-charcoal-500">
-                  Last updated:{' '}
-                  {new Date(item.lastUpdated).toLocaleDateString('en-IN', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </p>
-              </div>
 
-              <div className="flex items-center gap-4">
-                <div className="text-left sm:text-right">
-                  <p className="text-xl font-serif font-bold text-maroon-950">
-                    ₹{item.rate.toLocaleString('en-IN')}
+                {/* Price Display and Last Updated */}
+                <div className="flex items-baseline justify-between pt-1 border-t border-gold-200/50">
+                  <div>
+                    <span className="text-2xl font-serif font-bold text-maroon-950">
+                      ₹{item.rate.toLocaleString('en-IN')}
+                    </span>
+                    <span className="text-xs text-charcoal-500 font-sans ml-1.5">
+                      {item.unit}
+                    </span>
+                  </div>
+
+                  <p className="text-[10px] font-mono text-charcoal-500">
+                    Updated: {new Date(item.lastUpdated).toLocaleDateString('en-IN', {
+                      day: 'numeric',
+                      month: 'short',
+                    })}
                   </p>
-                  <p className="text-[11px] text-charcoal-500 font-sans">{item.unit}</p>
                 </div>
 
-                <div className="flex items-center gap-1.5 border-l border-gold-200 pl-4">
-                  {/* Toggle Active Button */}
+                {/* Action Controls Row (>=44px touch targets) */}
+                <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-gold-200/50">
+                  {/* Active/Inactive Toggle Button */}
                   <button
                     type="button"
                     onClick={() => handleToggleActive(item)}
                     aria-pressed={item.isActive}
                     aria-label={`${item.isActive ? 'Deactivate' : 'Activate'} ${item.label}`}
-                    className={`py-1.5 px-3 rounded-lg text-xs font-semibold border transition-colors cursor-pointer ${
+                    className={`flex-1 min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-bold border transition-colors inline-flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer ${
                       item.isActive
-                        ? 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
-                        : 'bg-cream-100 text-charcoal-600 border-gold-300 hover:bg-gold-100'
+                        ? 'bg-emerald-50 text-emerald-900 border-emerald-300 hover:bg-emerald-100'
+                        : 'bg-cream-100 text-charcoal-700 border-gold-300 hover:bg-gold-100'
                     }`}
                   >
-                    {item.isActive ? 'Deactivate' : 'Activate'}
+                    <CheckCircle2 className={`w-4 h-4 ${item.isActive ? 'text-emerald-700' : 'text-charcoal-400'}`} />
+                    <span>{item.isActive ? 'Publicly Active' : 'Set Active'}</span>
                   </button>
 
                   {/* Edit Button */}
                   <button
                     type="button"
                     onClick={() => handleOpenEdit(item)}
-                    className="p-2 text-charcoal-500 hover:text-maroon-900 hover:bg-gold-100 rounded-lg transition-colors cursor-pointer"
+                    className="min-h-[44px] px-3.5 py-2 bg-cream-100 hover:bg-gold-100 text-maroon-900 border border-gold-300 rounded-xl text-xs font-bold inline-flex items-center justify-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
                     aria-label={`Edit ${item.label}`}
                   >
                     <Edit className="w-4 h-4" />
+                    <span>Edit</span>
                   </button>
 
                   {/* Delete Button */}
                   <button
                     type="button"
                     onClick={() => handleDeletePrompt(item)}
-                    className="p-2 text-charcoal-400 hover:text-maroon-800 hover:bg-maroon-50 rounded-lg transition-colors cursor-pointer"
+                    className="min-h-[44px] px-3.5 py-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-xl text-xs font-bold inline-flex items-center justify-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
                     aria-label={`Delete ${item.label}`}
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-4 h-4 text-red-600" />
+                    <span>Delete</span>
                   </button>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       ) : (
-        <div className="bg-cream-50 border border-gold-200/90 rounded-3xl p-12 text-center shadow-card space-y-3">
+        <div className="bg-cream-50 border border-gold-200/90 rounded-2xl sm:rounded-3xl p-8 sm:p-12 text-center shadow-card space-y-3">
           <Coins className="w-12 h-12 text-gold-700 mx-auto opacity-70" />
           <h3 className="text-lg font-serif font-bold text-maroon-950">No Rates Entered</h3>
           <p className="text-xs text-charcoal-600 font-sans max-w-md mx-auto">
@@ -304,7 +413,7 @@ export const AdminRatesManager: React.FC = () => {
             <button
               type="button"
               onClick={handleOpenAdd}
-              className="inline-flex items-center gap-1.5 bg-maroon-800 hover:bg-maroon-900 text-cream-50 text-xs font-bold py-2.5 px-4 rounded-xl shadow-xs transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 bg-maroon-800 hover:bg-maroon-900 text-cream-50 text-xs font-bold py-2.5 px-4 rounded-xl shadow-xs transition-colors cursor-pointer min-h-[44px]"
             >
               <Plus className="w-4 h-4 text-gold-300" />
               <span>Add First Rate</span>
@@ -316,7 +425,7 @@ export const AdminRatesManager: React.FC = () => {
       {/* Add / Edit Rate Modal */}
       {isModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal-900/60 backdrop-blur-xs animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 flex items-center justify-center p-3.5 sm:p-4 bg-charcoal-900/60 backdrop-blur-xs animate-in fade-in duration-200 overflow-y-auto"
           role="dialog"
           aria-modal="true"
           aria-labelledby="rate-form-title"
@@ -346,18 +455,18 @@ export const AdminRatesManager: React.FC = () => {
             }
           }}
         >
-          <div className="bg-cream-50 border border-gold-300 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
+          <div className="bg-cream-50 border border-gold-300 rounded-2xl sm:rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-gold-200/80 pb-3">
               <h3
                 id="rate-form-title"
-                className="text-lg font-serif font-bold text-maroon-950"
+                className="text-base sm:text-lg font-serif font-bold text-maroon-950"
               >
                 {editingId ? 'Edit Reference Rate' : 'Add New Reference Rate'}
               </h3>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="p-1 text-charcoal-400 hover:text-charcoal-700 rounded-lg"
+                className="p-1.5 text-charcoal-400 hover:text-charcoal-700 rounded-lg min-h-[36px] min-w-[36px] inline-flex items-center justify-center"
                 aria-label="Close rate form"
               >
                 <X className="w-5 h-5" />
@@ -389,11 +498,12 @@ export const AdminRatesManager: React.FC = () => {
                   placeholder="e.g. 22K Gold (916 Standard)"
                   value={label}
                   onChange={(e) => setLabel(e.target.value)}
-                  className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500"
+                  className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500 min-h-[44px]"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              {/* Material and Unit stacked vertically on phones */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label
                     htmlFor="rate-material"
@@ -409,7 +519,7 @@ export const AdminRatesManager: React.FC = () => {
                     placeholder="e.g. 22K Gold"
                     value={material}
                     onChange={(e) => setMaterial(e.target.value)}
-                    className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500"
+                    className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500 min-h-[44px]"
                   />
                   <datalist id="rate-material-options">
                     <option value="18K Gold" />
@@ -434,7 +544,7 @@ export const AdminRatesManager: React.FC = () => {
                     placeholder="e.g. per gram"
                     value={unit}
                     onChange={(e) => setUnit(e.target.value)}
-                    className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500"
+                    className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500 min-h-[44px]"
                   />
                   <datalist id="rate-unit-options">
                     <option value="per gram" />
@@ -459,11 +569,11 @@ export const AdminRatesManager: React.FC = () => {
                   placeholder="e.g. 7250"
                   value={rate}
                   onChange={(e) => setRate(e.target.value)}
-                  className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 font-mono focus:outline-none focus:border-gold-500"
+                  className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 font-mono focus:outline-none focus:border-gold-500 min-h-[44px]"
                 />
               </div>
 
-              <div className="flex items-center gap-2 pt-1">
+              <div className="flex items-center gap-2.5 p-3 bg-cream-100 border border-gold-200 rounded-xl cursor-pointer">
                 <input
                   type="checkbox"
                   id="isActiveRate"
@@ -471,22 +581,22 @@ export const AdminRatesManager: React.FC = () => {
                   onChange={(e) => setIsActive(e.target.checked)}
                   className="w-4 h-4 rounded text-maroon-800 border-gold-300 focus:ring-gold-500"
                 />
-                <label htmlFor="isActiveRate" className="text-xs font-semibold text-charcoal-800">
+                <label htmlFor="isActiveRate" className="text-xs font-semibold text-charcoal-800 cursor-pointer">
                   Publish to Public /rates Page Immediately
                 </label>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-gold-200/80">
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-gold-200/80">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="py-2 px-4 rounded-xl text-xs font-semibold text-charcoal-700 bg-cream-100 hover:bg-gold-100"
+                  className="min-h-[44px] py-2.5 px-4 rounded-xl text-xs font-semibold text-charcoal-700 bg-cream-100 hover:bg-gold-100 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="inline-flex items-center gap-1.5 py-2 px-4 rounded-xl text-xs font-bold text-cream-50 bg-maroon-800 hover:bg-maroon-900 shadow-xs"
+                  className="min-h-[44px] inline-flex items-center justify-center gap-1.5 py-2.5 px-5 rounded-xl text-xs font-bold text-cream-50 bg-maroon-800 hover:bg-maroon-900 shadow-xs transition-colors"
                 >
                   <Save className="w-3.5 h-3.5 text-gold-300" />
                   <span>{editingId ? 'Save Changes' : 'Create Rate'}</span>

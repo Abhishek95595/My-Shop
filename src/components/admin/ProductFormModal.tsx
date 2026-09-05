@@ -420,7 +420,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-labelledby="product-form-title"
@@ -435,18 +435,18 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
       {/* Modal Card */}
       <div
         ref={modalRef}
-        className="relative w-full max-w-3xl bg-cream-50 border border-gold-300 rounded-3xl p-6 sm:p-8 shadow-2xl z-10 space-y-6 max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200"
+        className="relative w-full max-w-3xl bg-cream-50 border border-gold-300 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-2xl z-10 space-y-5 sm:space-y-6 max-h-[94vh] sm:max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200"
       >
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 border-b border-gold-200/80 pb-4">
+        <div className="flex items-start justify-between gap-3 border-b border-gold-200/80 pb-3.5 sm:pb-4">
           <div className="space-y-1">
-            <div className="inline-flex items-center gap-1.5 bg-gold-100 text-maroon-900 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-gold-200">
+            <div className="inline-flex items-center gap-1.5 bg-gold-100 text-maroon-900 text-[10px] sm:text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-gold-200">
               <Sparkles className="w-3 h-3 text-gold-700" />
               <span>{isEditing ? 'Edit Product' : 'Add New Gold Product'}</span>
             </div>
             <h2
               id="product-form-title"
-              className="text-xl sm:text-2xl font-serif font-bold text-maroon-950"
+              className="text-lg sm:text-2xl font-serif font-bold text-maroon-950 leading-snug"
             >
               {isEditing ? `Editing: ${productToEdit.name}` : 'Create Catalogue Product'}
             </h2>
@@ -457,7 +457,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             type="button"
             onClick={handleCancel}
             disabled={isSubmitting || isImageBusy || isCleaningUp || isClosing}
-            className="p-1.5 text-charcoal-500 hover:text-maroon-900 hover:bg-gold-100 rounded-full transition-colors disabled:opacity-40"
+            className="p-2 text-charcoal-500 hover:text-maroon-900 hover:bg-gold-100 rounded-full transition-colors disabled:opacity-40 min-h-[38px] min-w-[38px] inline-flex items-center justify-center"
             aria-label="Close product form"
           >
             <X className="w-5 h-5" />
@@ -466,7 +466,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
         {/* Cleanup Failure Modal Box */}
         {cleanupFailureInfo && (
-          <div className="p-4 bg-amber-50 border border-amber-300 rounded-2xl space-y-2 text-xs text-amber-950">
+          <div className="p-3.5 sm:p-4 bg-amber-50 border border-amber-300 rounded-2xl space-y-2 text-xs text-amber-950">
             <div className="flex items-center gap-1.5 font-bold text-amber-900">
               <AlertCircle className="w-4 h-4 text-amber-700 flex-shrink-0" />
               <span>Storage Cleanup Notice</span>
@@ -481,7 +481,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
               <button
                 type="button"
                 onClick={handleCancel}
-                className="py-1.5 px-3 bg-amber-200 hover:bg-amber-300 text-amber-950 rounded-lg font-bold text-[11px] transition-colors"
+                className="min-h-[38px] py-1.5 px-3 bg-amber-200 hover:bg-amber-300 text-amber-950 rounded-lg font-bold text-[11px] transition-colors"
               >
                 Retry Cleanup
               </button>
@@ -492,7 +492,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                   setCleanupFailureInfo(null);
                   onClose();
                 }}
-                className="py-1.5 px-3 bg-maroon-800 hover:bg-maroon-900 text-cream-50 rounded-lg font-bold text-[11px] transition-colors"
+                className="min-h-[38px] py-1.5 px-3 bg-maroon-800 hover:bg-maroon-900 text-cream-50 rounded-lg font-bold text-[11px] transition-colors"
               >
                 Close Anyway
               </button>
@@ -502,7 +502,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
         {/* Validation Errors Display */}
         {validationErrors.length > 0 && (
-          <div className="p-4 bg-maroon-50 border border-maroon-200 rounded-2xl space-y-1.5 text-xs text-maroon-900">
+          <div className="p-3.5 sm:p-4 bg-maroon-50 border border-maroon-200 rounded-2xl space-y-1.5 text-xs text-maroon-900">
             <div className="flex items-center gap-1.5 font-bold">
               <AlertCircle className="w-4 h-4 text-maroon-700 flex-shrink-0" />
               <span>Please resolve the following before proceeding:</span>
@@ -516,15 +516,15 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
         )}
 
         {/* Form Body */}
-        <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+        <form onSubmit={(e) => e.preventDefault()} className="space-y-5 sm:space-y-6">
           {/* SKU Preview & Basic Details Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
             {/* Auto Immutable SKU */}
             <div className="space-y-1">
               <span className="block text-xs font-bold uppercase tracking-wider text-maroon-900">
                 SKU (Immutable)
               </span>
-              <div className="p-2.5 bg-cream-200/70 border border-gold-300 rounded-xl font-mono text-xs text-maroon-950 font-bold">
+              <div className="p-2.5 bg-cream-200/70 border border-gold-300 rounded-xl font-mono text-xs text-maroon-950 font-bold min-h-[44px] flex items-center">
                 {skuPreview || 'Generating SKU...'}
               </div>
               <p className="text-[10px] text-charcoal-500 font-sans">
@@ -544,7 +544,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 id="product-category"
                 value={category}
                 onChange={(e) => setCategory(e.target.value as ProductCategory)}
-                className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500"
+                className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500 min-h-[44px]"
               >
                 {CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -556,7 +556,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
           </div>
 
           {/* Product Name & Slug */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
             <div className="space-y-1">
               <label
                 htmlFor="product-name"
@@ -571,7 +571,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 placeholder="e.g. Royal Bridal Gold Necklace"
                 value={name}
                 onChange={(e) => handleNameChange(e.target.value)}
-                className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500"
+                className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500 min-h-[44px]"
               />
             </div>
 
@@ -589,13 +589,13 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 placeholder="e.g. royal-bridal-gold-necklace"
                 value={slug}
                 onChange={(e) => setSlug(e.target.value)}
-                className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 font-mono focus:outline-none focus:border-gold-500"
+                className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 font-mono focus:outline-none focus:border-gold-500 min-h-[44px]"
               />
             </div>
           </div>
 
-          {/* Gender, Purity, Approx Weight, Availability */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {/* Gender, Purity, Approx Weight, Availability - Stack cleanly on phones */}
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="space-y-1">
               <label
                 htmlFor="product-gender"
@@ -607,7 +607,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 id="product-gender"
                 value={gender}
                 onChange={(e) => setGender(e.target.value as 'Women' | 'Men')}
-                className="w-full text-xs p-2 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none"
+                className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none min-h-[44px]"
               >
                 {GENDERS.map((g) => (
                   <option key={g} value={g}>
@@ -628,7 +628,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 id="product-purity"
                 value={purity}
                 onChange={(e) => setPurity(e.target.value as '18K' | '22K' | '24K')}
-                className="w-full text-xs p-2 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none"
+                className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none min-h-[44px]"
               >
                 {PURITIES.map((p) => (
                   <option key={p} value={p}>
@@ -653,7 +653,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 required
                 value={approxWeight}
                 onChange={(e) => setApproxWeight(e.target.value)}
-                className="w-full text-xs p-2 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none font-mono"
+                className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none font-mono min-h-[44px]"
               />
             </div>
 
@@ -672,7 +672,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                     e.target.value === 'available' ? 'available' : 'made_on_order'
                   )
                 }
-                className="w-full text-xs p-2 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none"
+                className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none min-h-[44px]"
               >
                 <option value="available">Available</option>
                 <option value="made_on_order">Made on Order</option>
@@ -681,7 +681,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
           </div>
 
           {/* Occasion & Tags */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
             <div className="space-y-1">
               <label
                 htmlFor="product-occasion"
@@ -697,7 +697,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 placeholder="e.g. Wedding, Daily Wear, Festive"
                 value={occasion}
                 onChange={(e) => setOccasion(e.target.value)}
-                className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500"
+                className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500 min-h-[44px]"
               />
               <datalist id="occasions-list">
                 {OCCASIONS.map((occ) => (
@@ -719,7 +719,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 placeholder="e.g. Bridal, Handcrafted, 22K Gold"
                 value={tagsInput}
                 onChange={(e) => setTagsInput(e.target.value)}
-                className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500"
+                className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500 min-h-[44px]"
               />
             </div>
           </div>
@@ -739,7 +739,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
               placeholder="1-2 sentences summarizing the jewellery piece"
               value={shortDescription}
               onChange={(e) => setShortDescription(e.target.value)}
-              className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500"
+              className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500 min-h-[44px]"
             />
           </div>
 
@@ -763,7 +763,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
           </div>
 
           {/* Featured Toggle */}
-          <div className="flex items-center gap-3 p-3 bg-cream-100 border border-gold-200 rounded-xl">
+          <div className="flex items-center gap-3 p-3 bg-cream-100 border border-gold-200 rounded-xl min-h-[44px] cursor-pointer">
             <input
               type="checkbox"
               id="featured-toggle-input"
@@ -804,13 +804,13 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             />
           </div>
 
-          {/* Footer Action Buttons */}
-          <div className="pt-4 border-t border-gold-200/80 flex flex-wrap items-center justify-end gap-3">
+          {/* Sticky Footer Action Buttons with Safe Area */}
+          <div className="sticky bottom-0 bg-cream-50/95 backdrop-blur-xs pt-3 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] sm:pb-0 border-t border-gold-200/80 -mx-4 px-4 sm:mx-0 sm:px-0 z-20 shadow-md sm:shadow-none flex flex-col xs:flex-row items-stretch xs:items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={handleCancel}
               disabled={isSubmitting || isImageBusy || isCleaningUp || isClosing}
-              className="py-2.5 px-4 rounded-xl text-xs font-semibold text-charcoal-700 hover:bg-gold-100 transition-colors disabled:opacity-40"
+              className="min-h-[44px] py-2.5 px-4 rounded-xl text-xs font-semibold text-charcoal-700 hover:bg-gold-100 transition-colors disabled:opacity-40 text-center"
             >
               {isCleaningUp ? 'Cleaning up...' : 'Cancel'}
             </button>
@@ -819,7 +819,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
               type="button"
               disabled={isSubmitting || isImageBusy || isCleaningUp || isClosing}
               onClick={() => handleSubmit('draft')}
-              className="py-2.5 px-5 bg-gold-100 hover:bg-gold-200 border border-gold-300 text-maroon-950 rounded-xl text-xs font-bold transition-colors shadow-2xs disabled:opacity-40"
+              className="min-h-[44px] py-2.5 px-5 bg-gold-100 hover:bg-gold-200 border border-gold-300 text-maroon-950 rounded-xl text-xs font-bold transition-colors shadow-2xs disabled:opacity-40 text-center"
             >
               Save as Draft
             </button>
@@ -828,7 +828,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
               type="button"
               disabled={isSubmitting || isImageBusy || isCleaningUp || isClosing}
               onClick={() => handleSubmit('published')}
-              className="py-2.5 px-6 bg-maroon-800 hover:bg-maroon-900 text-cream-50 rounded-xl text-xs font-bold transition-colors shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 disabled:opacity-40"
+              className="min-h-[44px] py-2.5 px-6 bg-maroon-800 hover:bg-maroon-900 text-cream-50 rounded-xl text-xs font-bold transition-colors shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 disabled:opacity-40 text-center"
             >
               {isSubmitting
                 ? 'Saving...'

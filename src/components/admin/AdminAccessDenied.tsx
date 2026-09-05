@@ -61,7 +61,7 @@ export const AdminAccessDenied: React.FC = () => {
               type="button"
               onClick={handleAdminSignIn}
               disabled={isSigningIn}
-              className="inline-flex items-center gap-2 bg-maroon-800 hover:bg-maroon-900 disabled:opacity-60 disabled:cursor-not-allowed text-cream-50 font-bold px-6 py-3 rounded-xl shadow-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 bg-maroon-800 hover:bg-maroon-900 disabled:opacity-60 disabled:cursor-not-allowed text-cream-50 font-bold px-6 py-3 rounded-xl shadow-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 cursor-pointer min-h-[44px] w-full sm:w-auto"
             >
               <UserCheck className="w-4 h-4 text-gold-300" />
               <span>{isSigningIn ? 'Opening Google Sign-In…' : 'Sign In as Administrator'}</span>
@@ -80,7 +80,7 @@ export const AdminAccessDenied: React.FC = () => {
       <div>
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-xs font-bold text-maroon-900 bg-gold-100 hover:bg-gold-200 border border-gold-300 px-5 py-2.5 rounded-xl transition-colors shadow-2xs"
+          className="inline-flex items-center justify-center gap-2 text-xs font-bold text-maroon-900 bg-gold-100 hover:bg-gold-200 border border-gold-300 px-5 py-2.5 rounded-xl transition-colors shadow-2xs min-h-[44px]"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Return to Homepage</span>

@@ -98,7 +98,7 @@ export const DeleteProductConfirmationModal: React.FC<DeleteProductConfirmationM
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3.5 sm:p-4 overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-labelledby="delete-product-dialog-title"
@@ -115,29 +115,29 @@ export const DeleteProductConfirmationModal: React.FC<DeleteProductConfirmationM
       {/* Modal Container */}
       <div
         ref={modalRef}
-        className="relative w-full max-w-md bg-cream-50 border border-red-200 rounded-2xl p-6 shadow-2xl z-10 space-y-5 animate-in fade-in zoom-in-95 duration-150"
+        className="relative w-full max-w-md bg-cream-50 border border-red-200 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl z-10 space-y-4 sm:space-y-5 animate-in fade-in zoom-in-95 duration-150 max-h-[92vh] overflow-y-auto"
       >
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
-          <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-700 flex-shrink-0">
+          <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-700 flex-shrink-0 shadow-2xs">
             <AlertTriangle className="w-5 h-5" />
           </div>
           <button
             type="button"
             onClick={onCancel}
             disabled={isDeleting}
-            className="p-1 text-charcoal-400 hover:text-maroon-800 rounded focus:outline-none disabled:opacity-40"
+            className="p-1.5 text-charcoal-400 hover:text-maroon-800 rounded-lg focus:outline-none disabled:opacity-40 min-h-[36px] min-w-[36px] inline-flex items-center justify-center"
             aria-label="Close dialog"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Title & Warning */}
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <h2
             id="delete-product-dialog-title"
-            className="font-serif font-bold text-lg sm:text-xl text-maroon-950 leading-snug"
+            className="font-serif font-bold text-base sm:text-xl text-maroon-950 leading-snug break-words"
           >
             Permanently delete &quot;{product.name}&quot;?
           </h2>
@@ -181,26 +181,26 @@ export const DeleteProductConfirmationModal: React.FC<DeleteProductConfirmationM
               value={confirmationInput}
               onChange={(e) => setConfirmationInput(e.target.value)}
               placeholder={`DELETE or "${product.name}"`}
-              className="w-full text-xs p-2.5 bg-white border border-gold-300 rounded-xl text-charcoal-900 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 disabled:bg-charcoal-100"
+              className="w-full text-xs p-2.5 bg-white border border-gold-300 rounded-xl text-charcoal-900 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 disabled:bg-charcoal-100 min-h-[44px]"
               autoComplete="off"
               spellCheck={false}
             />
           </div>
 
-          {/* Action Buttons */}
-          <div className="pt-2 flex items-center justify-end gap-2.5">
+          {/* Action Buttons (min 44px) */}
+          <div className="pt-2 flex flex-col xs:flex-row items-stretch xs:items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={onCancel}
               disabled={isDeleting}
-              className="py-2 px-3.5 rounded-lg text-xs font-semibold text-charcoal-700 hover:bg-gold-100 transition-colors disabled:opacity-40 cursor-pointer"
+              className="min-h-[44px] py-2.5 px-4 rounded-xl text-xs font-semibold text-charcoal-700 hover:bg-gold-100 transition-colors disabled:opacity-40 cursor-pointer text-center"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!isConfirmed || isDeleting}
-              className="py-2 px-4 rounded-lg text-xs font-bold bg-red-700 hover:bg-red-800 text-white shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              className="min-h-[44px] py-2.5 px-5 rounded-xl text-xs font-bold bg-red-700 hover:bg-red-800 text-white shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer text-center"
             >
               {isDeleting ? 'Deleting...' : 'Delete Permanently'}
             </button>

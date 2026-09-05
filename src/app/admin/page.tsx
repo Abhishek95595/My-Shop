@@ -272,12 +272,12 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
+    <div className="max-w-7xl mx-auto px-3.5 sm:px-6 py-5 sm:py-8 md:py-12 space-y-6 sm:space-y-8">
       {/* Firestore Load Failure Notice */}
       {failedCollections.length > 0 && (
         <div
           role="alert"
-          className="bg-maroon-50 border border-maroon-300 rounded-2xl p-4 flex items-start gap-3 text-xs text-maroon-950 font-sans shadow-xs"
+          className="bg-maroon-50 border border-maroon-300 rounded-2xl p-3.5 sm:p-4 flex items-start gap-3 text-xs text-maroon-950 font-sans shadow-xs"
         >
           <AlertTriangle className="w-5 h-5 text-maroon-700 flex-shrink-0 mt-0.5" />
           <div className="space-y-1">
@@ -293,26 +293,26 @@ export default function AdminDashboardPage() {
       )}
 
       {/* Top Banner Notice */}
-      <div className="bg-gold-100/90 border border-gold-300 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-maroon-950 font-sans shadow-xs">
+      <div className="bg-gold-100/90 border border-gold-300 rounded-2xl p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-maroon-950 font-sans shadow-xs">
         <div className="flex items-center gap-2.5">
-          <ShieldCheck className="w-5 h-5 text-gold-700 flex-shrink-0" />
+          <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-gold-700 flex-shrink-0" />
           <div>
-            <p className="font-bold">
-              {isFirebaseConfigured ? 'Firebase Admin Mode' : 'Development Admin Mode • Local Demonstration Only'}
+            <p className="font-bold text-[11px] sm:text-xs">
+              {isFirebaseConfigured ? 'Firebase Admin Mode' : 'Development Admin Mode • Local Demonstration'}
             </p>
-            <p className="text-charcoal-600 text-[11px]">
-              Logged in as an authorized administrator: <strong className="text-maroon-900">{adminUser?.email}</strong>.
+            <p className="text-charcoal-600 text-[10px] sm:text-[11px] truncate max-w-[280px] sm:max-w-none">
+              Authorized admin: <strong className="text-maroon-900">{adminUser?.email}</strong>
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="bg-cream-50 border border-gold-300 text-maroon-900 text-[11px] font-bold px-3 py-1 rounded-full">
-            {isFirebaseConfigured ? 'Cloud Firestore Mode' : 'Local Storage & IndexedDB Mode'}
+        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-2 sm:pt-0 border-gold-300/60">
+          <span className="bg-cream-50 border border-gold-300 text-maroon-900 text-[10px] sm:text-[11px] font-bold px-2.5 py-1 rounded-full">
+            {isFirebaseConfigured ? 'Cloud Firestore' : 'IndexedDB Mode'}
           </span>
           <button
             type="button"
             onClick={() => adminLogout()}
-            className="flex items-center gap-1.5 py-1 px-2.5 bg-maroon-800 hover:bg-maroon-900 text-cream-50 rounded-lg font-bold text-[11px] transition-colors shadow-sm cursor-pointer"
+            className="flex items-center gap-1.5 py-1.5 px-3 bg-maroon-800 hover:bg-maroon-900 text-cream-50 rounded-lg font-bold text-xs min-h-[38px] transition-colors shadow-sm cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Sign Out</span>
@@ -321,16 +321,16 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-gold-200/80 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-gold-200/80 pb-5 sm:pb-6">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 text-xs font-bold text-gold-800 uppercase tracking-widest bg-gold-100/90 border border-gold-300 px-3 py-0.5 rounded-full">
+          <div className="inline-flex items-center gap-1.5 text-[11px] font-bold text-gold-800 uppercase tracking-widest bg-gold-100/90 border border-gold-300 px-3 py-0.5 rounded-full">
             <Sparkles className="w-3.5 h-3.5 text-gold-700" />
             <span>Store Operations</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-serif font-bold text-maroon-950">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif font-bold text-maroon-950">
             Admin Management
           </h1>
-          <p className="text-sm text-charcoal-600 font-sans">
+          <p className="text-xs sm:text-sm text-charcoal-600 font-sans">
             Manage catalogue products, customer enquiries, and owner bullion reference rates.
           </p>
         </div>
@@ -339,7 +339,7 @@ export default function AdminDashboardPage() {
           <button
             type="button"
             onClick={handleCreateNew}
-            className="inline-flex items-center gap-2 bg-maroon-800 hover:bg-maroon-900 text-cream-50 font-bold px-5 py-3 rounded-xl shadow-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 self-start sm:self-auto cursor-pointer"
+            className="inline-flex items-center justify-center gap-2 bg-maroon-800 hover:bg-maroon-900 text-cream-50 font-bold px-5 py-3 rounded-xl shadow-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 w-full sm:w-auto min-h-[44px] cursor-pointer"
           >
             <Plus className="w-4 h-4 text-gold-300" />
             <span>Add Product</span>
@@ -347,106 +347,108 @@ export default function AdminDashboardPage() {
         )}
       </div>
 
-      {/* Admin Module Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-gold-200/80 pb-2">
-        <button
-          type="button"
-          onClick={() => setActiveTab('products')}
-          className={`inline-flex items-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-            activeTab === 'products'
-              ? 'bg-maroon-800 text-cream-50 shadow-xs'
-              : 'bg-cream-50 text-charcoal-700 hover:bg-gold-100 border border-gold-200'
-          }`}
-        >
-          <Package className="w-4 h-4" />
-          <span>Catalogue Products ({totalCount})</span>
-        </button>
+      {/* Admin Module Navigation Tabs - Horizontally scrollable on mobile without overflow */}
+      <div className="overflow-x-auto pb-1 -mx-3.5 px-3.5 sm:mx-0 sm:px-0 border-b border-gold-200/80">
+        <div className="flex items-center gap-2 min-w-max">
+          <button
+            type="button"
+            onClick={() => setActiveTab('products')}
+            className={`inline-flex items-center gap-2 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-bold transition-all min-h-[44px] cursor-pointer ${
+              activeTab === 'products'
+                ? 'bg-maroon-800 text-cream-50 shadow-xs'
+                : 'bg-cream-50 text-charcoal-700 hover:bg-gold-100 border border-gold-200'
+            }`}
+          >
+            <Package className="w-4 h-4" />
+            <span>Catalogue Products ({totalCount})</span>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab('enquiries')}
-          className={`inline-flex items-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-            activeTab === 'enquiries'
-              ? 'bg-maroon-800 text-cream-50 shadow-xs'
-              : 'bg-cream-50 text-charcoal-700 hover:bg-gold-100 border border-gold-200'
-          }`}
-        >
-          <MessageSquare className="w-4 h-4" />
-          <span>Customer Enquiries ({enquiriesCount})</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('enquiries')}
+            className={`inline-flex items-center gap-2 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-bold transition-all min-h-[44px] cursor-pointer ${
+              activeTab === 'enquiries'
+                ? 'bg-maroon-800 text-cream-50 shadow-xs'
+                : 'bg-cream-50 text-charcoal-700 hover:bg-gold-100 border border-gold-200'
+            }`}
+          >
+            <MessageSquare className="w-4 h-4" />
+            <span>Customer Enquiries ({enquiriesCount})</span>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab('rates')}
-          className={`inline-flex items-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-            activeTab === 'rates'
-              ? 'bg-maroon-800 text-cream-50 shadow-xs'
-              : 'bg-cream-50 text-charcoal-700 hover:bg-gold-100 border border-gold-200'
-          }`}
-        >
-          <Coins className="w-4 h-4" />
-          <span>Owner Rates ({ratesCount})</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('rates')}
+            className={`inline-flex items-center gap-2 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-bold transition-all min-h-[44px] cursor-pointer ${
+              activeTab === 'rates'
+                ? 'bg-maroon-800 text-cream-50 shadow-xs'
+                : 'bg-cream-50 text-charcoal-700 hover:bg-gold-100 border border-gold-200'
+            }`}
+          >
+            <Coins className="w-4 h-4" />
+            <span>Owner Rates ({ratesCount})</span>
+          </button>
+        </div>
       </div>
 
       {/* TAB 1: PRODUCT MANAGEMENT */}
       {activeTab === 'products' && (
-        <div className="space-y-8">
-          {/* Metric Summary Cards Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            <div className="bg-cream-50 border border-gold-200/90 rounded-2xl p-4 shadow-card flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gold-100 text-maroon-800 flex items-center justify-center flex-shrink-0">
-                <Package className="w-5 h-5 text-gold-700" />
+        <div className="space-y-6 sm:space-y-8">
+          {/* Metric Summary Cards Grid - 2 columns on mobile */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-4">
+            <div className="bg-cream-50 border border-gold-200/90 rounded-2xl p-3 sm:p-4 shadow-card flex items-center gap-2.5 sm:gap-3">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gold-100 text-maroon-800 flex items-center justify-center flex-shrink-0">
+                <Package className="w-4 h-4 sm:w-5 sm:h-5 text-gold-700" />
               </div>
-              <div>
-                <p className="text-[11px] font-bold uppercase text-charcoal-500">Total Products</p>
-                <p className="text-xl font-serif font-bold text-maroon-950">{totalCount}</p>
-              </div>
-            </div>
-
-            <div className="bg-cream-50 border border-gold-200/90 rounded-2xl p-4 shadow-card flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center flex-shrink-0">
-                <CheckCircle2 className="w-5 h-5 text-emerald-700" />
-              </div>
-              <div>
-                <p className="text-[11px] font-bold uppercase text-charcoal-500">Published</p>
-                <p className="text-xl font-serif font-bold text-emerald-900">{publishedCount}</p>
+              <div className="min-w-0">
+                <p className="text-[10px] sm:text-[11px] font-bold uppercase text-charcoal-500 truncate">Total Products</p>
+                <p className="text-lg sm:text-xl font-serif font-bold text-maroon-950">{totalCount}</p>
               </div>
             </div>
 
-            <div className="bg-cream-50 border border-gold-200/90 rounded-2xl p-4 shadow-card flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gold-100 text-gold-800 flex items-center justify-center flex-shrink-0">
-                <FileText className="w-5 h-5 text-gold-700" />
+            <div className="bg-cream-50 border border-gold-200/90 rounded-2xl p-3 sm:p-4 shadow-card flex items-center gap-2.5 sm:gap-3">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center flex-shrink-0">
+                <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-700" />
               </div>
-              <div>
-                <p className="text-[11px] font-bold uppercase text-charcoal-500">Drafts</p>
-                <p className="text-xl font-serif font-bold text-gold-900">{draftCount}</p>
-              </div>
-            </div>
-
-            <div className="bg-cream-50 border border-gold-200/90 rounded-2xl p-4 shadow-card flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-charcoal-100 text-charcoal-800 flex items-center justify-center flex-shrink-0">
-                <Archive className="w-5 h-5 text-charcoal-600" />
-              </div>
-              <div>
-                <p className="text-[11px] font-bold uppercase text-charcoal-500">Archived</p>
-                <p className="text-xl font-serif font-bold text-charcoal-900">{archivedCount}</p>
+              <div className="min-w-0">
+                <p className="text-[10px] sm:text-[11px] font-bold uppercase text-charcoal-500 truncate">Published</p>
+                <p className="text-lg sm:text-xl font-serif font-bold text-emerald-900">{publishedCount}</p>
               </div>
             </div>
 
-            <div className="bg-cream-50 border border-gold-200/90 rounded-2xl p-4 shadow-card flex items-center gap-3 col-span-2 sm:col-span-1">
-              <div className="w-10 h-10 rounded-xl bg-maroon-100 text-maroon-800 flex items-center justify-center flex-shrink-0">
-                <Star className="w-5 h-5 fill-current text-maroon-700" />
+            <div className="bg-cream-50 border border-gold-200/90 rounded-2xl p-3 sm:p-4 shadow-card flex items-center gap-2.5 sm:gap-3">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gold-100 text-gold-800 flex items-center justify-center flex-shrink-0">
+                <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-gold-700" />
               </div>
-              <div>
-                <p className="text-[11px] font-bold uppercase text-charcoal-500">Featured</p>
-                <p className="text-xl font-serif font-bold text-maroon-950">{featuredCount}</p>
+              <div className="min-w-0">
+                <p className="text-[10px] sm:text-[11px] font-bold uppercase text-charcoal-500 truncate">Drafts</p>
+                <p className="text-lg sm:text-xl font-serif font-bold text-gold-900">{draftCount}</p>
+              </div>
+            </div>
+
+            <div className="bg-cream-50 border border-gold-200/90 rounded-2xl p-3 sm:p-4 shadow-card flex items-center gap-2.5 sm:gap-3">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-charcoal-100 text-charcoal-800 flex items-center justify-center flex-shrink-0">
+                <Archive className="w-4 h-4 sm:w-5 sm:h-5 text-charcoal-600" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] sm:text-[11px] font-bold uppercase text-charcoal-500 truncate">Archived</p>
+                <p className="text-lg sm:text-xl font-serif font-bold text-charcoal-900">{archivedCount}</p>
+              </div>
+            </div>
+
+            <div className="bg-cream-50 border border-gold-200/90 rounded-2xl p-3 sm:p-4 shadow-card flex items-center gap-2.5 sm:gap-3 col-span-2 sm:col-span-1">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-maroon-100 text-maroon-800 flex items-center justify-center flex-shrink-0">
+                <Star className="w-4 h-4 sm:w-5 sm:h-5 fill-current text-maroon-700" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] sm:text-[11px] font-bold uppercase text-charcoal-500 truncate">Featured</p>
+                <p className="text-lg sm:text-xl font-serif font-bold text-maroon-950">{featuredCount}</p>
               </div>
             </div>
           </div>
 
           {/* Filter & Search Bar */}
-          <div className="bg-cream-50 border border-gold-200/90 rounded-2xl p-4 shadow-card flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+          <div className="bg-cream-50 border border-gold-200/90 rounded-2xl p-3 sm:p-4 shadow-card flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 sm:gap-4">
             <div className="flex flex-wrap items-center gap-1.5">
               {[
                 { key: 'all', label: `All (${totalCount})` },
@@ -458,7 +460,7 @@ export default function AdminDashboardPage() {
                   key={tab.key}
                   type="button"
                   onClick={() => setSelectedStatus(tab.key)}
-                  className={`py-2 px-3.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  className={`py-2 px-3 sm:px-3.5 rounded-xl text-xs font-semibold min-h-[40px] transition-all cursor-pointer ${
                     selectedStatus === tab.key
                       ? 'bg-maroon-800 text-cream-50 shadow-xs'
                       : 'bg-cream-100 text-charcoal-700 hover:bg-gold-100/70 hover:text-maroon-900'
@@ -473,10 +475,10 @@ export default function AdminDashboardPage() {
               <Search className="w-4 h-4 text-gold-700 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search by name, SKU, or category..."
+                placeholder="Search name, SKU, category..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-xs bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500"
+                className="w-full pl-9 pr-3 py-2.5 text-xs bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500 min-h-[44px]"
               />
             </div>
           </div>
@@ -485,7 +487,7 @@ export default function AdminDashboardPage() {
           {productsStatus === 'error' ? (
             <div
               role="alert"
-              className="bg-cream-50 border border-maroon-300 rounded-3xl p-12 text-center shadow-card space-y-3"
+              className="bg-cream-50 border border-maroon-300 rounded-3xl p-8 sm:p-12 text-center shadow-card space-y-3"
             >
               <AlertTriangle className="w-12 h-12 text-maroon-700 mx-auto opacity-80" />
               <h2 className="text-lg font-serif font-bold text-maroon-950">
@@ -498,7 +500,7 @@ export default function AdminDashboardPage() {
               </p>
             </div>
           ) : productsStatus === 'loading' ? (
-            <div className="bg-cream-50 border border-gold-200/90 rounded-3xl p-12 text-center shadow-card space-y-3">
+            <div className="bg-cream-50 border border-gold-200/90 rounded-3xl p-8 sm:p-12 text-center shadow-card space-y-3">
               <Package className="w-12 h-12 text-gold-700 mx-auto opacity-70 animate-pulse" />
               <h2 className="text-lg font-serif font-bold text-maroon-950">Loading Products…</h2>
               <p className="text-xs text-charcoal-600 font-sans">
@@ -506,7 +508,8 @@ export default function AdminDashboardPage() {
               </p>
             </div>
           ) : filteredProducts.length > 0 ? (
-            <div className="bg-cream-50 border border-gold-200/90 rounded-3xl shadow-card overflow-hidden">
+            <div className="bg-cream-50 border border-gold-200/90 rounded-2xl sm:rounded-3xl shadow-card overflow-hidden">
+              {/* Desktop Table View */}
               <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-left text-xs font-sans">
                   <thead className="bg-cream-200/60 border-b border-gold-200 text-maroon-950 font-bold uppercase tracking-wider text-[11px]">
@@ -679,14 +682,15 @@ export default function AdminDashboardPage() {
                 </table>
               </div>
 
-              {/* Mobile Card View */}
+              {/* Mobile Card View (>=44px touch targets, clear wrap, no horizontal scroll) */}
               <div className="md:hidden divide-y divide-gold-200/60">
                 {filteredProducts.map((p) => {
                   const primaryImg = getPrimaryImage(p.images);
                   return (
-                    <div key={p.id} className="p-4 space-y-3">
+                    <div key={p.id} className="p-3.5 sm:p-4 space-y-3 font-sans">
+                      {/* Top section: Thumbnail + Info */}
                       <div className="flex items-start gap-3">
-                        <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-cream-200 border border-gold-200 flex-shrink-0">
+                        <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-cream-200 border border-gold-200 flex-shrink-0 shadow-2xs">
                           {primaryImg ? (
                             <Image
                               src={primaryImg.url}
@@ -697,16 +701,16 @@ export default function AdminDashboardPage() {
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-charcoal-400">
-                              <Layers className="w-4 h-4" />
+                              <Layers className="w-5 h-5" />
                             </div>
                           )}
                         </div>
 
-                        <div className="flex-1 space-y-1">
-                          <div className="flex items-center justify-between">
-                            <span className="font-mono text-[10px] text-charcoal-500">{p.sku}</span>
+                        <div className="flex-1 min-w-0 space-y-1">
+                          <div className="flex items-center justify-between gap-1.5">
+                            <span className="font-mono text-[10px] text-charcoal-500 truncate">{p.sku}</span>
                             <span
-                              className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize ${
+                              className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize flex-shrink-0 ${
                                 p.status === 'published'
                                   ? 'bg-emerald-100 text-emerald-800'
                                   : p.status === 'draft'
@@ -717,88 +721,119 @@ export default function AdminDashboardPage() {
                               {p.status}
                             </span>
                           </div>
-                          <h3 className="font-serif font-bold text-maroon-950 text-sm leading-snug">
+
+                          <h3 className="font-serif font-bold text-maroon-950 text-sm leading-snug break-words">
                             {p.name}
                           </h3>
-                          <p className="text-xs text-charcoal-600">
-                            {p.category} • {p.purity} • {formatWeight(p.approxWeight)}
-                          </p>
+
+                          <div className="flex flex-wrap items-center gap-1.5 text-xs text-charcoal-600">
+                            <span>{p.category}</span>
+                            <span>•</span>
+                            <span className="font-semibold text-maroon-900">{p.purity}</span>
+                            <span>•</span>
+                            <span className="font-serif font-bold text-maroon-900">
+                              {formatWeight(p.approxWeight)}
+                            </span>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between pt-2 border-t border-gold-200/40">
+                      {/* Featured & Live Link Bar */}
+                      <div className="flex items-center justify-between pt-2 border-t border-gold-200/40 text-xs">
                         <button
                           type="button"
                           onClick={() => handleToggleFeatured(p)}
-                          className={`text-xs font-semibold flex items-center gap-1 ${
-                            p.isFeatured ? 'text-gold-600' : 'text-charcoal-400'
+                          className={`min-h-[40px] px-2.5 py-1.5 rounded-lg border font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
+                            p.isFeatured
+                              ? 'bg-gold-100 text-maroon-900 border-gold-300'
+                              : 'bg-cream-100 text-charcoal-500 border-gold-200 hover:bg-gold-50'
                           }`}
+                          aria-label={p.isFeatured ? 'Unmark featured' : 'Mark featured'}
                         >
-                          <Star className={`w-3.5 h-3.5 ${p.isFeatured ? 'fill-current' : ''}`} />
-                          <span>{p.isFeatured ? 'Featured' : 'Not Featured'}</span>
+                          <Star className={`w-3.5 h-3.5 ${p.isFeatured ? 'fill-current text-gold-600' : 'text-charcoal-400'}`} />
+                          <span>{p.isFeatured ? 'Featured Star' : 'Not Featured'}</span>
                         </button>
 
-                        <div className="flex items-center gap-2">
+                        {p.status === 'published' && (
+                          <Link
+                            href={`/catalogue/${p.slug}`}
+                            target="_blank"
+                            className="min-h-[40px] px-2.5 py-1.5 text-xs text-maroon-900 bg-cream-100 hover:bg-gold-100 border border-gold-200 rounded-lg transition-colors inline-flex items-center gap-1"
+                          >
+                            <span>Live View</span>
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </Link>
+                        )}
+                      </div>
+
+                      {/* Main Action Buttons Grid (min 44px touch targets) */}
+                      <div className="flex flex-wrap items-center gap-2 pt-1">
+                        {/* Edit Button */}
+                        <button
+                          type="button"
+                          onClick={() => handleEdit(p)}
+                          className="flex-1 min-h-[44px] px-3.5 py-2.5 bg-cream-100 hover:bg-gold-100 border border-gold-300 rounded-xl text-xs font-bold text-maroon-900 inline-flex items-center justify-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+                        >
+                          <Edit className="w-3.5 h-3.5" />
+                          <span>Edit</span>
+                        </button>
+
+                        {/* Status Switcher Button */}
+                        {p.status === 'draft' && (
                           <button
                             type="button"
-                            onClick={() => handleEdit(p)}
-                            className="py-1.5 px-3 bg-cream-100 border border-gold-300 rounded-lg text-xs font-bold text-maroon-900"
+                            onClick={() => handlePublish(p)}
+                            className="flex-1 min-h-[44px] px-3.5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold inline-flex items-center justify-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
                           >
-                            Edit
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>Publish</span>
                           </button>
+                        )}
 
-                          {p.status === 'draft' && (
+                        {p.status === 'published' && (
+                          <button
+                            type="button"
+                            onClick={() => handleSetDraft(p)}
+                            className="flex-1 min-h-[44px] px-3.5 py-2.5 bg-gold-100 hover:bg-gold-200 border border-gold-300 text-maroon-950 rounded-xl text-xs font-bold inline-flex items-center justify-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+                          >
+                            <FileText className="w-3.5 h-3.5" />
+                            <span>To Draft</span>
+                          </button>
+                        )}
+
+                        {/* Archive or Restore/Delete actions */}
+                        {p.status !== 'archived' ? (
+                          <button
+                            type="button"
+                            onClick={() => handleArchivePrompt(p)}
+                            className="min-h-[44px] px-3.5 py-2.5 bg-cream-100 hover:bg-maroon-50 text-charcoal-600 hover:text-maroon-900 border border-gold-200 rounded-xl text-xs font-bold inline-flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                            aria-label={`Archive ${p.name}`}
+                          >
+                            <Archive className="w-4 h-4 text-charcoal-500" />
+                            <span className="hidden xs:inline">Archive</span>
+                          </button>
+                        ) : (
+                          <>
                             <button
                               type="button"
-                              onClick={() => handlePublish(p)}
-                              className="py-1.5 px-3 bg-emerald-700 text-white rounded-lg text-xs font-bold"
+                              onClick={() => handleRestorePrompt(p)}
+                              className="flex-1 min-h-[44px] px-3.5 py-2.5 bg-gold-100 hover:bg-gold-200 border border-gold-300 text-maroon-900 rounded-xl text-xs font-bold inline-flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                             >
-                              Publish
+                              <RotateCcw className="w-3.5 h-3.5" />
+                              <span>Restore</span>
                             </button>
-                          )}
 
-                          {p.status === 'published' && (
                             <button
                               type="button"
-                              onClick={() => handleSetDraft(p)}
-                              className="py-1.5 px-3 bg-gold-100 border border-gold-300 text-maroon-900 rounded-lg text-xs font-bold"
+                              onClick={() => handleDeletePrompt(p)}
+                              className="min-h-[44px] px-3.5 py-2.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 rounded-xl text-xs font-bold inline-flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                              aria-label={`Delete ${p.name} permanently`}
                             >
-                              Draft
+                              <Trash2 className="w-4 h-4 text-red-600" />
+                              <span className="hidden xs:inline">Delete</span>
                             </button>
-                          )}
-
-                          {p.status !== 'archived' ? (
-                            <button
-                              type="button"
-                              onClick={() => handleArchivePrompt(p)}
-                              className="p-1.5 text-charcoal-400 hover:text-maroon-800 rounded"
-                              aria-label="Archive"
-                              title="Archive product"
-                            >
-                              <Archive className="w-4 h-4" />
-                            </button>
-                          ) : (
-                            <div className="flex items-center gap-1">
-                              <button
-                                type="button"
-                                onClick={() => handleRestorePrompt(p)}
-                                className="py-1.5 px-3 bg-gold-100 border border-gold-300 text-maroon-900 rounded-lg text-xs font-bold"
-                              >
-                                Restore
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => handleDeletePrompt(p)}
-                                className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                                aria-label={`Delete ${p.name} permanently`}
-                                title="Delete permanently"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          )}
-                        </div>
+                          </>
+                        )}
                       </div>
                     </div>
                   );
@@ -806,7 +841,7 @@ export default function AdminDashboardPage() {
               </div>
             </div>
           ) : (
-            <div className="bg-cream-50 border border-gold-200/90 rounded-3xl p-12 text-center shadow-card space-y-3">
+            <div className="bg-cream-50 border border-gold-200/90 rounded-2xl sm:rounded-3xl p-8 sm:p-12 text-center shadow-card space-y-3">
               <Package className="w-12 h-12 text-gold-700 mx-auto opacity-70" />
               <h2 className="text-lg font-serif font-bold text-maroon-950">No Products Found</h2>
               <p className="text-xs text-charcoal-600 font-sans">
