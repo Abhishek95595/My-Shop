@@ -272,7 +272,7 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-3.5 sm:px-6 py-5 sm:py-8 md:py-12 space-y-6 sm:space-y-8">
+    <div data-testid="admin-dashboard" className="max-w-7xl mx-auto px-3.5 sm:px-6 py-5 sm:py-8 md:py-12 space-y-6 sm:space-y-8">
       {/* Firestore Load Failure Notice */}
       {failedCollections.length > 0 && (
         <div
@@ -351,6 +351,7 @@ export default function AdminDashboardPage() {
       <div className="overflow-x-auto pb-1 -mx-3.5 px-3.5 sm:mx-0 sm:px-0 border-b border-gold-200/80">
         <div className="flex items-center gap-2 min-w-max">
           <button
+            data-testid="admin-tab-products"
             type="button"
             onClick={() => setActiveTab('products')}
             className={`inline-flex items-center gap-2 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-bold transition-all min-h-[44px] cursor-pointer ${
@@ -364,6 +365,7 @@ export default function AdminDashboardPage() {
           </button>
 
           <button
+            data-testid="admin-tab-enquiries"
             type="button"
             onClick={() => setActiveTab('enquiries')}
             className={`inline-flex items-center gap-2 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-bold transition-all min-h-[44px] cursor-pointer ${
@@ -377,6 +379,7 @@ export default function AdminDashboardPage() {
           </button>
 
           <button
+            data-testid="admin-tab-rates"
             type="button"
             onClick={() => setActiveTab('rates')}
             className={`inline-flex items-center gap-2 py-2.5 px-3.5 sm:px-4 rounded-xl text-xs font-bold transition-all min-h-[44px] cursor-pointer ${
@@ -393,7 +396,7 @@ export default function AdminDashboardPage() {
 
       {/* TAB 1: PRODUCT MANAGEMENT */}
       {activeTab === 'products' && (
-        <div className="space-y-6 sm:space-y-8">
+        <div data-testid="admin-products-section" className="space-y-6 sm:space-y-8">
           {/* Metric Summary Cards Grid - 2 columns on mobile */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-4">
             <div className="bg-cream-50 border border-gold-200/90 rounded-2xl p-3 sm:p-4 shadow-card flex items-center gap-2.5 sm:gap-3">
@@ -855,10 +858,18 @@ export default function AdminDashboardPage() {
       )}
 
       {/* TAB 2: ENQUIRIES MANAGEMENT */}
-      {activeTab === 'enquiries' && <AdminEnquiriesManager />}
+      {activeTab === 'enquiries' && (
+        <div data-testid="admin-enquiries-section">
+          <AdminEnquiriesManager />
+        </div>
+      )}
 
       {/* TAB 3: OWNER RATES MANAGEMENT */}
-      {activeTab === 'rates' && <AdminRatesManager />}
+      {activeTab === 'rates' && (
+        <div data-testid="admin-rates-section">
+          <AdminRatesManager />
+        </div>
+      )}
 
       {/* Add / Edit Product Modal */}
       <ProductFormModal

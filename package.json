@@ -10,7 +10,10 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint src/",
-    "test": "vitest run"
+    "test": "vitest run",
+    "verify:mobile": "node scripts/verify-mobile-structure.js",
+    "verify:browser-mobile": "node scripts/verify-browser-mobile.js",
+    "verify:browser-admin": "node scripts/verify-browser-mobile.js --admin"
   },
   "dependencies": {
     "clsx": "2.1.1",

@@ -22,7 +22,7 @@ export const AdminAccessDenied: React.FC = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-16 text-center space-y-8">
+    <div data-testid="admin-access-denied" className="max-w-2xl mx-auto px-4 py-16 text-center space-y-8">
       <div className="w-16 h-16 rounded-full bg-maroon-100 text-maroon-800 flex items-center justify-center mx-auto shadow-inner">
         <Lock className="w-8 h-8 text-maroon-800" />
       </div>
