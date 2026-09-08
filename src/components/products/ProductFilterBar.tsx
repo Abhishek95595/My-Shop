@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import {
   CATEGORIES,
+  ProductCategory,
   GENDERS,
   PURITIES,
   WEIGHT_RANGES,
@@ -32,6 +33,7 @@ interface ProductFilterBarProps {
   onResetFilters: () => void;
   availableOccasions: string[];
   totalResults: number;
+  availableCategories?: ProductCategory[];
 }
 
 const AVAILABILITY_OPTIONS = [
@@ -46,6 +48,7 @@ export const ProductFilterBar: React.FC<ProductFilterBarProps> = ({
   onResetFilters,
   availableOccasions,
   totalResults,
+  availableCategories = CATEGORIES as readonly ProductCategory[],
 }) => {
   const [mobileFiltersOpen, setMobileFiltersOpen] = React.useState(false);
 
@@ -95,7 +98,7 @@ export const ProductFilterBar: React.FC<ProductFilterBarProps> = ({
         >
           All
         </button>
-        {CATEGORIES.map((cat) => (
+        {availableCategories.map((cat) => (
           <button
             key={cat}
             type="button"
@@ -194,7 +197,7 @@ export const ProductFilterBar: React.FC<ProductFilterBarProps> = ({
               className="w-full py-1.5 px-2.5 bg-cream-100 border border-gold-200 rounded-lg text-xs text-charcoal-800 focus:outline-none focus:border-gold-500"
             >
               <option value="All">All Categories</option>
-              {CATEGORIES.map((cat) => (
+              {availableCategories.map((cat) => (
                 <option key={cat} value={cat}>
                   {cat}
                 </option>
@@ -391,7 +394,7 @@ export const ProductFilterBar: React.FC<ProductFilterBarProps> = ({
                   >
                     All Categories
                   </button>
-                  {CATEGORIES.map((cat) => (
+                  {availableCategories.map((cat) => (
                     <button
                       key={cat}
                       type="button"

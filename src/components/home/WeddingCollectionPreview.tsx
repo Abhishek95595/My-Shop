@@ -94,9 +94,11 @@ export const WeddingCollectionPreview: React.FC = () => {
                     <h3 className="font-serif font-bold text-xs sm:text-base text-cream-50 group-hover:text-gold-300 transition-colors line-clamp-1 sm:line-clamp-2">
                       {product.name}
                     </h3>
-                    <p className="hidden sm:block text-xs text-cream-200/70 font-sans line-clamp-2">
-                      {product.shortDescription}
-                    </p>
+                    {product.shortDescription?.trim() ? (
+                      <p className="hidden sm:block text-xs text-cream-200/70 font-sans line-clamp-2">
+                        {product.shortDescription}
+                      </p>
+                    ) : null}
                   </div>
 
                   <div className="pt-1 sm:pt-2 flex items-center justify-between text-[10px] sm:text-xs text-gold-300 border-t border-gold-300/20">

@@ -207,9 +207,11 @@ export const ClientProductDetailResolver: React.FC<ClientProductDetailResolverPr
           </div>
 
           {/* Short Description Overview */}
-          <p className="text-xs sm:text-sm md:text-base text-charcoal-700 font-sans leading-relaxed">
-            {product.shortDescription}
-          </p>
+          {product.shortDescription?.trim() ? (
+            <p className="text-xs sm:text-sm md:text-base text-charcoal-700 font-sans leading-relaxed">
+              {product.shortDescription}
+            </p>
+          ) : null}
 
           {/* Specifications Table Grid */}
           <div className="bg-cream-50 border border-gold-200/90 rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-card space-y-3">
@@ -289,14 +291,16 @@ export const ClientProductDetailResolver: React.FC<ClientProductDetailResolverPr
           </div>
 
           {/* Detailed Craftsmanship Description */}
-          <div className="space-y-2">
-            <h3 className="text-sm font-serif font-bold text-maroon-900 uppercase tracking-wide">
-              Craftsmanship &amp; Details
-            </h3>
-            <p className="text-sm text-charcoal-700 font-sans leading-relaxed">
-              {product.detailedDescription}
-            </p>
-          </div>
+          {product.detailedDescription?.trim() ? (
+            <div className="space-y-2">
+              <h3 className="text-sm font-serif font-bold text-maroon-900 uppercase tracking-wide">
+                Craftsmanship &amp; Details
+              </h3>
+              <p className="text-sm text-charcoal-700 font-sans leading-relaxed">
+                {product.detailedDescription}
+              </p>
+            </div>
+          ) : null}
 
           {/* Tags Chips */}
           {product.tags && product.tags.length > 0 && (

@@ -8,7 +8,6 @@ import {
   Clock,
   ShieldCheck,
   ExternalLink,
-  Mail,
 } from 'lucide-react';
 import {
   CONTACT_CONFIG,
@@ -16,17 +15,17 @@ import {
   STORE_TAGLINE,
   STORE_OWNER,
   GSTIN,
-  CATEGORIES,
   FOOTER_QUICK_LINKS,
   FOOTER_LEGAL_LINKS,
 } from '@/lib/constants';
 import { OwnerRatesFooterLink } from './OwnerRatesFooterLink';
+import { FooterCategoryLinks } from './FooterCategoryLinks';
 
 export const Footer: React.FC = () => {
   return (
     <footer
       id="store-info"
-      className="bg-cream-100 border-t border-gold-200/90 text-charcoal-800 pt-12 pb-8"
+      className="bg-cream-100 border-t border-gold-200/90 text-charcoal-800 pt-12 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-8"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 pb-10 border-b border-gold-200/80">
@@ -66,27 +65,9 @@ export const Footer: React.FC = () => {
             <h3 className="text-xs font-serif font-bold text-maroon-950 uppercase tracking-widest">
               Gold Collections
             </h3>
-            <ul className="space-y-2 text-xs sm:text-sm text-charcoal-700 font-sans">
-              {CATEGORIES.map((cat) => (
-                <li key={cat}>
-                  <Link
-                    href={`/catalogue?category=${encodeURIComponent(cat)}`}
-                    className="hover:text-maroon-800 hover:underline transition-colors"
-                  >
-                    {cat}
-                  </Link>
-                </li>
-              ))}
-              <li>
-                <Link
-                  href="/catalogue?occasion=Wedding"
-                  className="font-semibold text-maroon-800 hover:underline transition-colors"
-                >
-                  Wedding Collection
-                </Link>
-              </li>
-            </ul>
+            <FooterCategoryLinks />
           </div>
+
 
           {/* Showroom & Services */}
           <div className="space-y-3">

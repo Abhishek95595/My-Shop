@@ -77,13 +77,18 @@ export async function generateMetadata({
     };
   }
 
+  const pageDescription =
+    product.shortDescription?.trim() ||
+    product.detailedDescription?.trim() ||
+    `Explore handcrafted ${product.purity} ${product.category} at ${STORE_NAME} in Gorakhpur. 25+ Years of Trust.`;
+
   return {
     title: `${product.name} (${product.purity} Gold)`,
-    description: product.shortDescription,
+    description: pageDescription,
     alternates: { canonical: `/catalogue/${slug}` },
     openGraph: {
       title: `${product.name} | ${STORE_NAME}`,
-      description: product.shortDescription,
+      description: pageDescription,
     },
   };
 }

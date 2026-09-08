@@ -212,9 +212,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <p className="text-[10px] sm:text-xs font-mono text-charcoal-500 tracking-wide truncate">
             SKU: {product.sku}
           </p>
-          <p className="hidden sm:block text-xs text-charcoal-700 line-clamp-2 leading-relaxed font-sans">
-            {product.shortDescription}
-          </p>
+          {product.shortDescription?.trim() ? (
+            <p className="hidden sm:block text-xs text-charcoal-700 line-clamp-2 leading-relaxed font-sans">
+              {product.shortDescription}
+            </p>
+          ) : null}
         </div>
 
         {/* Specifications & Weight Block */}

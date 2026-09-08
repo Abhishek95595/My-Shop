@@ -93,7 +93,7 @@ export default function RootLayout({
             <AdminAuthProvider>
               <SavedItemsProvider>
                 <Header />
-                <main className="flex-1 pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:pb-0">{children}</main>
+                <main className="flex-1 pb-[env(safe-area-inset-bottom,0px)] md:pb-0">{children}</main>
                 <Footer />
                 <FloatingWhatsApp />
                 <MobileBottomNav />

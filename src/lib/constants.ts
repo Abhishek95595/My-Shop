@@ -36,13 +36,18 @@ export const APPROVED_SERVICES = [
   'Gold/silver coins and in-store silver articles',
 ] as const;
 
-export const CATEGORIES = [
-  'Rings',
-  'Necklaces/Sets',
-  'Chains',
-  'Mangalsutra',
-  'Bangles/Kada',
-] as const;
+export {
+  CATEGORY_REGISTRY,
+  CATEGORIES,
+  CATEGORY_CODES,
+  getAvailableCategories,
+  getAvailableCategoryDefinitions,
+  type ProductCategory,
+  type CategoryDefinition,
+  type ProductAvailabilityCandidate,
+} from './categoryRegistry';
+
+
 
 export const GENDERS = ['Women', 'Men'] as const;
 

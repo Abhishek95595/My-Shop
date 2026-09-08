@@ -104,8 +104,15 @@ assert(
   'FloatingWhatsApp keeps desktop bottom spacing'
 );
 assert(
-  floatingWaFile.includes('4.5rem') && floatingWaFile.includes('safe-area-inset-bottom'),
+  floatingWaFile.includes('safe-area-inset-bottom'),
   'FloatingWhatsApp is raised on mobile to clear bottom nav and respects safe area'
+);
+assert(
+  floatingWaFile.includes('w-12') &&
+  floatingWaFile.includes('h-12') &&
+  floatingWaFile.includes('rounded-full') &&
+  floatingWaFile.includes('hidden md:inline'),
+  'FloatingWhatsApp is circular on all widths where MobileBottomNav is visible (< md)'
 );
 
 // ---------------------------------------------------------------------------
@@ -243,12 +250,14 @@ assert(
 
 const layoutFile = readSource('app/layout.tsx');
 assert(
-  layoutFile.includes('4.5rem') && layoutFile.includes('safe-area-inset-bottom'),
+  layoutFile.includes('safe-area-inset-bottom') && layoutFile.includes('md:pb-0'),
   'Root layout main content area preserves bottom clearance for mobile nav and safe area'
 );
+
+const footerFile = readSource('components/layout/Footer.tsx');
 assert(
-  layoutFile.includes('md:pb-0'),
-  'Root layout main content area resets bottom padding on desktop'
+  footerFile.includes('safe-area-inset-bottom') && footerFile.includes('md:pb-8'),
+  'Footer preserves mobile bottom clearance for MobileBottomNav and safe area'
 );
 
 // ---------------------------------------------------------------------------
@@ -259,6 +268,23 @@ const constantsFile = readSource('lib/constants.ts');
 assert(
   constantsFile.includes('Approximate weight shown. Actual weight may vary depending on size and design.'),
   'Constants contains the exact approved weight disclaimer'
+);
+
+// ---------------------------------------------------------------------------
+// 9. Mobile Category Quick Chips Scrollability
+// ---------------------------------------------------------------------------
+console.log('\n--- 9. Mobile Category Quick Chips Scrollability ---');
+const shopByCategoryFile = readSource('components/home/ShopByCategory.tsx');
+assert(
+  shopByCategoryFile.includes('overflow-x-auto') &&
+  shopByCategoryFile.includes('-mx-3') &&
+  shopByCategoryFile.includes('px-3'),
+  'ShopByCategory chips have edge-to-edge full width scroll track (-mx-3 px-3)'
+);
+assert(
+  shopByCategoryFile.includes('whitespace-nowrap') &&
+  shopByCategoryFile.includes('sm:hidden'),
+  'ShopByCategory chips use whitespace-nowrap and are hidden on desktop (sm:hidden)'
 );
 
 // ---------------------------------------------------------------------------

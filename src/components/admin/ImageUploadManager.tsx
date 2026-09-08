@@ -454,7 +454,7 @@ export const ImageUploadManager: React.FC<ImageUploadManagerProps> = ({
                 }`}
               >
                 {/* Thumbnail Preview & Alt Text Input */}
-                <div className="flex flex-col xs:flex-row items-start xs:items-center gap-3 w-full sm:w-auto flex-1">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto flex-1">
                   <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-cream-200/60 border border-gold-200 flex-shrink-0 shadow-2xs">
                     {previewUrl ? (
                       <Image

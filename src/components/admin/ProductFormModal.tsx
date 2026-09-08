@@ -46,7 +46,8 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
   const [purity, setPurity] = useState<'18K' | '22K' | '24K'>('22K');
   const [approxWeight, setApproxWeight] = useState<string>('10.0');
   const [availability, setAvailability] = useState<'available' | 'made_on_order'>('available');
-  const [occasion, setOccasion] = useState<string>('Wedding');
+  const [selectedOccasionOption, setSelectedOccasionOption] = useState<string>('Wedding');
+  const [customOccasionText, setCustomOccasionText] = useState<string>('');
   const [tagsInput, setTagsInput] = useState<string>('');
   const [shortDescription, setShortDescription] = useState('');
   const [detailedDescription, setDetailedDescription] = useState('');
@@ -55,6 +56,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
   const [skuPreview, setSkuPreview] = useState('');
 
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [customOccasionError, setCustomOccasionError] = useState<string | null>(null);
   const [cleanupWarning, setCleanupWarning] = useState<string | null>(null);
   const [cleanupFailureInfo, setCleanupFailureInfo] = useState<{
     paths: string[];
@@ -154,10 +156,13 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
         setPurity(productToEdit.purity);
         setApproxWeight(productToEdit.approxWeight.toString());
         setAvailability(productToEdit.availability);
-        setOccasion(productToEdit.occasion);
+        const occ = typeof productToEdit.occasion === 'string' ? productToEdit.occasion.trim() : '';
+        setSelectedOccasionOption(occ);
+        setCustomOccasionText('');
+        setCustomOccasionError(null);
         setTagsInput(productToEdit.tags.join(', '));
-        setShortDescription(productToEdit.shortDescription);
-        setDetailedDescription(productToEdit.detailedDescription);
+        setShortDescription(productToEdit.shortDescription || '');
+        setDetailedDescription(productToEdit.detailedDescription || '');
         setIsFeatured(productToEdit.isFeatured);
         setImages(productToEdit.images);
         setSkuPreview(productToEdit.sku);
@@ -171,7 +176,9 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
         setPurity('22K');
         setApproxWeight('10.0');
         setAvailability('available');
-        setOccasion('Wedding');
+        setSelectedOccasionOption('Wedding');
+        setCustomOccasionText('');
+        setCustomOccasionError(null);
         setTagsInput('Wedding, 22K Gold');
         setShortDescription('');
         setDetailedDescription('');
@@ -255,6 +262,19 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
       .map((t) => t.trim())
       .filter((t) => t.length > 0);
 
+    if (selectedOccasionOption === '__other__' && !customOccasionText.trim()) {
+      setCustomOccasionError('Please enter a custom occasion name.');
+      setValidationErrors(['Please enter a custom occasion name.']);
+      return;
+    }
+
+    setCustomOccasionError(null);
+
+    const finalOccasion =
+      selectedOccasionOption === '__other__'
+        ? customOccasionText.trim()
+        : selectedOccasionOption.trim();
+
     const payload: Omit<Product, 'id' | 'createdAt' | 'updatedAt'> = {
       sku: isEditing ? productToEdit.sku : skuPreview,
       name: name.trim(),
@@ -266,7 +286,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
       availability,
       shortDescription: shortDescription.trim(),
       detailedDescription: detailedDescription.trim(),
-      occasion: occasion.trim() || 'Wedding',
+      occasion: finalOccasion,
       tags: parsedTags,
       isFeatured,
       status: desiredStatus,
@@ -351,7 +371,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
               ? { failedPaths: postCleanup.failed.map((f) => f.path) }
               : undefined;
 
-          onSave(updated, cleanupNotice);
+          onSave?.(updated, cleanupNotice);
           onClose();
         }
       } else {
@@ -405,7 +425,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
           }
 
           sessionUploadedPaths.current.clear();
-          onSave(created, postCleanupNotice);
+          onSave?.(created, postCleanupNotice);
           onClose();
         }
       }
@@ -435,10 +455,10 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
       {/* Modal Card */}
       <div
         ref={modalRef}
-        className="relative w-full max-w-3xl bg-cream-50 border border-gold-300 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-2xl z-10 space-y-5 sm:space-y-6 max-h-[94vh] sm:max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200"
+        className="relative w-full max-w-3xl bg-cream-50 border border-gold-300 rounded-2xl sm:rounded-3xl shadow-2xl z-10 flex flex-col max-h-[92vh] sm:max-h-[88vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200"
       >
-        {/* Header */}
-        <div className="flex items-start justify-between gap-3 border-b border-gold-200/80 pb-3.5 sm:pb-4">
+        {/* Fixed Header */}
+        <div className="flex-shrink-0 flex items-start justify-between gap-3 border-b border-gold-200/80 p-4 sm:p-6 pb-3.5 sm:pb-4 bg-cream-50">
           <div className="space-y-1">
             <div className="inline-flex items-center gap-1.5 bg-gold-100 text-maroon-900 text-[10px] sm:text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-gold-200">
               <Sparkles className="w-3 h-3 text-gold-700" />
@@ -457,67 +477,76 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             type="button"
             onClick={handleCancel}
             disabled={isSubmitting || isImageBusy || isCleaningUp || isClosing}
-            className="p-2 text-charcoal-500 hover:text-maroon-900 hover:bg-gold-100 rounded-full transition-colors disabled:opacity-40 min-h-[38px] min-w-[38px] inline-flex items-center justify-center"
+            className="p-2 text-charcoal-500 hover:text-maroon-900 hover:bg-gold-100 rounded-full transition-colors disabled:opacity-40 min-h-[38px] min-w-[38px] inline-flex items-center justify-center cursor-pointer"
             aria-label="Close product form"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Cleanup Failure Modal Box */}
-        {cleanupFailureInfo && (
-          <div className="p-3.5 sm:p-4 bg-amber-50 border border-amber-300 rounded-2xl space-y-2 text-xs text-amber-950">
-            <div className="flex items-center gap-1.5 font-bold text-amber-900">
-              <AlertCircle className="w-4 h-4 text-amber-700 flex-shrink-0" />
-              <span>Storage Cleanup Notice</span>
-            </div>
-            <p className="text-amber-800 leading-relaxed">{cleanupFailureInfo.message}</p>
-            <div className="font-mono text-[11px] bg-amber-100/70 p-2 rounded-lg space-y-1 text-amber-900">
-              {cleanupFailureInfo.paths.map((p, idx) => (
-                <div key={idx} className="truncate">• {p}</div>
-              ))}
-            </div>
-            <div className="pt-2 flex items-center justify-end gap-2">
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="min-h-[38px] py-1.5 px-3 bg-amber-200 hover:bg-amber-300 text-amber-950 rounded-lg font-bold text-[11px] transition-colors"
-              >
-                Retry Cleanup
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  sessionUploadedPaths.current.clear();
-                  setCleanupFailureInfo(null);
-                  onClose();
-                }}
-                className="min-h-[38px] py-1.5 px-3 bg-maroon-800 hover:bg-maroon-900 text-cream-50 rounded-lg font-bold text-[11px] transition-colors"
-              >
-                Close Anyway
-              </button>
-            </div>
-          </div>
-        )}
+        {/* Product Form wrapping scrollable content and pinned footer */}
+        <form
+          id="product-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit('published');
+          }}
+          className="flex flex-col flex-1 min-h-0 overflow-hidden"
+        >
+          {/* Scrollable Form Body */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6 overscroll-contain">
+            {/* Cleanup Failure Modal Box */}
+            {cleanupFailureInfo && (
+              <div className="p-3.5 sm:p-4 bg-amber-50 border border-amber-300 rounded-2xl space-y-2 text-xs text-amber-950">
+                <div className="flex items-center gap-1.5 font-bold text-amber-900">
+                  <AlertCircle className="w-4 h-4 text-amber-700 flex-shrink-0" />
+                  <span>Storage Cleanup Notice</span>
+                </div>
+                <p className="text-amber-800 leading-relaxed">{cleanupFailureInfo.message}</p>
+                <div className="font-mono text-[11px] bg-amber-100/70 p-2 rounded-lg space-y-1 text-amber-900">
+                  {cleanupFailureInfo.paths.map((p, idx) => (
+                    <div key={idx} className="truncate">• {p}</div>
+                  ))}
+                </div>
+                <div className="pt-2 flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="min-h-[38px] py-1.5 px-3 bg-amber-200 hover:bg-amber-300 text-amber-950 rounded-lg font-bold text-[11px] transition-colors"
+                  >
+                    Retry Cleanup
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sessionUploadedPaths.current.clear();
+                      setCleanupFailureInfo(null);
+                      onClose();
+                    }}
+                    className="min-h-[38px] py-1.5 px-3 bg-maroon-800 hover:bg-maroon-900 text-cream-50 rounded-lg font-bold text-[11px] transition-colors"
+                  >
+                    Close Anyway
+                  </button>
+                </div>
+              </div>
+            )}
 
-        {/* Validation Errors Display */}
-        {validationErrors.length > 0 && (
-          <div className="p-3.5 sm:p-4 bg-maroon-50 border border-maroon-200 rounded-2xl space-y-1.5 text-xs text-maroon-900">
-            <div className="flex items-center gap-1.5 font-bold">
-              <AlertCircle className="w-4 h-4 text-maroon-700 flex-shrink-0" />
-              <span>Please resolve the following before proceeding:</span>
-            </div>
-            <ul className="list-disc list-inside space-y-0.5 pl-2 text-maroon-800">
-              {validationErrors.map((err, i) => (
-                <li key={i}>{err}</li>
-              ))}
-            </ul>
-          </div>
-        )}
+            {/* Validation Errors Display */}
+            {validationErrors.length > 0 && (
+              <div className="p-3.5 sm:p-4 bg-maroon-50 border border-maroon-200 rounded-2xl space-y-1.5 text-xs text-maroon-900">
+                <div className="flex items-center gap-1.5 font-bold">
+                  <AlertCircle className="w-4 h-4 text-maroon-700 flex-shrink-0" />
+                  <span>Please resolve the following before proceeding:</span>
+                </div>
+                <ul className="list-disc list-inside space-y-0.5 pl-2 text-maroon-800">
+                  {validationErrors.map((err, i) => (
+                    <li key={i}>{err}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
-        {/* Form Body */}
-        <form onSubmit={(e) => e.preventDefault()} className="space-y-5 sm:space-y-6">
-          {/* SKU Preview & Basic Details Grid */}
+            {/* SKU Preview & Basic Details Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
             {/* Auto Immutable SKU */}
             <div className="space-y-1">
@@ -595,7 +624,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
           </div>
 
           {/* Gender, Purity, Approx Weight, Availability - Stack cleanly on phones */}
-          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             <div className="space-y-1">
               <label
                 htmlFor="product-gender"
@@ -607,6 +636,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 id="product-gender"
                 value={gender}
                 onChange={(e) => setGender(e.target.value as 'Women' | 'Men')}
+                disabled={isSubmitting || isClosing || isCleaningUp}
                 className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none min-h-[44px]"
               >
                 {GENDERS.map((g) => (
@@ -628,6 +658,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 id="product-purity"
                 value={purity}
                 onChange={(e) => setPurity(e.target.value as '18K' | '22K' | '24K')}
+                disabled={isSubmitting || isClosing || isCleaningUp}
                 className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none min-h-[44px]"
               >
                 {PURITIES.map((p) => (
@@ -653,6 +684,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 required
                 value={approxWeight}
                 onChange={(e) => setApproxWeight(e.target.value)}
+                disabled={isSubmitting || isClosing || isCleaningUp}
                 className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none font-mono min-h-[44px]"
               />
             </div>
@@ -672,6 +704,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                     e.target.value === 'available' ? 'available' : 'made_on_order'
                   )
                 }
+                disabled={isSubmitting || isClosing || isCleaningUp}
                 className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none min-h-[44px]"
               >
                 <option value="available">Available</option>
@@ -689,21 +722,66 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
               >
                 Occasion *
               </label>
-              <input
+              <select
                 id="product-occasion"
-                type="text"
-                list="occasions-list"
-                required
-                placeholder="e.g. Wedding, Daily Wear, Festive"
-                value={occasion}
-                onChange={(e) => setOccasion(e.target.value)}
-                className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500 min-h-[44px]"
-              />
-              <datalist id="occasions-list">
+                value={selectedOccasionOption}
+                onChange={(e) => {
+                  setSelectedOccasionOption(e.target.value);
+                  setCustomOccasionError(null);
+                  if (e.target.value !== '__other__') {
+                    setCustomOccasionText('');
+                  }
+                }}
+                disabled={isSubmitting || isClosing || isCleaningUp}
+                className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500 min-h-[44px] cursor-pointer"
+              >
+                {!OCCASIONS.includes(selectedOccasionOption as any) &&
+                  selectedOccasionOption !== '__other__' && (
+                    <option value={selectedOccasionOption}>
+                      {selectedOccasionOption ? selectedOccasionOption : '-- Select Occasion --'}
+                    </option>
+                  )}
                 {OCCASIONS.map((occ) => (
-                  <option key={occ} value={occ} />
+                  <option key={occ} value={occ}>
+                    {occ}
+                  </option>
                 ))}
-              </datalist>
+                <option value="__other__">Other (Custom Occasion)</option>
+              </select>
+
+              {selectedOccasionOption === '__other__' && (
+                <div className="pt-2 space-y-1">
+                  <input
+                    id="product-custom-occasion"
+                    type="text"
+                    required
+                    placeholder="Enter custom occasion (e.g. Anniversary)"
+                    value={customOccasionText}
+                    onChange={(e) => {
+                      setCustomOccasionText(e.target.value);
+                      if (e.target.value.trim()) {
+                        setCustomOccasionError(null);
+                      }
+                    }}
+                    aria-invalid={!!customOccasionError}
+                    aria-describedby={customOccasionError ? 'custom-occasion-error' : undefined}
+                    disabled={isSubmitting || isClosing || isCleaningUp}
+                    className={`w-full text-xs p-2.5 bg-cream-100 border rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500 min-h-[44px] ${
+                      customOccasionError ? 'border-red-500 bg-red-50/20' : 'border-gold-300'
+                    }`}
+                  />
+                  {customOccasionError && (
+                    <p
+                      id="custom-occasion-error"
+                      role="alert"
+                      className="text-[11px] text-red-600 font-medium flex items-center gap-1"
+                    >
+                      <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span>{customOccasionError}</span>
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="space-y-1">
@@ -719,6 +797,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 placeholder="e.g. Bridal, Handcrafted, 22K Gold"
                 value={tagsInput}
                 onChange={(e) => setTagsInput(e.target.value)}
+                disabled={isSubmitting || isClosing || isCleaningUp}
                 className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500 min-h-[44px]"
               />
             </div>
@@ -730,15 +809,15 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
               htmlFor="product-short-description"
               className="block text-xs font-bold uppercase tracking-wider text-maroon-900"
             >
-              Short Description *
+              Short Description <span className="text-charcoal-500 font-normal lowercase">(optional)</span>
             </label>
             <input
               id="product-short-description"
               type="text"
-              required
               placeholder="1-2 sentences summarizing the jewellery piece"
               value={shortDescription}
               onChange={(e) => setShortDescription(e.target.value)}
+              disabled={isSubmitting || isClosing || isCleaningUp}
               className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500 min-h-[44px]"
             />
           </div>
@@ -749,15 +828,15 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
               htmlFor="product-detailed-description"
               className="block text-xs font-bold uppercase tracking-wider text-maroon-900"
             >
-              Detailed Description *
+              Detailed Description <span className="text-charcoal-500 font-normal lowercase">(optional)</span>
             </label>
             <textarea
               id="product-detailed-description"
               rows={3}
-              required
               placeholder="Detailed description of craftsmanship, motifs, polish and design highlights."
               value={detailedDescription}
               onChange={(e) => setDetailedDescription(e.target.value)}
+              disabled={isSubmitting || isClosing || isCleaningUp}
               className="w-full text-xs p-2.5 bg-cream-100 border border-gold-200 rounded-xl text-charcoal-900 focus:outline-none focus:border-gold-500"
             />
           </div>
@@ -769,7 +848,8 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
               id="featured-toggle-input"
               checked={isFeatured}
               onChange={(e) => setIsFeatured(e.target.checked)}
-              className="w-4 h-4 text-maroon-800 rounded border-gold-300 focus:ring-gold-500"
+              disabled={isSubmitting || isClosing || isCleaningUp}
+              className="w-4 h-4 text-maroon-800 rounded border-gold-300 focus:ring-gold-500 cursor-pointer"
             />
             <label
               htmlFor="featured-toggle-input"
@@ -803,44 +883,45 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
               disabled={isSubmitting || isClosing || isCleaningUp}
             />
           </div>
+        </div>
 
-          {/* Sticky Footer Action Buttons with Safe Area */}
-          <div className="sticky bottom-0 bg-cream-50/95 backdrop-blur-xs pt-3 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] sm:pb-0 border-t border-gold-200/80 -mx-4 px-4 sm:mx-0 sm:px-0 z-20 shadow-md sm:shadow-none flex flex-col xs:flex-row items-stretch xs:items-center justify-end gap-2.5">
-            <button
-              type="button"
-              onClick={handleCancel}
-              disabled={isSubmitting || isImageBusy || isCleaningUp || isClosing}
-              className="min-h-[44px] py-2.5 px-4 rounded-xl text-xs font-semibold text-charcoal-700 hover:bg-gold-100 transition-colors disabled:opacity-40 text-center"
-            >
-              {isCleaningUp ? 'Cleaning up...' : 'Cancel'}
-            </button>
+        {/* Pinned Action Footer */}
+        <div className="flex-shrink-0 bg-cream-50/98 backdrop-blur-xs border-t border-gold-200/80 px-4 py-3 sm:px-6 sm:py-3.5 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] sm:pb-3.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2.5 z-10 shadow-md sm:shadow-none">
+          <button
+            type="button"
+            onClick={handleCancel}
+            disabled={isSubmitting || isImageBusy || isCleaningUp || isClosing}
+            className="min-h-[44px] py-2.5 px-4 rounded-xl text-xs font-semibold text-charcoal-700 hover:bg-gold-100 transition-colors disabled:opacity-40 text-center cursor-pointer"
+          >
+            {isCleaningUp ? 'Cleaning up...' : 'Cancel'}
+          </button>
 
-            <button
-              type="button"
-              disabled={isSubmitting || isImageBusy || isCleaningUp || isClosing}
-              onClick={() => handleSubmit('draft')}
-              className="min-h-[44px] py-2.5 px-5 bg-gold-100 hover:bg-gold-200 border border-gold-300 text-maroon-950 rounded-xl text-xs font-bold transition-colors shadow-2xs disabled:opacity-40 text-center"
-            >
-              Save as Draft
-            </button>
+          <button
+            type="button"
+            disabled={isSubmitting || isImageBusy || isCleaningUp || isClosing}
+            onClick={() => handleSubmit('draft')}
+            className="min-h-[44px] py-2.5 px-5 bg-gold-100 hover:bg-gold-200 border border-gold-300 text-maroon-950 rounded-xl text-xs font-bold transition-colors shadow-2xs disabled:opacity-40 text-center cursor-pointer"
+          >
+            Save as Draft
+          </button>
 
-            <button
-              type="button"
-              disabled={isSubmitting || isImageBusy || isCleaningUp || isClosing}
-              onClick={() => handleSubmit('published')}
-              className="min-h-[44px] py-2.5 px-6 bg-maroon-800 hover:bg-maroon-900 text-cream-50 rounded-xl text-xs font-bold transition-colors shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 disabled:opacity-40 text-center"
-            >
-              {isSubmitting
-                ? 'Saving...'
-                : isCleaningUp
-                  ? 'Cleaning Up...'
-                  : isImageBusy
-                    ? 'Finishing Image...'
-                    : isClosing
-                      ? 'Closing...'
-                      : 'Publish Product'}
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={isSubmitting || isImageBusy || isCleaningUp || isClosing}
+            onClick={() => handleSubmit('published')}
+            className="min-h-[44px] py-2.5 px-6 bg-maroon-800 hover:bg-maroon-900 text-cream-50 rounded-xl text-xs font-bold transition-colors shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 disabled:opacity-40 text-center cursor-pointer"
+          >
+            {isSubmitting
+              ? 'Saving...'
+              : isCleaningUp
+                ? 'Cleaning Up...'
+                : isImageBusy
+                  ? 'Finishing Image...'
+                  : isClosing
+                    ? 'Closing...'
+                    : 'Publish Product'}
+          </button>
+        </div>
         </form>
       </div>
     </div>

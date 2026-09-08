@@ -21,16 +21,14 @@ import {
 import { firebaseStorageService } from '../images/firebaseStorageService';
 import { imageStorageService } from '../images/imageStorageService';
 
+import { CATEGORY_CODES, CATEGORIES, getAvailableCategories } from '../../lib/categoryRegistry';
+
+
 const CUSTOM_PRODUCTS_STORAGE_KEY = 'koh_admin_custom_products';
 const SAMPLE_OVERRIDES_STORAGE_KEY = 'koh_admin_sample_overrides';
 
-export const CATEGORY_CODES: Record<ProductCategory, string> = {
-  Rings: 'RNG',
-  'Necklaces/Sets': 'NCK',
-  Chains: 'CHN',
-  Mangalsutra: 'MNG',
-  'Bangles/Kada': 'BNG',
-};
+export { CATEGORY_CODES };
+
 
 export interface ProductValidationResult {
   isValid: boolean;
@@ -82,6 +80,19 @@ export class ProductDeletionError extends Error {
  *   satisfies the rules for a caller matching isAdmin(). It is started lazily so
  *   a public visitor never issues a query that is guaranteed to be denied.
  */
+export function normalizeProduct(raw: any): Product {
+  if (!raw || typeof raw !== 'object') {
+    return raw;
+  }
+  return {
+    ...raw,
+    shortDescription: typeof raw.shortDescription === 'string' ? raw.shortDescription : '',
+    detailedDescription: typeof raw.detailedDescription === 'string' ? raw.detailedDescription : '',
+    occasion: typeof raw.occasion === 'string' ? raw.occasion : '',
+    tags: Array.isArray(raw.tags) ? raw.tags : [],
+  };
+}
+
 class ProductRepository {
   private publishedCache: Product[] = [];
   private publishedStatus: RepositoryStatus = 'ready';
@@ -104,10 +115,11 @@ class ProductRepository {
         collection(db, 'products'),
         where('status', '==', 'published')
       );
+
       onSnapshot(publishedQuery, (snapshot) => {
         const list: Product[] = [];
         snapshot.forEach((d) => {
-          list.push({ ...(d.data() as Product), id: d.id });
+          list.push(normalizeProduct({ ...(d.data() as Product), id: d.id }));
         });
         this.publishedCache = list;
         this.publishedStatus = 'ready';
@@ -140,7 +152,7 @@ class ProductRepository {
       onSnapshot(productsRef, (snapshot) => {
         const list: Product[] = [];
         snapshot.forEach((d) => {
-          list.push({ ...(d.data() as Product), id: d.id });
+          list.push(normalizeProduct({ ...(d.data() as Product), id: d.id }));
         });
         this.adminCache = list;
         this.adminStatus = 'ready';
@@ -280,7 +292,7 @@ class ProductRepository {
       .map((p) => overrides[p.id] || p)
       .filter((p) => (p as unknown as { isDeleted?: boolean })?.isDeleted !== true);
     const custom = this.getStoredCustomProducts();
-    return [...baseline, ...custom];
+    return [...baseline, ...custom].map(normalizeProduct);
   }
 
   /**
@@ -312,7 +324,16 @@ class ProductRepository {
     return this.getLocalModeProducts().filter((p) => p.status === 'published');
   }
 
+  /**
+   * PUBLIC scope: returns only categories that contain at least one published,
+   * non-archived, non-deleted product. Preserves canonical CATEGORIES order.
+   */
+  public getAvailableCategories(): ProductCategory[] {
+    return getAvailableCategories(this.getPublishedProducts());
+  }
+
   /** PUBLIC scope: featured products drawn from the published stream. */
+
   public getFeaturedPublishedProducts(): Product[] {
     return this.getPublishedProducts().filter((p) => p.isFeatured);
   }
@@ -392,19 +413,18 @@ class ProductRepository {
 
     if (!product.name || !product.name.trim()) errors.push('Product name is required.');
     if (!product.slug || !product.slug.trim()) errors.push('Product slug is required.');
-    if (!product.category) errors.push('Category is required.');
+    if (!product.category) {
+      errors.push('Category is required.');
+    } else if (!CATEGORIES.includes(product.category)) {
+      errors.push(`Invalid category: "${product.category}".`);
+    }
     if (!product.gender) errors.push('Gender classification is required.');
     if (!product.purity) errors.push('Purity is required.');
+
     if (typeof product.approxWeight !== 'number' || product.approxWeight <= 0) {
       errors.push('Approximate weight must be a positive number in grams.');
     }
     if (!product.availability) errors.push('Availability is required.');
-    if (!product.shortDescription || !product.shortDescription.trim()) {
-      errors.push('Short description is required.');
-    }
-    if (!product.detailedDescription || !product.detailedDescription.trim()) {
-      errors.push('Detailed description is required.');
-    }
     if (!product.occasion || !product.occasion.trim()) {
       errors.push('Occasion is required.');
     }
@@ -464,12 +484,12 @@ class ProductRepository {
 
     const now = new Date().toISOString();
 
-    const newProduct: Product = {
+    const newProduct: Product = normalizeProduct({
       ...data,
       id,
       createdAt: now,
       updatedAt: now,
-    };
+    });
 
     if (isFirebaseConfigured && db) {
       const docRef = doc(db, 'products', id);
@@ -505,14 +525,14 @@ class ProductRepository {
     if (!existing) return null;
 
     const now = new Date().toISOString();
-    const updated: Product = {
+    const updated: Product = normalizeProduct({
       ...existing,
       ...updates,
       id: existing.id,
       sku: existing.sku,
       createdAt: existing.createdAt,
       updatedAt: now,
-    };
+    });
 
     if (isFirebaseConfigured && db) {
       const docRef = doc(db, 'products', id);
@@ -520,6 +540,12 @@ class ProductRepository {
         'Product update',
         updateDoc(docRef, {
           ...updates,
+          ...(updates.shortDescription !== undefined
+            ? { shortDescription: typeof updates.shortDescription === 'string' ? updates.shortDescription : '' }
+            : {}),
+          ...(updates.detailedDescription !== undefined
+            ? { detailedDescription: typeof updates.detailedDescription === 'string' ? updates.detailedDescription : '' }
+            : {}),
           updatedAt: now
         })
       );

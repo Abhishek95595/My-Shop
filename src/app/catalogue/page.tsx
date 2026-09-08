@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useMemo, useEffect, Suspense } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, Suspense } from 'react';
+
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Product } from '@/services/productTypes';
 import { productRepository } from '@/services/products/productRepository';
@@ -10,7 +11,12 @@ import {
   ProductFilterBar,
   FilterState,
 } from '@/components/products/ProductFilterBar';
-import { WEIGHT_RANGES, STORE_NAME } from '@/lib/constants';
+import {
+  WEIGHT_RANGES,
+  STORE_NAME,
+  getAvailableCategories,
+  ProductCategory,
+} from '@/lib/constants';
 import { Sparkles, PackageSearch, RotateCcw, ShieldAlert } from 'lucide-react';
 
 function CatalogueContent() {
@@ -58,14 +64,132 @@ function CatalogueContent() {
     };
   }, []);
 
-  // Synchronize search query filter if URL parameter 'q' updates while viewing catalogue
+  // Synchronize filters if URL parameters update while viewing catalogue
   useEffect(() => {
     const currentQ = searchParams.get('q') || '';
+    const currentCat = searchParams.get('category') || 'All';
+    const currentOccasion = searchParams.get('occasion') || 'All';
+    const currentGender = searchParams.get('gender') || 'All';
+    const currentPurity = searchParams.get('purity') || 'All';
+    const currentAvailability = searchParams.get('availability') || 'All';
+
     setFilters((prev) => {
-      if (prev.search === currentQ) return prev;
-      return { ...prev, search: currentQ };
+      if (
+        prev.search === currentQ &&
+        prev.category === currentCat &&
+        prev.occasion === currentOccasion &&
+        prev.gender === currentGender &&
+        prev.purity === currentPurity &&
+        prev.availability === currentAvailability
+      ) {
+        return prev;
+      }
+      return {
+        ...prev,
+        search: currentQ,
+        category: currentCat,
+        occasion: currentOccasion,
+        gender: currentGender,
+        purity: currentPurity,
+        availability: currentAvailability,
+      };
     });
   }, [searchParams]);
+
+  // Available categories: strictly categories with published, non-archived, non-deleted products
+  const availableCategories = useMemo(() => {
+    return getAvailableCategories(publishedProducts);
+  }, [publishedProducts]);
+
+  const handleFilterChange = useCallback(
+    (newFilters: Partial<FilterState>) => {
+      setFilters((prev) => ({ ...prev, ...newFilters }));
+
+      const params = new URLSearchParams(searchParams.toString());
+
+      if ('category' in newFilters) {
+        if (newFilters.category && newFilters.category !== 'All') {
+          params.set('category', newFilters.category);
+        } else {
+          params.delete('category');
+        }
+      }
+      if ('gender' in newFilters) {
+        if (newFilters.gender && newFilters.gender !== 'All') {
+          params.set('gender', newFilters.gender);
+        } else {
+          params.delete('gender');
+        }
+      }
+      if ('purity' in newFilters) {
+        if (newFilters.purity && newFilters.purity !== 'All') {
+          params.set('purity', newFilters.purity);
+        } else {
+          params.delete('purity');
+        }
+      }
+      if ('availability' in newFilters) {
+        if (newFilters.availability && newFilters.availability !== 'All') {
+          params.set('availability', newFilters.availability);
+        } else {
+          params.delete('availability');
+        }
+      }
+      if ('occasion' in newFilters) {
+        if (newFilters.occasion && newFilters.occasion !== 'All') {
+          params.set('occasion', newFilters.occasion);
+        } else {
+          params.delete('occasion');
+        }
+      }
+      if ('search' in newFilters) {
+        const q = (newFilters.search || '').trim();
+        if (q) {
+          params.set('q', q);
+        } else {
+          params.delete('q');
+        }
+      }
+
+      const queryString = params.toString();
+      const targetUrl = queryString ? `/catalogue?${queryString}` : '/catalogue';
+      const currentQuery = searchParams.toString();
+      const currentUrl = currentQuery ? `/catalogue?${currentQuery}` : '/catalogue';
+
+      if (targetUrl !== currentUrl) {
+        router.replace(targetUrl, { scroll: false });
+      }
+    },
+    [router, searchParams]
+  );
+
+  // Safely auto-reset selected category to 'All' if it is not 'All' and has become unavailable
+  useEffect(() => {
+    if (loadStatus !== 'ready') return;
+    if (filters.category === 'All') return;
+
+    const isAvailable = availableCategories.includes(
+      filters.category as ProductCategory
+    );
+    if (!isAvailable) {
+      // 1. Pure state update
+      setFilters((prev) => (prev.category === 'All' ? prev : { ...prev, category: 'All' }));
+
+      // 2. Remove only 'category' query parameter while preserving other valid parameters
+      const params = new URLSearchParams(searchParams.toString());
+      if (params.has('category')) {
+        params.delete('category');
+        const queryString = params.toString();
+        const targetUrl = queryString ? `/catalogue?${queryString}` : '/catalogue';
+        const currentQuery = searchParams.toString();
+        const currentUrl = currentQuery ? `/catalogue?${currentQuery}` : '/catalogue';
+
+        if (targetUrl !== currentUrl) {
+          router.replace(targetUrl, { scroll: false });
+        }
+      }
+    }
+  }, [loadStatus, availableCategories, filters.category, searchParams, router]);
 
   // Extract unique occasions dynamically
   const availableOccasions = useMemo(() => {
@@ -76,25 +200,6 @@ function CatalogueContent() {
     return Array.from(set);
   }, [publishedProducts]);
 
-  const handleFilterChange = (newFilters: Partial<FilterState>) => {
-    setFilters((prev) => {
-      const updated = { ...prev, ...newFilters };
-      const params = new URLSearchParams();
-      if (updated.category !== 'All') params.set('category', updated.category);
-      if (updated.gender !== 'All') params.set('gender', updated.gender);
-      if (updated.purity !== 'All') params.set('purity', updated.purity);
-      if (updated.availability !== 'All')
-        params.set('availability', updated.availability);
-      if (updated.occasion !== 'All') params.set('occasion', updated.occasion);
-      if (updated.search.trim()) params.set('q', updated.search.trim());
-
-      const queryStr = params.toString();
-      router.replace(queryStr ? `/catalogue?${queryStr}` : '/catalogue', {
-        scroll: false,
-      });
-      return updated;
-    });
-  };
 
   const handleResetFilters = () => {
     setFilters({
@@ -122,9 +227,9 @@ function CatalogueContent() {
           const matchesTag = product.tags.some((t: string) =>
             t.toLowerCase().includes(query)
           );
-          const matchesDesc = product.shortDescription
-            .toLowerCase()
-            .includes(query);
+          const matchesDesc =
+            (product.shortDescription || '').toLowerCase().includes(query) ||
+            (product.detailedDescription || '').toLowerCase().includes(query);
           if (!matchesName && !matchesSku && !matchesTag && !matchesDesc) {
             return false;
           }
@@ -240,6 +345,7 @@ function CatalogueContent() {
             onFilterChange={handleFilterChange}
             onResetFilters={handleResetFilters}
             availableOccasions={availableOccasions}
+            availableCategories={availableCategories}
             totalResults={filteredProducts.length}
           />
 

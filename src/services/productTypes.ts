@@ -1,9 +1,5 @@
-export type ProductCategory =
-  | 'Rings'
-  | 'Necklaces/Sets'
-  | 'Chains'
-  | 'Mangalsutra'
-  | 'Bangles/Kada';
+import type { ProductCategory } from '@/lib/categoryRegistry';
+export type { ProductCategory };
 
 export type ProductGender = 'Women' | 'Men';
 
