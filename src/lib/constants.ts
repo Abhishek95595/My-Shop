@@ -6,6 +6,23 @@ export const GSTIN = '09AJBPV9683Q1ZW';
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
+// Warn at build/startup time when the production site URL is not configured.
+// This fires only in non-development, non-test environments so local `npm run dev`
+// is completely unaffected.
+if (
+  !process.env.NEXT_PUBLIC_SITE_URL &&
+  process.env.NODE_ENV !== 'development' &&
+  process.env.NODE_ENV !== 'test'
+) {
+  console.warn(
+    '[KOH] NEXT_PUBLIC_SITE_URL is not set. ' +
+    'WhatsApp product enquiry links, canonical URLs, sitemap, and Open Graph ' +
+    'URLs will incorrectly use http://localhost:3000 in production. ' +
+    'Set NEXT_PUBLIC_SITE_URL=https://your-domain.com in your Vercel environment variables.'
+  );
+}
+
+
 export const CONTACT_CONFIG = {
   primaryPhone: '+91 8853665166',
   primaryPhoneRaw: '918853665166',

@@ -1,22 +1,74 @@
 rules_version = '2';
 
+// ---------------------------------------------------------------------------
+// KOH Firebase Storage Security Rules
+// ---------------------------------------------------------------------------
+// Admin authorization uses the same single source of truth as Firestore rules:
+// existence of the Firestore document  admins/{uid}
+//
+// This is a cross-service read performed at the time of each Storage request.
+// Firebase bills one Firestore read per storage request that invokes isAdmin().
+//
+// IMPORTANT — deployment prerequisite:
+// Cross-service Storage → Firestore rules require the Firebase Storage service
+// agent to have permission to read Firestore at rule evaluation time. Firebase
+// configures this automatically when you deploy Storage rules that reference
+// firestore.exists() or firestore.get().
+//
+// VERIFIED 2026-09 (P0 verification run):
+// The required Firebase Storage cross-service IAM permission already exists on
+// this project for the Storage service agent. No manual IAM modification was
+// necessary and none should be made.
+// ---------------------------------------------------------------------------
+
 service firebase.storage {
   match /b/{bucket}/o {
 
+    /**
+     * isAdmin() — mirrors the Firestore rules isAdmin() function.
+     *
+     * Checks that:
+     *   1. The request carries a valid Firebase Auth token (user is signed in).
+     *   2. A document exists at  admins/{request.auth.uid}  in the default
+     *      Firestore database.
+     *
+     * This is the ONLY admin authorization mechanism in this project.
+     * No Firebase Auth custom claims are used or required.
+     */
     function isAdmin() {
       return request.auth != null
-        && request.auth.token.admin == true;
+        && firestore.exists(
+             /databases/(default)/documents/admins/$(request.auth.uid)
+           );
     }
 
+    // -----------------------------------------------------------------------
+    // Product image objects:  products/{productId}/{imageId}
+    // -----------------------------------------------------------------------
     match /products/{productId}/{imageId} {
+
+      // Public catalogue reads — all product images must be publicly readable
+      // so the catalogue works for unauthenticated visitors.
       allow read: if true;
 
+      // Admin uploads and replacements.
+      // request.resource is guaranteed to exist for create and update.
+      // Validation enforces:
+      //   • Valid admin (Firestore admins/{uid} document exists)
+      //   • File size ≤ 5 MB  (matches client-side MAX_IMAGE_SIZE_BYTES)
+      //   • MIME type is an allowed image format — strict server-side allowlist
+      //     enforced here because client-side validation can be bypassed by
+      //     direct Storage requests. Allowed: image/jpeg, image/png, image/webp.
+      //     (Note: the client allowlist also lists non-standard 'image/jpg',
+      //     but browsers never report that MIME — File.type is 'image/jpeg' —
+      //     so it is intentionally NOT accepted server-side.)
       allow create, update: if isAdmin()
         && request.resource.size <= 5 * 1024 * 1024
-        && request.resource.contentType.matches(
-          'image/(jpeg|jpg|png|webp)'
-        );
+        && request.resource.contentType.matches('image/(jpeg|png|webp)');
 
+      // Admin deletes.
+      // request.resource is NOT inspected here — it can be null on a delete
+      // operation and would cause the rule to evaluate incorrectly.
       allow delete: if isAdmin();
     }
   }
