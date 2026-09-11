@@ -12,6 +12,7 @@ import {
 } from '@/services/mockProducts';
 import { CONTACT_CONFIG, EXACT_WEIGHT_DISCLAIMER, SITE_URL } from '@/lib/constants';
 import { useSavedItems } from '@/context/SavedItemsContext';
+import { ProductShareButton } from './ProductShareButton';
 
 interface ProductCardProps {
   product: Product;
@@ -126,54 +127,67 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         </div>
 
         {/* Top Right Quick Action Buttons */}
-        <div className="absolute top-2 right-2 sm:top-3 sm:right-3 flex flex-col items-center gap-1 sm:gap-1.5 z-10">
-          {/* Wishlist Button */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              toggleWishlist(product.id, product.name);
-            }}
-            className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full shadow-xs backdrop-blur-xs transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 active:scale-95 ${
-              isFav
-                ? 'bg-maroon-800 text-white hover:bg-maroon-900'
-                : 'bg-cream-50/90 text-charcoal-700 hover:text-maroon-800 hover:bg-white'
-            }`}
-            aria-label={
-              isFav
-                ? `Remove ${product.name} from Wishlist`
-                : `Add ${product.name} to Wishlist`
-            }
-            aria-pressed={isFav}
-          >
-            <Heart
-              className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isFav ? 'fill-current' : ''}`}
-            />
-          </button>
+        <div className="absolute top-1 right-1 sm:top-2 sm:right-2 flex flex-col items-center gap-0 sm:gap-0.5 z-10">
+          {/* Wishlist Button (44px min touch target container) */}
+          <div className="flex items-center justify-center min-w-[44px] min-h-[44px]">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleWishlist(product.id, product.name);
+              }}
+              className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full shadow-xs backdrop-blur-xs transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 active:scale-95 cursor-pointer ${
+                isFav
+                  ? 'bg-maroon-800 text-white hover:bg-maroon-900'
+                  : 'bg-cream-50/90 text-charcoal-700 hover:text-maroon-800 hover:bg-white'
+              }`}
+              aria-label={
+                isFav
+                  ? `Remove ${product.name} from Wishlist`
+                  : `Add ${product.name} to Wishlist`
+              }
+              aria-pressed={isFav}
+            >
+              <Heart
+                className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isFav ? 'fill-current' : ''}`}
+              />
+            </button>
+          </div>
 
-          {/* Buying Shortlist Button */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              toggleShortlist(product.id, product.name);
-            }}
-            className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full shadow-xs backdrop-blur-xs transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 active:scale-95 ${
-              isShortlisted
-                ? 'bg-gold-600 text-white hover:bg-gold-700'
-                : 'bg-cream-50/90 text-charcoal-700 hover:text-gold-800 hover:bg-white'
-            }`}
-            aria-label={
-              isShortlisted
-                ? `Remove ${product.name} from Buying Shortlist`
-                : `Add ${product.name} to Buying Shortlist`
-            }
-            aria-pressed={isShortlisted}
-          >
-            <ShoppingBag
-              className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isShortlisted ? 'fill-current' : ''}`}
-            />
-          </button>
+          {/* Buying Shortlist Button (44px min touch target container) */}
+          <div className="flex items-center justify-center min-w-[44px] min-h-[44px]">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleShortlist(product.id, product.name);
+              }}
+              className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full shadow-xs backdrop-blur-xs transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 active:scale-95 cursor-pointer ${
+                isShortlisted
+                  ? 'bg-gold-600 text-white hover:bg-gold-700'
+                  : 'bg-cream-50/90 text-charcoal-700 hover:text-gold-800 hover:bg-white'
+              }`}
+              aria-label={
+                isShortlisted
+                  ? `Remove ${product.name} from Buying Shortlist`
+                  : `Add ${product.name} to Buying Shortlist`
+              }
+              aria-pressed={isShortlisted}
+            >
+              <ShoppingBag
+                className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isShortlisted ? 'fill-current' : ''}`}
+              />
+            </button>
+          </div>
+
+          {/* Share Button (44px min touch target container) */}
+          <ProductShareButton
+            product={product}
+            imageUrl={resolvedImageUrl}
+            variant="card"
+          />
         </div>
 
         {/* Bottom Purity Pill */}

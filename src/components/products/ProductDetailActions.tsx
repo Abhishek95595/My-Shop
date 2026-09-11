@@ -5,6 +5,7 @@ import { Product } from '@/services/productTypes';
 import { useSavedItems } from '@/context/SavedItemsContext';
 import { CONTACT_CONFIG, SITE_URL } from '@/lib/constants';
 import { Heart, ShoppingBag, MessageCircle, Phone, Check } from 'lucide-react';
+import { ProductShareButton } from './ProductShareButton';
 
 interface ProductDetailActionsProps {
   product: Product;
@@ -28,12 +29,12 @@ export const ProductDetailActions: React.FC<ProductDetailActionsProps> = ({
     <>
       {/* In-Page Actions (Visible across all viewports) */}
       <div className="space-y-3 sm:space-y-4 pt-3 sm:pt-4">
-        {/* Wishlist and Buying Shortlist Actions Row */}
-        <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+        {/* Wishlist, Shortlist and Share Actions Row */}
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
           <button
             type="button"
             onClick={() => toggleWishlist(product.id, product.name)}
-            className={`flex items-center justify-center gap-2 py-3 px-3 sm:px-4 rounded-xl border text-xs sm:text-sm font-semibold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 active:scale-95 min-h-[44px] cursor-pointer ${
+            className={`flex items-center justify-center gap-1.5 sm:gap-2 py-3 px-2 sm:px-4 rounded-xl border text-xs sm:text-sm font-semibold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 active:scale-95 min-h-[44px] cursor-pointer ${
               isFav
                 ? 'bg-maroon-800 text-white border-maroon-900 shadow-sm'
                 : 'bg-cream-50 hover:bg-gold-50 text-maroon-900 border-gold-300'
@@ -46,13 +47,13 @@ export const ProductDetailActions: React.FC<ProductDetailActionsProps> = ({
             aria-pressed={isFav}
           >
             <Heart className={`w-4 h-4 ${isFav ? 'fill-current' : ''}`} />
-            <span>{isFav ? 'In Wishlist' : 'Add to Wishlist'}</span>
+            <span className="truncate">{isFav ? 'Wishlisted' : 'Wishlist'}</span>
           </button>
 
           <button
             type="button"
             onClick={() => toggleShortlist(product.id, product.name)}
-            className={`flex items-center justify-center gap-2 py-3 px-3 sm:px-4 rounded-xl border text-xs sm:text-sm font-semibold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 active:scale-95 min-h-[44px] cursor-pointer ${
+            className={`flex items-center justify-center gap-1.5 sm:gap-2 py-3 px-2 sm:px-4 rounded-xl border text-xs sm:text-sm font-semibold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 active:scale-95 min-h-[44px] cursor-pointer ${
               isShortlisted
                 ? 'bg-gold-600 text-white border-gold-700 shadow-sm'
                 : 'bg-cream-50 hover:bg-gold-50 text-maroon-900 border-gold-300'
@@ -67,8 +68,14 @@ export const ProductDetailActions: React.FC<ProductDetailActionsProps> = ({
             <ShoppingBag
               className={`w-4 h-4 ${isShortlisted ? 'fill-current' : ''}`}
             />
-            <span>{isShortlisted ? 'In Shortlist' : 'Buying Shortlist'}</span>
+            <span className="truncate">{isShortlisted ? 'Shortlisted' : 'Shortlist'}</span>
           </button>
+
+          <ProductShareButton
+            product={product}
+            variant="detail"
+            className="w-full"
+          />
         </div>
 
         {/* WhatsApp & Call Direct Enquiry Actions */}
@@ -98,14 +105,21 @@ export const ProductDetailActions: React.FC<ProductDetailActionsProps> = ({
       {/* Sticky Mobile Action Bar (Sits immediately above the sticky bottom navigation) */}
       <div
         aria-label="Quick Product Actions"
-        className="fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom,0px))] inset-x-0 z-30 bg-cream-50/95 backdrop-blur-md border-t border-gold-200/90 p-2.5 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] md:hidden"
+        className="fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom,0px))] inset-x-0 z-30 bg-cream-50/95 backdrop-blur-md border-t border-gold-200/90 p-2 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] md:hidden"
       >
-        <div className="flex items-center gap-2 max-w-lg mx-auto">
+        <div className="flex items-center gap-1.5 max-w-lg mx-auto">
+          {/* Share Action */}
+          <ProductShareButton
+            product={product}
+            variant="detail"
+            className="px-2.5 py-2 text-[11px]"
+          />
+
           {/* Shortlist Toggle Button */}
           <button
             type="button"
             onClick={() => toggleShortlist(product.id, product.name)}
-            className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs font-semibold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 active:scale-95 min-h-[44px] ${
+            className={`flex items-center justify-center gap-1 px-2.5 py-2 rounded-xl border text-[11px] font-semibold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 active:scale-95 min-h-[44px] ${
               isShortlisted
                 ? 'bg-gold-600 text-white border-gold-700 shadow-xs'
                 : 'bg-white text-maroon-900 border-gold-300'
@@ -118,20 +132,20 @@ export const ProductDetailActions: React.FC<ProductDetailActionsProps> = ({
             aria-pressed={isShortlisted}
           >
             {isShortlisted ? (
-              <Check className="w-4 h-4" />
+              <Check className="w-3.5 h-3.5" />
             ) : (
-              <ShoppingBag className="w-4 h-4 text-gold-700" />
+              <ShoppingBag className="w-3.5 h-3.5 text-gold-700" />
             )}
-            <span>{isShortlisted ? 'Shortlisted' : 'Shortlist'}</span>
+            <span>{isShortlisted ? 'Saved' : 'Shortlist'}</span>
           </button>
 
           {/* Call Button */}
           <a
             href={`tel:+${CONTACT_CONFIG.primaryPhoneRaw}`}
-            className="flex-1 inline-flex items-center justify-center gap-1.5 bg-maroon-800 hover:bg-maroon-900 active:scale-95 text-cream-50 font-semibold py-2.5 px-3 rounded-xl shadow-xs transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-maroon-600 min-h-[44px] text-xs"
+            className="inline-flex items-center justify-center gap-1 bg-maroon-800 hover:bg-maroon-900 active:scale-95 text-cream-50 font-semibold py-2 px-2.5 rounded-xl shadow-xs transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-maroon-600 min-h-[44px] text-[11px]"
             aria-label={`Call store at ${CONTACT_CONFIG.primaryPhone}`}
           >
-            <Phone className="w-4 h-4 text-gold-300" />
+            <Phone className="w-3.5 h-3.5 text-gold-300" />
             <span>Call</span>
           </a>
 
@@ -140,10 +154,10 @@ export const ProductDetailActions: React.FC<ProductDetailActionsProps> = ({
             href={`https://wa.me/${CONTACT_CONFIG.whatsappNumberRaw}?text=${whatsappMessage}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-[1.4] inline-flex items-center justify-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 active:scale-95 text-white font-semibold py-2.5 px-3 rounded-xl shadow-xs transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 min-h-[44px] text-xs"
+            className="flex-1 inline-flex items-center justify-center gap-1 bg-emerald-700 hover:bg-emerald-800 active:scale-95 text-white font-semibold py-2 px-2.5 rounded-xl shadow-xs transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 min-h-[44px] text-[11px]"
             aria-label={`Inquire about ${product.name} on WhatsApp`}
           >
-            <MessageCircle className="w-4 h-4" />
+            <MessageCircle className="w-3.5 h-3.5" />
             <span>WhatsApp</span>
           </a>
         </div>
