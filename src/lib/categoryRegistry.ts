@@ -51,12 +51,14 @@ export const CATEGORY_REGISTRY = [
     name: 'Earrings',
     code: 'ERN',
     subtitle: 'Jhumkas, Studs & Drops',
+    image: '/assets/products/gold-earrings-main.svg',
     iconName: 'Sparkles',
   },
   {
     name: 'Pendants',
     code: 'PND',
     subtitle: 'Devotional & Daily Charms',
+    image: '/assets/products/gold-pendant-main.svg',
     iconName: 'Award',
   },
   {
