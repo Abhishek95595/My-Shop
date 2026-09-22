@@ -36,24 +36,31 @@ export const OwnerRatesModule: React.FC = () => {
   }, activeRates[0].lastUpdated);
 
   return (
-    <section id="owner-rates" className="max-w-7xl mx-auto px-4 sm:px-6">
-      <div className="bg-cream-50 border border-gold-300 rounded-3xl p-6 sm:p-8 shadow-card space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gold-200/80 pb-4">
-          <div className="space-y-1">
-            <div className="inline-flex items-center gap-1.5 bg-gold-100 text-maroon-900 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-gold-300">
+    <section id="owner-rates" className="max-w-7xl mx-auto px-3 sm:px-6">
+      <div className="relative bg-gradient-to-b from-cream-50 via-gold-50/40 to-cream-50 border border-gold-300/90 rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-luxury space-y-6 overflow-hidden">
+        {/* Subtle gold filigree accent on top edge */}
+        <div
+          className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-gold-400 to-transparent"
+          aria-hidden="true"
+        />
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gold-200/80 pb-4 sm:pb-5">
+          <div className="space-y-1 sm:space-y-1.5">
+            <div className="inline-flex items-center gap-2 bg-gold-50 border border-gold-300/80 text-maroon-950 text-[11px] font-semibold px-3 py-1 rounded-full shadow-xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true" />
               <Sparkles className="w-3 h-3 text-gold-700" />
-              <span>Showroom Reference</span>
+              <span>Showroom Reference Bullion Rates</span>
             </div>
-            <h3 className="font-serif font-bold text-xl sm:text-2xl text-maroon-950">
+            <h3 className="font-serif font-bold text-xl sm:text-2xl text-maroon-950 tracking-tight">
               Owner-Updated Current Rates
             </h3>
-            <p className="text-xs text-charcoal-600 font-sans">
+            <p className="text-xs sm:text-sm text-charcoal-600 font-sans">
               Indicative bullion reference rates manually updated by store proprietor.
             </p>
           </div>
 
-          <div className="flex flex-col sm:items-end gap-1">
-            <span className="text-[11px] text-charcoal-500 font-mono flex items-center gap-1">
+          <div className="flex flex-col sm:items-end gap-1.5">
+            <span className="text-[11px] sm:text-xs text-charcoal-500 font-mono flex items-center gap-1.5 bg-cream-100/80 px-2.5 py-1 rounded-lg border border-gold-200/60">
               <Clock className="w-3.5 h-3.5 text-gold-700" />
               <span>Updated: {new Date(latestUpdate).toLocaleDateString('en-IN', {
                 day: 'numeric',
@@ -64,31 +71,31 @@ export const OwnerRatesModule: React.FC = () => {
             </span>
             <Link
               href="/rates"
-              className="text-xs font-bold text-maroon-800 hover:text-maroon-950 inline-flex items-center gap-1"
+              className="text-xs font-bold text-maroon-900 hover:text-maroon-950 inline-flex items-center gap-1 group"
             >
               <span>View Full Rates Page</span>
-              <ArrowRight className="w-3.5 h-3.5 text-gold-700" />
+              <ArrowRight className="w-3.5 h-3.5 text-gold-700 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
         </div>
 
         {/* Rates Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {activeRates.map((item) => (
             <div
               key={item.id}
-              className="bg-cream-100/80 p-4 rounded-2xl border border-gold-200 flex items-center justify-between gap-3"
+              className="group bg-cream-50 p-4 sm:p-5 rounded-2xl border border-gold-300/80 hover:border-gold-400 flex items-center justify-between gap-3 shadow-card hover:shadow-card-hover transition-all duration-300"
             >
               <div>
-                <span className="text-xs font-bold text-maroon-900 block font-serif">
+                <span className="text-xs sm:text-sm font-bold text-maroon-950 block font-serif">
                   {item.label}
                 </span>
-                <span className="text-[11px] text-charcoal-500 font-sans">
+                <span className="text-[11px] sm:text-xs text-charcoal-500 font-sans mt-0.5 block">
                   {item.material} • {item.unit}
                 </span>
               </div>
               <div className="text-right">
-                <span className="text-lg font-serif font-bold text-maroon-950 block">
+                <span className="text-lg sm:text-xl font-serif font-bold text-maroon-950 block">
                   ₹{item.rate.toLocaleString('en-IN')}
                 </span>
               </div>
@@ -97,10 +104,10 @@ export const OwnerRatesModule: React.FC = () => {
         </div>
 
         {/* Rate Disclaimer Notice */}
-        <div className="flex items-start gap-2 text-xs text-charcoal-600 bg-gold-50/60 p-3 rounded-xl border border-gold-200/60">
+        <div className="flex items-start gap-2.5 text-xs text-charcoal-600 bg-gold-50/70 p-3 sm:p-3.5 rounded-xl border border-gold-200/80 shadow-xs">
           <Info className="w-4 h-4 text-gold-700 flex-shrink-0 mt-0.5" />
-          <p className="italic font-sans leading-snug">
-            Reference rates only. Gold rates fluctuate continuously. Please confirm the final effective rate directly with our showroom team prior to transacting.
+          <p className="leading-relaxed">
+            Rates are indicative reference values updated by the owner for showroom visits. Final gold transactions are calculated at prevailing showroom billing rates at the time of purchase.
           </p>
         </div>
       </div>

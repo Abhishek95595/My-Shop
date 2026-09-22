@@ -74,9 +74,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   );
 
   return (
-    <div className="group bg-cream-50 rounded-2xl border border-gold-200/90 shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col overflow-hidden relative">
+    <div className="group bg-cream-50 rounded-2xl border border-gold-300/80 hover:border-gold-400/90 shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col overflow-hidden relative">
       {/* Image Container with Badges & Save Actions */}
-      <div className="relative aspect-square w-full bg-cream-100/60 overflow-hidden border-b border-gold-200/60">
+      <div className="relative aspect-square w-full bg-cream-100/70 overflow-hidden border-b border-gold-200/70">
         <Link
           href={`/catalogue/${product.slug}`}
           className="relative block w-full h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
@@ -107,8 +107,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         <div className="absolute top-2 left-2 sm:top-3 sm:left-3 flex flex-col items-start gap-1 pointer-events-none z-10">
           {/* Sample Product Badge */}
           {isSample && (
-            <span className="inline-flex items-center gap-1 bg-maroon-900/90 text-cream-50 text-[9px] sm:text-[11px] font-semibold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full shadow-xs backdrop-blur-xs">
-              <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-gold-300" />
+            <span className="inline-flex items-center gap-1 bg-maroon-950/90 text-gold-300 border border-gold-400/30 text-[9px] sm:text-[11px] font-semibold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full shadow-xs backdrop-blur-xs">
+              <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-gold-400" />
               <span className="hidden xs:inline">Sample Product</span>
               <span className="xs:hidden">Sample</span>
             </span>
@@ -118,8 +118,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <span
             className={`text-[9px] sm:text-[11px] font-semibold px-2 py-0.5 rounded-full shadow-xs backdrop-blur-xs ${
               product.availability === 'available'
-                ? 'bg-emerald-800/90 text-cream-50'
-                : 'bg-gold-800/90 text-cream-50'
+                ? 'bg-emerald-900/90 text-cream-50 border border-emerald-500/30'
+                : 'bg-gold-900/90 text-cream-50 border border-gold-500/30'
             }`}
           >
             {formatAvailability(product.availability)}
@@ -137,10 +137,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 e.stopPropagation();
                 toggleWishlist(product.id, product.name);
               }}
-              className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full shadow-xs backdrop-blur-xs transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 active:scale-95 cursor-pointer ${
+              className={`w-9 h-9 flex items-center justify-center rounded-full shadow-xs backdrop-blur-xs border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 active:scale-95 cursor-pointer ${
                 isFav
-                  ? 'bg-maroon-800 text-white hover:bg-maroon-900'
-                  : 'bg-cream-50/90 text-charcoal-700 hover:text-maroon-800 hover:bg-white'
+                  ? 'bg-maroon-800 text-white border-maroon-900 hover:bg-maroon-900'
+                  : 'bg-white/95 text-charcoal-700 border-gold-200/80 hover:text-maroon-800 hover:border-gold-400'
               }`}
               aria-label={
                 isFav
@@ -164,10 +164,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 e.stopPropagation();
                 toggleShortlist(product.id, product.name);
               }}
-              className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full shadow-xs backdrop-blur-xs transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 active:scale-95 cursor-pointer ${
+              className={`w-9 h-9 flex items-center justify-center rounded-full shadow-xs backdrop-blur-xs border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 active:scale-95 cursor-pointer ${
                 isShortlisted
-                  ? 'bg-gold-600 text-white hover:bg-gold-700'
-                  : 'bg-cream-50/90 text-charcoal-700 hover:text-gold-800 hover:bg-white'
+                  ? 'bg-gold-600 text-white border-gold-700 hover:bg-gold-700'
+                  : 'bg-white/95 text-charcoal-700 border-gold-200/80 hover:text-gold-800 hover:border-gold-400'
               }`}
               aria-label={
                 isShortlisted
@@ -192,7 +192,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Bottom Purity Pill */}
         <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 pointer-events-none">
-          <span className="inline-flex items-center gap-1 bg-cream-50/95 border border-gold-300 text-maroon-900 text-[9px] sm:text-[11px] font-bold px-1.5 sm:px-2.5 py-0.5 rounded-full shadow-xs">
+          <span className="inline-flex items-center gap-1 bg-cream-50/95 backdrop-blur-xs border border-gold-300 text-maroon-950 text-[9px] sm:text-[11px] font-bold px-2 sm:px-2.5 py-0.5 rounded-full shadow-xs">
             <Shield className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-gold-700" />
             <span>{product.purity} Gold</span>
           </span>
@@ -200,14 +200,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       </div>
 
       {/* Card Content Area - Compact for 2-column mobile */}
-      <div className="p-2.5 sm:p-4 md:p-5 flex-1 flex flex-col justify-between space-y-2 sm:space-y-3">
-        <div className="space-y-1 sm:space-y-1.5">
+      <div className="p-3 sm:p-4 md:p-5 flex-1 flex flex-col justify-between space-y-2.5 sm:space-y-3 bg-gradient-to-b from-cream-50 to-cream-100/40">
+        <div className="space-y-1.5 sm:space-y-2">
           {/* Category & Gender & Occasion Meta */}
           <div className="flex items-center justify-between text-[10px] sm:text-xs text-charcoal-600 font-sans">
-            <span className="uppercase tracking-wider font-medium text-gold-800 truncate max-w-[65%]">
+            <span className="uppercase tracking-wider font-semibold text-gold-800 truncate max-w-[65%]">
               {product.category}
             </span>
-            <span className="bg-gold-50 border border-gold-200 text-maroon-800 px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[11px] truncate">
+            <span className="bg-gold-100/70 border border-gold-200/80 text-maroon-900 px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-medium truncate">
               {product.occasion}
             </span>
           </div>
@@ -227,19 +227,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             SKU: {product.sku}
           </p>
           {product.shortDescription?.trim() ? (
-            <p className="hidden sm:block text-xs text-charcoal-700 line-clamp-2 leading-relaxed font-sans">
+            <p className="hidden sm:block text-xs text-charcoal-700 line-clamp-2 leading-relaxed font-sans mt-1">
               {product.shortDescription}
             </p>
           ) : null}
         </div>
 
         {/* Specifications & Weight Block */}
-        <div className="pt-1.5 sm:pt-2.5 border-t border-gold-200/80 space-y-1 sm:space-y-1.5">
+        <div className="pt-2 sm:pt-2.5 border-t border-gold-200/80 space-y-1 sm:space-y-1.5">
           <div className="flex items-center justify-between text-[11px] sm:text-xs">
             <span className="text-charcoal-600 font-sans font-medium">
               Approx. Weight:
             </span>
-            <span className="font-serif font-bold text-maroon-900 text-xs sm:text-sm">
+            <span className="font-serif font-bold text-maroon-950 text-xs sm:text-sm">
               {formatWeight(product.approxWeight)}
             </span>
           </div>
@@ -254,17 +254,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         <div className="grid grid-cols-2 gap-1.5 sm:gap-2 pt-1 sm:pt-1.5">
           <Link
             href={`/catalogue/${product.slug}`}
-            className="inline-flex items-center justify-center gap-1 text-[11px] sm:text-xs font-semibold text-maroon-900 bg-gold-100/90 hover:bg-gold-200 border border-gold-300 py-1.5 sm:py-2.5 px-2 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 active:scale-95"
+            className="inline-flex items-center justify-center gap-1 text-[11px] sm:text-xs font-semibold text-maroon-950 bg-gold-100/90 hover:bg-gold-200/90 border border-gold-300/90 min-h-[40px] sm:min-h-[44px] py-2 sm:py-2.5 px-2 rounded-xl transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 active:scale-95 shadow-xs"
           >
             <span>Details</span>
-            <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+            <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gold-700" />
           </Link>
 
           <a
             href={`https://wa.me/${CONTACT_CONFIG.whatsappNumberRaw}?text=${whatsappMessage}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-1 text-[11px] sm:text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 py-1.5 sm:py-2.5 px-2 rounded-lg transition-colors shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 active:scale-95"
+            className="inline-flex items-center justify-center gap-1 text-[11px] sm:text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 min-h-[40px] sm:min-h-[44px] py-2 sm:py-2.5 px-2 rounded-xl transition-all shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 active:scale-95"
             aria-label={`Inquire about ${product.name} on WhatsApp`}
           >
             <MessageCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />

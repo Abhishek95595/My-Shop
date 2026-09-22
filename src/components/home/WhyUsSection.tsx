@@ -53,36 +53,42 @@ export const WhyUsSection: React.FC = () => {
     <section id="why-us" className="max-w-7xl mx-auto px-3 sm:px-6 space-y-4 sm:space-y-8">
       {/* Section Header */}
       <div className="text-center max-w-3xl mx-auto space-y-2 sm:space-y-3">
-        <div className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-gold-800 uppercase tracking-widest bg-gold-100/90 border border-gold-300 px-3 py-1 rounded-full">
+        <div className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-gold-800 uppercase tracking-widest bg-gold-50 border border-gold-300/80 px-3 py-1 rounded-full shadow-xs">
           <Sparkles className="w-3.5 h-3.5 text-gold-700" />
-          <span>25+ Years of Trust</span>
+          <span>Heritage of Integrity</span>
         </div>
-        <h2 className="text-xl sm:text-3xl md:text-4xl font-serif font-bold text-maroon-950">
+        <h2 className="text-xl sm:text-3xl md:text-4xl font-serif font-bold text-maroon-950 tracking-tight">
           Why Choose {STORE_NAME}
         </h2>
         <p className="text-xs sm:text-sm md:text-base text-charcoal-600 font-sans leading-relaxed">
-          Approved gold jewellery services and dedicated in-store guidance in Gorakhpur.
+          Approved gold jewellery services, certified purity, and dedicated in-store consultation in Gorakhpur.
         </p>
       </div>
 
-      {/* Pillars Grid - Compact cards with scannable summaries */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4 lg:gap-6">
+      {/* Pillars Grid - Heraldic luxury cards with scannable summaries */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5 lg:gap-6">
         {PILLARS.map((pillar) => {
           const Icon = pillar.icon;
           return (
             <div
               key={pillar.title}
-              className="bg-cream-50 rounded-xl sm:rounded-2xl border border-gold-200/90 p-3.5 sm:p-5 shadow-card hover:shadow-card-hover transition-all duration-300 space-y-2 flex flex-col"
+              className="group relative bg-gradient-to-b from-cream-50 to-cream-100/60 rounded-2xl border border-gold-300/80 hover:border-gold-400/90 p-4 sm:p-6 shadow-card hover:shadow-card-hover transition-all duration-300 space-y-2.5 flex flex-col overflow-hidden"
             >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gold-100 border border-gold-200 flex items-center justify-center text-maroon-800 flex-shrink-0">
+              {/* Subtle top gold accent */}
+              <div
+                className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-gold-400/60 to-transparent"
+                aria-hidden="true"
+              />
+
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 sm:w-13 sm:h-13 rounded-2xl bg-gradient-to-br from-gold-100 to-gold-200/80 border border-gold-300/80 flex items-center justify-center text-maroon-800 flex-shrink-0 shadow-xs group-hover:scale-105 transition-transform duration-300">
                   <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-gold-700" />
                 </div>
-                <h3 className="font-serif font-bold text-sm sm:text-lg text-maroon-950">
+                <h3 className="font-serif font-bold text-base sm:text-lg text-maroon-950 group-hover:text-maroon-700 transition-colors">
                   {pillar.title}
                 </h3>
               </div>
-              <p className="text-xs sm:text-sm text-charcoal-600 font-sans leading-relaxed flex-1 pt-1">
+              <p className="text-xs sm:text-sm text-charcoal-700 font-sans leading-relaxed flex-1 pt-1">
                 {pillar.description}
               </p>
             </div>

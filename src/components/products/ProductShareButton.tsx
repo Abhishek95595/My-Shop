@@ -59,7 +59,7 @@ export const ProductShareButton: React.FC<ProductShareButtonProps> = ({
           type="button"
           onClick={handleShare}
           disabled={isSharing}
-          className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full shadow-xs backdrop-blur-xs transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 active:scale-95 cursor-pointer ${
+          className={`w-9 h-9 flex items-center justify-center rounded-full shadow-xs backdrop-blur-xs transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 active:scale-95 cursor-pointer ${
             copiedSuccess
               ? 'bg-emerald-800 text-white'
               : 'bg-cream-50/90 text-charcoal-700 hover:text-gold-900 hover:bg-white'

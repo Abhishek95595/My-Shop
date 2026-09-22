@@ -37,7 +37,9 @@
   --font-sans: var(--font-sans), 'Plus Jakarta Sans', system-ui, sans-serif;
 
   --shadow-card: 0 8px 24px rgba(38, 27, 23, 0.08);
-  --shadow-card-hover: 0 12px 32px rgba(38, 27, 23, 0.14);
+  --shadow-card-hover: 0 14px 36px rgba(38, 27, 23, 0.12), 0 2px 8px rgba(197, 160, 89, 0.18);
+  --shadow-luxury: 0 10px 30px -5px rgba(56, 9, 20, 0.08), 0 0 0 1px rgba(212, 175, 55, 0.15);
+  --shadow-gold-glow: 0 0 25px rgba(212, 175, 55, 0.22);
   --shadow-header: 0 4px 20px rgba(38, 27, 23, 0.06);
 }
 
@@ -96,4 +98,23 @@ h1, h2, h3, h4, h5, h6 {
 }
 .scrollbar-none::-webkit-scrollbar {
   display: none;
+}
+
+/* Luxury Gold & Glass Utilities */
+.bg-gold-metallic {
+  background: linear-gradient(135deg, #F9F5EB 0%, #FAF0D7 50%, #E8DFC8 100%);
+}
+
+.bg-gold-badge {
+  background: linear-gradient(135deg, rgba(250, 246, 236, 0.95) 0%, rgba(243, 235, 211, 0.9) 100%);
+}
+
+.border-gold-subtle {
+  border-color: rgba(212, 175, 55, 0.35);
+}
+
+.gold-gradient-text {
+  background: linear-gradient(135deg, #7A5C22 0%, #C5A059 50%, #7A5C22 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }

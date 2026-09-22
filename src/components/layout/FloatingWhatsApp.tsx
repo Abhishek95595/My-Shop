@@ -16,7 +16,7 @@ export const FloatingWhatsApp: React.FC = () => {
       className={`fixed ${
         isProductDetail
           ? 'hidden md:block bottom-6'
-          : 'bottom-[calc(4.5rem+0.75rem+env(safe-area-inset-bottom,0px))] md:bottom-6'
+          : 'bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:bottom-6'
       } right-3 sm:right-6 z-30`}
     >
       <a
