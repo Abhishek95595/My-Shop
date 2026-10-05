@@ -1,11 +1,11 @@
 import { IAuthService, AuthUser } from './authTypes';
 import { auth, isFirebaseConfigured } from '@/lib/firebase/client';
-import { 
-  signInWithPopup, 
-  GoogleAuthProvider, 
+import {
+  signInWithPopup,
+  GoogleAuthProvider,
   browserLocalPersistence,
   setPersistence,
-  signOut as firebaseSignOut, 
+  signOut as firebaseSignOut,
   onAuthStateChanged as firebaseOnAuthStateChanged,
   User as FirebaseUser
 } from 'firebase/auth';

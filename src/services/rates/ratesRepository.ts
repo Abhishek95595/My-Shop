@@ -1,11 +1,11 @@
 import { RateItem, CreateRateInput } from './ratesTypes';
 import { RepositoryStatus } from '../types';
 import { db, isFirebaseConfigured } from '@/lib/firebase/client';
-import { 
-  collection, 
-  onSnapshot, 
-  doc, 
-  setDoc, 
+import {
+  collection,
+  onSnapshot,
+  doc,
+  setDoc,
   updateDoc,
   deleteDoc,
   query,

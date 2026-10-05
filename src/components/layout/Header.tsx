@@ -94,7 +94,7 @@ export const Header: React.FC = () => {
             aria-label="Khushi Ornament House Home"
           >
             <Image
-              src="/assets/khushi-logo.png"
+              src="/assets/khushi-logo.webp"
               alt="Khushi Ornament House Logo"
               width={150}
               height={46}

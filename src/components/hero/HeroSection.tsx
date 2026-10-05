@@ -17,7 +17,7 @@ export const HeroSection: React.FC = () => {
         {/* Approved Graphic Showcase Container - Stable, non-shifting aspect ratio with luxury frame */}
         <div className="relative aspect-[16/9] sm:aspect-[21/9] md:aspect-[24/10] w-full rounded-2xl sm:rounded-3xl border border-gold-300/80 shadow-luxury bg-gradient-to-b from-cream-50 to-gold-50/30 overflow-hidden group">
           <Image
-            src="/assets/khushi-wedding-hero.png"
+            src="/assets/khushi-wedding-hero.webp"
             alt="Khushi Ornament House — Heritage Bridal Jewellery and Logo"
             fill
             priority
@@ -91,4 +91,3 @@ export const HeroSection: React.FC = () => {
     </section>
   );
 };
-

@@ -10,7 +10,10 @@ const { execFileSync } = require('child_process');
 const chromeRoot = path.join(process.env.HOME, 'Library/Application Support/Google/Chrome');
 const project = 'khushi-ornament-house';
 const bucket = 'khushi-ornament-house.firebasestorage.app';
-const apiKey = 'AIzaSyAGJwsGKIqy5vY0h4DRiUYkb2WuTRAFkns';
+const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+if (!apiKey) {
+  throw new Error('NEXT_PUBLIC_FIREBASE_API_KEY is required to run this verification.');
+}
 const customer = '100omkarnathverma@gmail.com';
 const admin = '100abhisheksarraf@gmail.com';
 const suffix = `p0-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
