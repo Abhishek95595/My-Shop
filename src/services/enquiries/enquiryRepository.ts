@@ -1,11 +1,11 @@
 import { CustomerEnquiry, CreateEnquiryInput, EnquiryStatus } from './enquiryTypes';
 import { RepositoryStatus } from '../types';
 import { db, isFirebaseConfigured } from '@/lib/firebase/client';
-import { 
-  collection, 
-  onSnapshot, 
-  doc, 
-  setDoc, 
+import {
+  collection,
+  onSnapshot,
+  doc,
+  setDoc,
   updateDoc
 } from 'firebase/firestore';
 

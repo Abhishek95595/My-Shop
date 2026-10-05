@@ -36,7 +36,7 @@ export const Footer: React.FC = () => {
               className="inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 rounded"
             >
               <Image
-                src="/assets/khushi-logo.png"
+                src="/assets/khushi-logo.webp"
                 alt="Khushi Ornament House Logo"
                 width={180}
                 height={56}

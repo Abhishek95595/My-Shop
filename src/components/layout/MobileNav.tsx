@@ -82,7 +82,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
             aria-label="Khushi Ornament House Home"
           >
             <Image
-              src="/assets/khushi-logo.png"
+              src="/assets/khushi-logo.webp"
               alt="Khushi Ornament House Logo"
               width={140}
               height={44}

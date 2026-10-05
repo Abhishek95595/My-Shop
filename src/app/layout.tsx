@@ -45,9 +45,24 @@ export const metadata: Metadata = {
     siteName: STORE_NAME,
     locale: 'en_IN',
     type: 'website',
+    images: [
+      {
+        url: '/assets/khushi-wedding-hero.webp',
+        width: 1200,
+        height: 630,
+        alt: `${STORE_NAME} — Gorakhpur Gold Jewellery`,
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${STORE_NAME} | Gorakhpur Gold Jewellery`,
+    description:
+      '25+ Years of Trust in Gorakhpur. Discover 18K, 22K and 24K gold bridal sets, rings, chains, mangalsutras, and custom jewellery.',
+    images: ['/assets/khushi-wedding-hero.webp'],
   },
   icons: {
-    icon: '/assets/khushi-logo.png',
+    icon: '/assets/khushi-logo.webp',
   },
 };
 
